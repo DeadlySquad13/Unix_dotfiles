@@ -76,12 +76,13 @@
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
-  } // # Bookmarks
+  } // # Bookmarks.
   builtins.mapAttrs
       (name: value: { source = config.lib.file.mkOutOfStoreSymlink value; })
       {
         ".bookmarks/config" = ~/.config;
         ".bookmarks/shared_configs" = "/shared/archive&resources-/Shared/Configs";
+        ".bookmarks/shared_scripts" = "/shared/archive&resources-/Shared/_scripts";
       };
 
   # You can also manage environment variables but you will have to manually

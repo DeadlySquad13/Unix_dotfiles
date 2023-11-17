@@ -96,7 +96,7 @@
   #
   # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
-    # EDITOR = "emacs";
+    # CDPATH = "~/.bookmarks:/mnt/e";
   };
 
   programs = {

@@ -34,6 +34,7 @@
 
     git
     lazygit
+    gh # GitHub cli
 
     keepassxc
 

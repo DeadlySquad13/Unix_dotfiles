@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  nix = {
+    package = pkgs.nix;
+    settings.experimental-features = [ "nix-command" "flakes" ];
+    settings.extra-experimental-features = [ "nix-command" "flakes" ];
+  };
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "ds13";
@@ -22,6 +27,7 @@
     # # "Hello, world!" when run.
     # neovim
     xclip
+    keychain # For easier ssh keys management.
 
     #   Doesn't have service included. Most likely it should be enabled 'nix'
     # way.
@@ -37,6 +43,10 @@
     gh # GitHub cli
 
     keepassxc
+
+    ferdium
+
+    zathura
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -58,7 +68,13 @@
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
-    ".config/nvim".source = ~/.bookmarks/shared_configs/NeoVim_config;
+
+    # Solution for normies like me who are still not 100% into immutable.
+    # Reference: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
+    ".config/nvim" = {
+        source = config.lib.file.mkOutOfStoreSymlink ~/.bookmarks/shared_configs/NeoVim_config;
+        recursive = true;
+    };
 
     # # xdg home should be set to "$HOME/.config", otherwise wezterm will look
     # in another location.
@@ -82,8 +98,12 @@
       (name: value: { source = config.lib.file.mkOutOfStoreSymlink value; })
       {
         ".bookmarks/config" = ~/.config;
-        ".bookmarks/shared_configs" = "/shared/archive&resources-/Shared/Configs";
-        ".bookmarks/shared_scripts" = "/shared/archive&resources-/Shared/_scripts";
+        ".bookmarks/shared_configs" = "/shared/archive-resources-/Shared/Configs";
+        ".bookmarks/shared_scripts" = "/shared/archive-resources-/Shared/_scripts";
+        ".bookmarks/kbd" = "/shared/archive-resources-/Resources/KnowledgeBase__Data";
+
+        # More specific.
+        ".bookmarks/qmk" = "/shared/archive-resources-/Shared/Configs/Keyboard__/ErgohavenVialQmk/keyboards/ergohaven/k02/keymaps/DeadlySquad13";
       };
 
   # You can also manage environment variables but you will have to manually
@@ -97,7 +117,7 @@
   #
   # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
-    # CDPATH = "~/.bookmarks:/mnt/e";
+    CDPATH = "~/.bookmarks:/mnt/e";
   };
 
   programs = {

@@ -64,6 +64,27 @@
           # }
         ];
       };
+
+      "aspakalo" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-darwin; # Home-manager requires 'pkgs' instance
+        extraSpecialArgs = {inherit inputs outputs;};
+        # system = "x86_64-linux";
+        modules = [
+          # ./home-manager/default.nix
+          ./home-darwin.nix
+          #./hosts/buddha.nix
+          #./modules
+          # ./configuration.nix
+          #{ nixpkgs.config.allowUnfree = true; }
+          # home-manager.nixosModules.home-manager
+          # {
+          #   home-manager.useGlobalPkgs = true;
+          #   home-manager.useUserPackages = true;
+          #   home-manager.users.ds13 = import ./home-manager/default.nix;
+          #   home-manager.extraSpecialArgs = { inherit inputs; };
+          # }
+        ];
+      };
     };
   };
 }

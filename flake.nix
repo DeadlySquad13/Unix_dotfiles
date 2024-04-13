@@ -2,7 +2,9 @@
   description = "NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs = {
+        url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
+    };
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -54,7 +56,7 @@
           #./hosts/buddha.nix
           #./modules
           # ./configuration.nix
-          #{ nixpkgs.config.allowUnfree = true; }
+          #{ nixpkgs.config.allowUnfree = true; { nixpkgs.config.allowUnsupportedSystem = true; }}
           # home-manager.nixosModules.home-manager
           # {
           #   home-manager.useGlobalPkgs = true;

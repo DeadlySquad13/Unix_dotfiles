@@ -40,7 +40,8 @@
 
     git
     lazygit
-    gh # GitHub cli
+    gh # GitHub cli.
+    glab # GitLab cli.
 
     keepassxc
 

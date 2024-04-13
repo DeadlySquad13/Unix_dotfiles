@@ -38,14 +38,14 @@
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
-  /* home.file = {
+  home.file = {
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
     # # symlink to the Nix store copy.
 
     # Solution for normies like me who are still not 100% into immutable.
     # Reference: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
-    ".config/nvim" = {
+    /* ".config/nvim" = {
         source = config.lib.file.mkOutOfStoreSymlink ~/.bookmarks/shared_configs/NeoVim_config;
         recursive = true;
     };
@@ -57,7 +57,7 @@
     ".bash".source = ~/.bookmarks/shared_configs/Bash_config;
 
     ".gitconfig".source = ~/.bookmarks/shared_configs/Wsl2_dotfiles/stow_home/git/.gitconfig;
-    ".config/lazygit".source = ~/.bookmarks/shared_configs/Wsl2_dotfiles/stow_home/lazygit/.config/lazygit;
+    ".config/lazygit".source = ~/.bookmarks/shared_configs/Wsl2_dotfiles/stow_home/lazygit/.config/lazygit; */
 
     # Not working unfortunately... It seems that left part can't start with '/'.
     # "/usr/local/share/fonts/Iosevka".source = ~/.bookmarks/shared-fonts;
@@ -70,15 +70,26 @@
   } // # Bookmarks.
   builtins.mapAttrs
       (name: value: { source = config.lib.file.mkOutOfStoreSymlink value; })
-      {
-        ".bookmarks/config" = ~/.config;
-        ".bookmarks/shared_configs" = "/shared/archive-resources-/Shared/Configs";
-        ".bookmarks/shared_scripts" = "/shared/archive-resources-/Shared/_scripts";
-        ".bookmarks/kbd" = "/shared/archive-resources-/Resources/KnowledgeBase__Data";
-
+      (
+        lib.attrsets.concatMapAttrs (name: value: { ".bookmarks/${name}" = value; } )
+        ({
+          "config" = ~/.config;
+          "kbd" = ~/KnowledgeBase__Data;
+          "projects" = "/Users/aspakalo/Projects";
+        } //
         # More specific.
-        ".bookmarks/qmk" = "/shared/archive-resources-/Shared/Configs/Keyboard__/ErgohavenVialQmk/keyboards/ergohaven/k02/keymaps/DeadlySquad13";
-      };
+        # # Projects
+        builtins.mapAttrs (name: value: "/Users/aspakalo/Projects/${value}") {
+          "lp" = "logistic-platform";
+          "shepherd" = "shepherd";
+          "kit" = "main-ui-kit";
+          "@kit" = "main-ui-kit/packages";
+          "@components" = "main-ui-kit/packages/components";
+          "kit2" = "main-ui-kit2";
+          "@kit2" = "main-ui-kit2/packages";
+          "@components2" = "main-ui-kit2/packages/components";
+        })
+      );
 
   # You can also manage environment variables but you will have to manually
   # source
@@ -90,7 +101,7 @@
   #  /etc/profiles/per-user/ds13/etc/profile.d/hm-session-vars.sh
   #
   # if you don't want to manage your shell through Home Manager.
-  home.sessionVariables = {
+  /* home.sessionVariables = {
     CDPATH = "~/.bookmarks:/mnt/e";
   }; */
 

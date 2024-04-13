@@ -124,6 +124,12 @@
       # Let Home Manager install and manage itself.
       home-manager.enable = true;
 
+      direnv = {
+        enable = true;
+        enableBashIntegration = true; # Bash should be managed by nix.
+        nix-direnv.enable = true;
+      };
+
       bash = {
         enable = true;
 

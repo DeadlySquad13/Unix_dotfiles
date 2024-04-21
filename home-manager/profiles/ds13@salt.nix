@@ -42,6 +42,7 @@
     # pixi # Package manager (only on unstable yet).
 
     # General.
+    ../apps/bash.nix
     ../apps/keepassxc.nix
 
     ../apps/ferdium.nix
@@ -56,16 +57,14 @@
     ../bookmarks.nix
   ];
 
-  home.file = {
-    ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
+  programs = {
+    bash.bashrcExtra = 
+      ''
+          # Pixi completion.
+          eval "$(pixi completion --shell bash)"
 
-    # Not working unfortunately... It seems that left part can't start with '/'.
-    # "/usr/local/share/fonts/Iosevka".source = ~/.bookmarks/shared-fonts;
-    
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
+          # Docker in rootless mode.
+          export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+      '';
   };
 }

@@ -1,12 +1,6 @@
 { config, pkgs, lib, ... }:
 
 {
-  nix = {
-    package = pkgs.nix;
-    settings.experimental-features = [ "nix-command" "flakes" ];
-    settings.extra-experimental-features = [ "nix-command" "flakes" ];
-  };
-
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
@@ -47,25 +41,6 @@
         enable = true;
         enableBashIntegration = true; # Bash should be managed by nix.
         nix-direnv.enable = true;
-      };
-
-      bash = {
-        enable = true;
-
-        shellAliases = {
-            i = "invoke --search-root ~/.bookmarks/shared-scripts";
-        };
-
-        bashrcExtra = 
-        ''
-            [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
-
-            # Pixi completion.
-            eval "$(pixi completion --shell bash)"
-
-            # Docker in rootless mode.
-            export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-        '';
       };
   };
 

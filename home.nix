@@ -23,8 +23,6 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
     # neovim
     xclip
     keychain # For easier ssh keys management.
@@ -36,7 +34,6 @@
     # pkgs.wezterm
     plantuml
     qmk
-    ripgrep
 
     git
     lazygit

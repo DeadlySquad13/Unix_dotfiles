@@ -23,6 +23,7 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
+    # Base.
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # neovim
@@ -33,21 +34,35 @@
     # way.
     # udisks2
 
+    # Utilities.
     # pkgs.wezterm
     plantuml
-    qmk
     ripgrep
 
+    # Development.
+    nodejs_21
+    # # Base.
+    # # # Git.
     git
     lazygit
     gh # GitHub cli.
     glab # GitLab cli.
 
+    # # # Docker.
+    docker
+
+    # # Python.
+    # pixi # Package manager (only on unstable yet).
+
+    # General.
     keepassxc
 
     ferdium
 
     zathura
+
+    # Specific.
+    qmk
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -73,18 +88,18 @@
     # Solution for normies like me who are still not 100% into immutable.
     # Reference: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
     ".config/nvim" = {
-        source = config.lib.file.mkOutOfStoreSymlink ~/.bookmarks/shared_configs/NeoVim_config;
+        source = config.lib.file.mkOutOfStoreSymlink ~/.bookmarks/shared-configs/NeoVim_config;
         recursive = true;
     };
 
     # # xdg home should be set to "$HOME/.config", otherwise wezterm will look
     # in another location.
-    ".config/wezterm".source = ~/.bookmarks/shared_configs/WezTerm_config;
+    ".config/wezterm".source = ~/.bookmarks/shared-configs/WezTerm_config;
 
-    ".bash".source = ~/.bookmarks/shared_configs/Bash_config;
+    ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
 
-    ".gitconfig".source = ~/.bookmarks/shared_configs/Wsl2_dotfiles/stow_home/git/.gitconfig;
-    ".config/lazygit".source = ~/.bookmarks/shared_configs/Wsl2_dotfiles/stow_home/lazygit/.config/lazygit;
+    ".gitconfig".source = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/git/.gitconfig;
+    ".config/lazygit".source = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/lazygit/.config/lazygit;
 
     # Not working unfortunately... It seems that left part can't start with '/'.
     # "/usr/local/share/fonts/Iosevka".source = ~/.bookmarks/shared-fonts;
@@ -158,11 +173,19 @@
         enable = true;
 
         shellAliases = {
-            i = "invoke --search-root ~/.bookmarks/shared_scripts";
+            i = "invoke --search-root ~/.bookmarks/shared-scripts";
         };
 
         bashrcExtra = 
-            "[[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc";
+        ''
+            [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
+
+            # Pixi completion.
+            eval "$(pixi completion --shell bash)"
+
+            # Docker in rootless mode.
+            export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+        '';
       };
   };
 

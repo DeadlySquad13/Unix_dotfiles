@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, inputs, config, ... }:
 
 {
   home.packages = with pkgs; [
-    ripgrep
+    qmk
   ];
 }

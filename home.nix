@@ -10,42 +10,6 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
-    # neovim
-    xclip
-    keychain # For easier ssh keys management.
-
-    #   Doesn't have service included. Most likely it should be enabled 'nix'
-    # way.
-    # udisks2
-
-    # Utilities.
-    # pkgs.wezterm
-    plantuml
-
-    # Development.
-    nodejs_21
-    # # Base.
-    # # # Git.
-    git
-    lazygit
-    gh # GitHub cli.
-    glab # GitLab cli.
-
-    # # # Docker.
-    docker
-
-    # # Python.
-    # pixi # Package manager (only on unstable yet).
-
-    # General.
-    keepassxc
-
-    ferdium
-
-    zathura
-
-    # Specific.
-    qmk
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the

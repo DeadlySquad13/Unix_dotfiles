@@ -16,26 +16,48 @@
 
   imports =  
   [ 
+    ../apps/keychain.nix # For easier ssh keys management.
+
+    #   Doesn't have service included. Most likely it should be enabled 'nix'
+    # way.
+    # udisks2
+
+    # Utilities.
+    ../apps/wezterm.nix
+    ../apps/plantuml.nix
+
+    # Development.
+    ../apps/nodejs.nix
+    # # Base.
+    # # # Git.
+    ../apps/git.nix
+    ../apps/lazygit.nix
+    ../apps/gh.nix # GitHub cli.
+    ../apps/glab.nix # GitLab cli.
+
+    # # # Docker.
+    ../apps/docker.nix
+
+    # # Python.
+    # pixi # Package manager (only on unstable yet).
+
+    # General.
+    ../apps/keepassxc.nix
+
+    ../apps/ferdium.nix
+
+    ../apps/zathura.nix
+
+    ../apps/neovim.nix
     ../apps/ripgrep.nix
+    # Specific.
+    ../apps/qmk.nix
+
     ../bookmarks.nix
   ];
 
   home.file = {
-    # Solution for normies like me who are still not 100% into immutable.
-    # Reference: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
-    ".config/nvim" = {
-        source = config.lib.file.mkOutOfStoreSymlink ~/.bookmarks/shared-configs/NeoVim_config;
-        recursive = true;
-    };
-
-    # # xdg home should be set to "$HOME/.config", otherwise wezterm will look
-    # in another location.
-    ".config/wezterm".source = ~/.bookmarks/shared-configs/WezTerm_config;
-
     ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
-
-    ".gitconfig".source = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/git/.gitconfig;
-    ".config/lazygit".source = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/lazygit/.config/lazygit;
 
     # Not working unfortunately... It seems that left part can't start with '/'.
     # "/usr/local/share/fonts/Iosevka".source = ~/.bookmarks/shared-fonts;

@@ -16,6 +16,7 @@
 
   imports =  
   [ 
+    ../apps/home-manager.nix
     ../apps/nix.nix
     ../apps/keychain.nix # For easier ssh keys management.
 

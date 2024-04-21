@@ -52,7 +52,6 @@
         # system = "x86_64-linux";
         modules = [
           # ./home-manager/default.nix
-          ./home.nix
           (./home-manager/profiles + "/ds13@salt.nix")
           #./hosts/buddha.nix
           #./modules

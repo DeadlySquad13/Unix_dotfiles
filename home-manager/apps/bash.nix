@@ -15,8 +15,4 @@
   home.file = {
     ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
   };
-
-  home.packages = with pkgs; [
-    bash
-  ];
 }

@@ -72,7 +72,6 @@
         extraSpecialArgs = {inherit inputs outputs;};
         # system = "x86_64-linux";
         modules = [
-          ./home-darwin.nix
           (./home-manager/profiles + "/aspakalo@darwin.nix")
           # import ./test.nix
           #./hosts/buddha.nix

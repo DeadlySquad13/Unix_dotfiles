@@ -30,6 +30,7 @@
 
     # Development.
     ../apps/nodejs.nix
+    ../apps/direnv.nix
     # # Base.
     # # # Git.
     ../apps/git.nix
@@ -58,6 +59,22 @@
 
     ../bookmarks.nix
   ];
+
+  # FIX: Doesn't seems to work.
+  #
+  # You can also manage environment variables but you will have to manually
+  # source
+  #
+  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+  #
+  # or
+  #
+  #  /etc/profiles/per-user/ds13/etc/profile.d/hm-session-vars.sh
+  #
+  # if you don't want to manage your shell through Home Manager.
+  home.sessionVariables = {
+    CDPATH = "~/.bookmarks:/test";
+  };
 
   programs = {
     bash.bashrcExtra = 

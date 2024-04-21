@@ -11,8 +11,4 @@
       ];
     };
   };
-
-  home.packages = with pkgs; [
-    broot
-  ];
 }

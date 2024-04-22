@@ -27,6 +27,7 @@
     # Utilities.
     ../apps/wezterm.nix
     ../apps/plantuml.nix
+    ../apps/broot.nix
 
     # Development.
     ../apps/nodejs.nix

@@ -1,15 +1,19 @@
-{ pkgs, inputs, config, ... }:
+{ ... }:
 
 {
   programs.bash = {
     enable = true;
+    # Completion script was causing errors on shell startup because of `[ "$vars" ]`.
+    enableCompletion = false;
 
     shellAliases = {
         i = "invoke --search-root ~/.bookmarks/shared-scripts";
     };
 
     bashrcExtra = 
-        "[[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc";
+      ''
+        [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
+      '';
   };
 
   home.file = {

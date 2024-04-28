@@ -16,8 +16,12 @@
 
   imports =  
   [ 
+    # Nix related.
     ../apps/home-manager.nix
     ../apps/nix.nix
+
+    # General.
+    ../apps/numlockx.nix
     ../apps/keychain.nix # For easier ssh keys management.
 
     #   Doesn't have service included. Most likely it should be enabled 'nix'

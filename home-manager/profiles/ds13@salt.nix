@@ -50,6 +50,7 @@
     ../apps/keepassxc.nix
 
     ../apps/ferdium.nix
+    ../apps/telegram-desktop.nix
 
     ../apps/zathura.nix
 

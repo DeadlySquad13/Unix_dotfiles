@@ -57,6 +57,7 @@
     ../apps/telegram-desktop.nix
 
     ../apps/zathura.nix
+    ../apps/zotero.nix
 
     ../apps/neovim.nix
     ../apps/ripgrep.nix

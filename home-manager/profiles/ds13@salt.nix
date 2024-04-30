@@ -33,6 +33,7 @@
     ../apps/plantuml.nix
     ../apps/broot.nix
     ../apps/cht-sh.nix
+    ../apps/thefuck.nix
 
     # Development.
     ../apps/nodejs.nix

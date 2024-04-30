@@ -4,7 +4,7 @@
   programs.bash = {
     enable = true;
     # Completion script was causing errors on shell startup because of `[ "$vars" ]`.
-    enableCompletion = false;
+    enableCompletion = true;
 
     shellAliases = {
         i = "invoke --search-root ~/.bookmarks/shared-scripts";

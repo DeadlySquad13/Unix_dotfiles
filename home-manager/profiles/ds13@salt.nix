@@ -32,6 +32,7 @@
     ../apps/wezterm.nix
     ../apps/plantuml.nix
     ../apps/broot.nix
+    ../apps/cht-sh.nix
 
     # Development.
     ../apps/nodejs.nix

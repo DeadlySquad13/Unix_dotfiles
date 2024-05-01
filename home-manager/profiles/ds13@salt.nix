@@ -34,6 +34,7 @@
     ../apps/broot.nix
     ../apps/cht-sh.nix
     ../apps/thefuck.nix
+    ../apps/bat.nix
 
     # Development.
     ../apps/nodejs.nix

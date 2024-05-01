@@ -7,11 +7,15 @@
     enableCompletion = true;
 
     shellAliases = {
-        i = "invoke --search-root ~/.bookmarks/shared-scripts";
+      i = "invoke --search-root ~/.bookmarks/shared-scripts";
     };
 
     bashrcExtra = 
       ''
+        # For environment variables.
+        [[ -f ~/.profile ]] && . ~/.profile
+
+        # Personal profile.
         [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
       '';
   };

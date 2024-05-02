@@ -20,6 +20,7 @@
     ../apps/nix.nix
     ../apps/home-manager.nix
 
+    ../apps/invoke.nix
     ../apps/bash.nix
     ../apps/broot.nix
     ../apps/zoxide.nix
@@ -42,6 +43,8 @@
           "config" = ~/.config;
           "kbd" = ~/KnowledgeBase__Data;
           "projects" = "/Users/aspakalo/Projects";
+          "shared-scripts" = ~/shared-scripts;
+          # "shared-configs" = ~/shared-configs;
         } //
         # More specific.
         # # Projects

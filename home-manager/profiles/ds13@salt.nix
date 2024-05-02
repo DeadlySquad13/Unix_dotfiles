@@ -16,16 +16,34 @@
 
   imports =  
   [ 
+    # Nix related.
     ../apps/home-manager.nix
     ../apps/nix.nix
+
+    # General.
+    ../apps/numlockx.nix
     ../apps/keychain.nix # For easier ssh keys management.
+    ../apps/wezterm.nix
 
     #   Doesn't have service included. Most likely it should be enabled 'nix'
     # way.
     # udisks2
 
     # Utilities.
-    ../apps/wezterm.nix
+    ../apps/broot.nix
+    ../apps/cht-sh.nix
+    ../apps/thefuck.nix
+    ../apps/bat.nix
+    ../apps/flameshot.nix
+
+    # FIX: Doesn't detect gpu on Arch.
+    # With yay it works, though. It also installed these packages alongside
+    # maybe they were missing:
+    # libdatachannel-0.20.3-2  libjuice-1.4.0-1  libsrtp-1:2.6.0-1  mbedtls-3.5.2-1  qt6-svg-6.7.0-1  rnnoise-1:0.2-1
+    # ../apps/obs-studio.nix
+    ../apps/vlc.nix
+
+    # Architecturing.
     ../apps/plantuml.nix
 
     # Development.
@@ -49,8 +67,10 @@
     ../apps/keepassxc.nix
 
     ../apps/ferdium.nix
+    ../apps/telegram-desktop.nix
 
     ../apps/zathura.nix
+    ../apps/zotero.nix
 
     ../apps/neovim.nix
     ../apps/ripgrep.nix

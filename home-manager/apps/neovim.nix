@@ -15,4 +15,17 @@
     # neovim
     xclip
   ];
+  imports =  
+  [ 
+      # TODO: Move to layer.
+      # Was required for rest.nvim (for luarocks to be more specific).
+      ./unzip.nix
+  ];
+
+  programs.bash = {
+    sessionVariables = {
+      # Use neovim as a man pager.
+      MANPAGER = "nvim +Man!";
+    };
+  };
 }

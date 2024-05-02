@@ -11,6 +11,7 @@
         } //
         # Linking to shared `archive-resources-`.
         builtins.mapAttrs (name: value: "/shared/archive-resources-/${value}") {
+          # TODO: Add subdivision to windows and unix shared configs.
           "shared-configs" = "Shared/Configs";
           "shared-scripts" = "Shared/_scripts";
 
@@ -20,7 +21,27 @@
           # More specific.
           "qmk" = "Shared/Configs/Keyboard__/ErgohavenVialQmk/keyboards/ergohaven/k02/keymaps/DeadlySquad13";
         } //
-        # # Projects
+        # System-level configs.
+        # - Temporary.
+        builtins.mapAttrs (name: value: "/usr/local/etc/${value}") {
+          "incoming.system-configs" = "";
+        } //
+        # - Permanent.
+        builtins.mapAttrs (name: value: "/usr/local/dotfiles-/${value}") {
+          "system-configs" = "_configs";
+          "system-scripts" = "_scripts";
+        } //
+        # User-level configs.
+        # - Temporary.
+        builtins.mapAttrs (name: value: "/home/ds13/.local/etc/${value}") {
+          "incoming.home-configs" = "";
+        } //
+        # - Permanent.
+        builtins.mapAttrs (name: value: "/home/ds13/.local/dotfiles-/${value}") {
+          "home-configs" = "_configs";
+          "home-scripts" = "_scripts";
+        } //
+        # Projects
         builtins.mapAttrs (name: value: "/home/ds13/Projects/${value}") {
           "mlops" = "--educational/MlOps_course__Tasks";
         } //

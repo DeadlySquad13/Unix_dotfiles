@@ -30,10 +30,13 @@
     # udisks2
 
     # Utilities.
+    # - Cli level.
     ../apps/broot.nix
+    ../apps/fzf.nix
     ../apps/cht-sh.nix
     ../apps/thefuck.nix
     ../apps/bat.nix
+    # - X level.
     ../apps/flameshot.nix
 
     # FIX: Doesn't detect gpu on Arch.

@@ -6,10 +6,6 @@
     # Completion script was causing errors on shell startup because of `[ "$vars" ]`.
     enableCompletion = true;
 
-    shellAliases = {
-      i = "invoke --search-root ~/.bookmarks/shared-scripts";
-    };
-
     bashrcExtra = 
       ''
         # For environment variables.

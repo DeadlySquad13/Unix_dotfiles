@@ -46,6 +46,7 @@
     # libdatachannel-0.20.3-2  libjuice-1.4.0-1  libsrtp-1:2.6.0-1  mbedtls-3.5.2-1  qt6-svg-6.7.0-1  rnnoise-1:0.2-1
     # ../apps/obs-studio.nix
     ../apps/vlc.nix
+    ../apps/logseq.nix
 
     # Architecturing.
     ../apps/plantuml.nix

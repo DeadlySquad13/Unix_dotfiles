@@ -24,6 +24,7 @@
     ../apps/numlockx.nix
     ../apps/keychain.nix # For easier ssh keys management.
     ../apps/wezterm.nix
+    ../apps/syncthing.nix
 
     #   Doesn't have service included. Most likely it should be enabled 'nix'
     # way.

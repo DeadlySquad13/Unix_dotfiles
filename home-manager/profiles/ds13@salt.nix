@@ -53,6 +53,7 @@
 
     # Development.
     ../apps/nodejs.nix
+    ../apps/browser-sync.nix # Requires nodejs.
     ../apps/direnv.nix
     # # Base.
     # # # Git.

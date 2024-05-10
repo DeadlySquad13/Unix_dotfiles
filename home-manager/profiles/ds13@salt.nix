@@ -87,6 +87,7 @@
       "ripgrep"
       # Specific.
       "qmk"
+      "texlive"
     ])
   );
 

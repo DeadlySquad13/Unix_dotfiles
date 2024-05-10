@@ -2,6 +2,6 @@
 
 {
   home.packages = with pkgs; [
-    qmk
+    texlive.combined.scheme-full
   ];
 }

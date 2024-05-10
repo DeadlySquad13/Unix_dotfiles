@@ -14,77 +14,81 @@
   home.username = "ds13";
   home.homeDirectory = "/home/ds13";
 
-  imports =  
-  [ 
-    # Nix related.
-    ../apps/home-manager.nix
-    ../apps/nix.nix
+  # TODO: Add autocomplete to names.
+  imports = map (module: ../${module}.nix) (
+    [
+      "bookmarks"
+    ] ++ (map (name: "apps/${name}")
+    [
+      # Nix related.
+      "home-manager"
+      "nix"
 
-    # General.
-    ../apps/numlockx.nix
-    ../apps/keychain.nix # For easier ssh keys management.
-    ../apps/wezterm.nix
-    ../apps/syncthing.nix
+      # General.
+      "numlockx"
+      "keychain" # For easier ssh keys management.
+      "wezterm"
+      "syncthing"
 
-    #   Doesn't have service included. Most likely it should be enabled 'nix'
-    # way.
-    # udisks2
+      #   Doesn't have service included. Most likely it should be enabled 'nix'
+      # "way"
+      # "udisks2"
 
-    # Utilities.
-    # - Cli level.
-    ../apps/broot.nix
-    ../apps/fzf.nix
-    ../apps/cht-sh.nix
-    ../apps/thefuck.nix
-    ../apps/bat.nix
-    # - X level.
-    ../apps/flameshot.nix
+      # Utilities.
+      # - Cli level.
+      "invoke"
+      "broot"
+      "fzf"
+      "cht-sh"
+      "thefuck"
+      "bat"
+      # - X level.
+      "flameshot"
 
-    # FIX: Doesn't detect gpu on Arch.
-    # With yay it works, though. It also installed these packages alongside
-    # maybe they were missing:
-    # libdatachannel-0.20.3-2  libjuice-1.4.0-1  libsrtp-1:2.6.0-1  mbedtls-3.5.2-1  qt6-svg-6.7.0-1  rnnoise-1:0.2-1
-    # ../apps/obs-studio.nix
-    ../apps/vlc.nix
-    ../apps/logseq.nix
+      # FIX: Doesn't detect gpu on Arch.
+      # With yay it works, though. It also installed these packages alongside
+      # maybe they were missing:
+      # libdatachannel-0.20.3-2  libjuice-1.4.0-1  libsrtp-1:2.6.0-1  mbedtls-3.5.2-1  qt6-svg-6.7.0-1  rnnoise-1:0.2-1
+      # obs-studio
+      "vlc"
+      "logseq"
 
-    # Architecturing.
-    ../apps/plantuml.nix
+      # Architecturing.
+      "plantuml"
 
-    # Development.
-    ../apps/nodejs.nix
-    ../apps/browser-sync.nix # Requires nodejs.
-    ../apps/direnv.nix
-    # # Base.
-    # # # Git.
-    ../apps/git.nix
-    ../apps/lazygit.nix
-    ../apps/gh.nix # GitHub cli.
-    ../apps/glab.nix # GitLab cli.
+      # Development.
+      "nodejs"
+      "browser-sync" # Requires nodejs.
+      "direnv"
+      # # Base.
+      # # # Git.
+      "git"
+      "lazygit"
+      "gh" # GitHub cli.
+      "glab" # GitLab cli.
 
-    # # # Docker.
-    ../apps/docker.nix
+      # # # Docker.
+      "docker"
 
-    # # Python.
-    # pixi # Package manager (only on unstable yet).
+      # # Python.
+      # pixi # Package manager (only on unstable yet).
 
-    # General.
-    ../apps/bash.nix
-    ../apps/keepassxc.nix
+      # General.
+      "bash"
+      "keepassxc"
 
-    ../apps/ferdium.nix
-    ../apps/telegram-desktop.nix
+      "ferdium"
+      "telegram-desktop"
 
-    ../apps/zathura.nix
-    ../apps/zotero.nix
+      "zathura"
+      "zotero"
 
-    ../apps/neovim.nix
-    ../apps/ripgrep.nix
-    # Specific.
-    ../apps/qmk.nix
-
-    ../bookmarks.nix
-  ];
+      "neovim"
+      "ripgrep"
+      # Specific.
+      "qmk"
+    ])
+  );
 
   # FIX: Doesn't seems to work.
   #

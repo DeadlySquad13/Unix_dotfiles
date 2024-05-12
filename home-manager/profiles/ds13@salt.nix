@@ -42,6 +42,7 @@
       "cht-sh"
       "thefuck"
       "bat"
+      "zoxide"
       # - X level.
       "flameshot"
 

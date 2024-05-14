@@ -20,6 +20,7 @@
     ../apps/nix.nix
     ../apps/home-manager.nix
 
+    ../apps/flameshot.nix
     ../apps/invoke.nix
     ../apps/bash.nix
     ../apps/broot.nix

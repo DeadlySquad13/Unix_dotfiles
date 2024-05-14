@@ -1,5 +1,7 @@
 { config, lib, ... }:
 {
+  # TODO: Fix links with "shared-configs/..." on empty system without existing shared-configs
+  # link.
   home.file = builtins.mapAttrs
     (name: value: { source = config.lib.file.mkOutOfStoreSymlink value; })
     (
@@ -12,14 +14,14 @@
         # Linking to shared `archive-resources-`.
         builtins.mapAttrs (name: value: "/shared/archive-resources-/${value}") {
           # TODO: Add subdivision to windows and unix shared configs.
-          "shared-configs" = "Shared/Configs";
+          "shared-configs" = "Shared/_configs";
           "shared-scripts" = "Shared/_scripts";
 
           # ?: Should be in Shared too?
           "kbd" = "Resources/KnowledgeBase__Data";
 
           # More specific.
-          "qmk" = "Shared/Configs/Keyboard__/ErgohavenVialQmk/keyboards/ergohaven/k02/keymaps/DeadlySquad13";
+          "qmk" = "Shared/_configs/Keyboard__/ErgohavenVialQmk/keyboards/ergohaven/k02/keymaps/DeadlySquad13";
         } //
         # System-level configs.
         # - Temporary.

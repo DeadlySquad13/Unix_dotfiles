@@ -5,10 +5,11 @@
     flameshot
   ];
   home.file = {
-    ".config/flameshot" = {
-      source = ''
+    ".config/flameshot/flameshot.ini" = {
+      text = ''
         [General]
         contrastOpacity=188
+        startupLaunch=true
 
         [Shortcuts]
         TAKE_SCREENSHOT=F13

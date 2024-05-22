@@ -26,10 +26,9 @@
     ../apps/broot.nix
     ../apps/zoxide.nix
     ../apps/docker.nix
-  ];
 
-  home.packages = with pkgs; [
-    zoxide
+    # Cli (Quality of Life).
+    ../apps/eza.nix
   ];
 
   home.file = {

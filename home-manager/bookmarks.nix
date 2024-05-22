@@ -45,6 +45,11 @@
         } //
         # Projects
         builtins.mapAttrs (name: value: "/home/ds13/Projects/${value}") {
+          # Namespaces.
+          "ephemeral-projects" = "emphemeral-";
+          "interim-projects" = "interim-";
+
+          # Specific projects.
           "mlops" = "--educational/MlOps_course__Tasks";
         } //
         # # Shared Projects

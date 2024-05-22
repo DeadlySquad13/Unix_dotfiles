@@ -49,6 +49,11 @@
         # More specific.
         # # Projects
         builtins.mapAttrs (name: value: "/Users/aspakalo/Projects/${value}") {
+          # Namespaces.
+          "ephemeral-projects" = "ephemeral-";
+          "interim-projects" = "interim-";
+
+          # Specific projects.
           "lp" = "logistic-platform";
           "shepherd" = "shepherd";
           "kit" = "main-ui-kit";

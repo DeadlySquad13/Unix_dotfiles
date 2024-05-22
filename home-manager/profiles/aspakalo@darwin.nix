@@ -29,6 +29,8 @@
 
     # Cli (Quality of Life).
     ../apps/eza.nix
+    ../apps/atuin.nix
+    ../apps/blesh.nix
   ];
 
   home.file = {

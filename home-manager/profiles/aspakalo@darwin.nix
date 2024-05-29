@@ -20,15 +20,17 @@
     ../apps/nix.nix
     ../apps/home-manager.nix
 
+    ../apps/flameshot.nix
     ../apps/invoke.nix
     ../apps/bash.nix
     ../apps/broot.nix
     ../apps/zoxide.nix
     ../apps/docker.nix
-  ];
 
-  home.packages = with pkgs; [
-    zoxide
+    # Cli (Quality of Life).
+    ../apps/eza.nix
+    ../apps/atuin.nix
+    ../apps/blesh.nix
   ];
 
   home.file = {
@@ -49,6 +51,11 @@
         # More specific.
         # # Projects
         builtins.mapAttrs (name: value: "/Users/aspakalo/Projects/${value}") {
+          # Namespaces.
+          "ephemeral-projects" = "ephemeral-";
+          "interim-projects" = "interim-";
+
+          # Specific projects.
           "lp" = "logistic-platform";
           "shepherd" = "shepherd";
           "kit" = "main-ui-kit";

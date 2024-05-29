@@ -48,6 +48,10 @@
       # - X level.
       "flameshot"
 
+      # Productivity
+      "taskwarrior"
+      "taskwarrior-tui"
+
       # FIX: Doesn't detect gpu on Arch.
       # With yay it works, though. It also installed these packages alongside
       # maybe they were missing:

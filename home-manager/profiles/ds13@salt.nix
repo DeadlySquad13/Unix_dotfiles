@@ -27,6 +27,7 @@
       # General.
       "numlockx"
       "keychain" # For easier ssh keys management.
+      "unzip"
       "wezterm"
       "syncthing"
 

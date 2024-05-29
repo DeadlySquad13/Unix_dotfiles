@@ -43,6 +43,8 @@
       "thefuck"
       "bat"
       "zoxide"
+      "nvimpager"
+      "tree"
       # - X level.
       "flameshot"
 

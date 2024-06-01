@@ -30,6 +30,7 @@
       "unzip"
       "wezterm"
       "syncthing"
+      "flatpak"
 
       #   Doesn't have service included. Most likely it should be enabled 'nix'
       # "way"

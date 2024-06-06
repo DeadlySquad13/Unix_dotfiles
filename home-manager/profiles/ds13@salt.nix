@@ -51,6 +51,7 @@
       "flameshot"
 
       # Productivity
+      "tmux"
       "taskwarrior"
       "taskwarrior-tui"
 

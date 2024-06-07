@@ -99,6 +99,7 @@
       # Specific.
       "qmk"
       "texlive"
+      "pandoc"
     ])
   );
 

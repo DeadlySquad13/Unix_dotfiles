@@ -31,6 +31,7 @@
     ../apps/eza.nix
     ../apps/atuin.nix
     ../apps/blesh.nix
+    ../apps/fzf.nix
   ];
 
   home.file = {

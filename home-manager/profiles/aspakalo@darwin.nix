@@ -17,6 +17,8 @@
 
   imports =  
   [ 
+    ../share.nix
+
     ../apps/nix.nix
     ../apps/home-manager.nix
 

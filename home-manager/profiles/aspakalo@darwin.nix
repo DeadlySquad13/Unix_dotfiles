@@ -20,6 +20,8 @@
     ../apps/nix.nix
     ../apps/home-manager.nix
 
+    ../apps/git.nix
+
     ../apps/flameshot.nix
     ../apps/invoke.nix
     ../apps/bash.nix

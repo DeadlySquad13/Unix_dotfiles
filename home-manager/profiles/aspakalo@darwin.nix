@@ -20,7 +20,7 @@
     ../apps/nix.nix
     ../apps/home-manager.nix
 
-    ../apps/git.nix
+    # ../apps/git.nix
 
     ../apps/flameshot.nix
     ../apps/invoke.nix
@@ -34,6 +34,11 @@
     ../apps/atuin.nix
     ../apps/blesh.nix
     ../apps/fzf.nix
+    # ../apps/ranger.nix
+    # ../apps/yabai.nix
+    # ../apps/skhd.nix
+
+    # ../apps/mattermost.nix
   ];
 
   home.file = {

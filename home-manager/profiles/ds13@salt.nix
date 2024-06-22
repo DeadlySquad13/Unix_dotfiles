@@ -52,6 +52,7 @@
 
       # Productivity
       "tmux"
+      "uair"
       "smug"
       "taskwarrior"
       "taskwarrior-tui"

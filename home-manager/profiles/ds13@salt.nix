@@ -94,6 +94,8 @@
       "zathura"
       "zotero"
 
+      "qbittorrent"
+
       "neovim"
       "ripgrep"
       # Specific.

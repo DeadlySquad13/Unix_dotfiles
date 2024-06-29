@@ -44,6 +44,7 @@
       "cht-sh"
       "thefuck"
       "bat"
+      "eza"
       "zoxide"
       "nvimpager"
       "tree"

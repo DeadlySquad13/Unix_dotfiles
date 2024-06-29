@@ -1,8 +1,13 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   programs.tmux = {
     enable = true;
+
+    plugins = with pkgs; [
+      tmuxPlugins.sensible
+      tmuxPlugins.resurrect
+    ];
 
     extraConfig = "source ~/.config/tmux/old.conf";
   };

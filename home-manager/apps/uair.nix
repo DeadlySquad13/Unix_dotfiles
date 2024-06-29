@@ -14,4 +14,8 @@
     # Gui dialog for shell scripts. Used for displaying uair stdout timer.
     yad
   ];
+
+  home.shellAliases = {
+    uairWork = "uair --config ~/.bookmarks/home-configs/uair/work.toml | yad --progress --no-buttons --css='* { font-size: 80px;  }'";
+  };
 }

@@ -50,6 +50,7 @@
       "tree"
       # - X level.
       "flameshot"
+      "rofi"
 
       # Productivity
       "tmux"

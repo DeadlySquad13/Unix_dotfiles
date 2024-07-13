@@ -69,6 +69,7 @@
 
       # Architecturing.
       "plantuml"
+      "yed"
 
       # Development.
       "nodejs"

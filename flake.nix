@@ -62,6 +62,10 @@
               permittedInsecurePackages = [
                 "electron-27.3.11"
               ];
+              allowUnfree = true;
+              # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+              #   "yEd"
+              # ];
             };
           }
           # { nixpkgs.config.allowUnfree = true; { nixpkgs.config.allowUnsupportedSystem = true; }}

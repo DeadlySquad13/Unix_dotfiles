@@ -80,6 +80,7 @@
       "lazygit"
       "gh" # GitHub cli.
       "glab" # GitLab cli.
+      "cz-cli"
 
       # # # Docker.
       "docker"

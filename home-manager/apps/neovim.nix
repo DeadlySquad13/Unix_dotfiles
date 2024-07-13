@@ -1,5 +1,7 @@
 { pkgs, config, ... }:
 
+# TODO: Move to programs.neovim. Use unstable channel. set .defaultEditor, .viAlias and
+# .withPython3 to true.
 {
   home.file = {
     # Solution for normies like me who are still not 100% into immutable.

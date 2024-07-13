@@ -2,8 +2,8 @@
 
 {
   home.packages = with pkgs; [
-    nodejs_21
+    nodejs_22
     # pkgs.node-18_x.pkgs.pnpm
-    corepack_21
+    corepack_22
   ];
 }

@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs = {
-        url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
+        url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     };
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -56,7 +56,15 @@
           #./hosts/buddha.nix
           #./modules
           # ./configuration.nix
-          #{ nixpkgs.config.allowUnfree = true; { nixpkgs.config.allowUnsupportedSystem = true; }}
+          # { nixpkgs.config.allowUnfree = true; }
+          {
+            nixpkgs.config = {
+              permittedInsecurePackages = [
+                "electron-27.3.11"
+              ];
+            };
+          }
+          # { nixpkgs.config.allowUnfree = true; { nixpkgs.config.allowUnsupportedSystem = true; }}
           # home-manager.nixosModules.home-manager
           # {
           #   home-manager.useGlobalPkgs = true;

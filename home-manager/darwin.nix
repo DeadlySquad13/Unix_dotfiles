@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  home.stateVersion = "23.05";
+  home.stateVersion = "24.11";
   imports =  
   [ 
     ./bash.nix

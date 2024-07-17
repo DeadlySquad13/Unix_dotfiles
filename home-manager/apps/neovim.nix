@@ -17,11 +17,16 @@
     # neovim
     xclip
   ];
+  # TODO: Move all these to layer.
   imports =  
   [ 
-      # TODO: Move to layer.
       # Was required for rest.nvim (for luarocks to be more specific).
       ./unzip.nix
+
+      # TODO: Move to a separate layer.
+      ./nil.nix
+      ./statix.nix
+      ./alejandra.nix
   ];
 
   programs.bash = {

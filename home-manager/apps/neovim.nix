@@ -27,6 +27,10 @@
       ./nil.nix
       ./statix.nix
       ./alejandra.nix
+
+      # TODO: Move to a separate layer.
+      # Used for sniprun REPLs.
+      ./deno.nix
   ];
 
   programs.bash = {

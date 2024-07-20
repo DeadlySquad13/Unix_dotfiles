@@ -28,6 +28,8 @@
       "numlockx"
       "keychain" # For easier ssh keys management.
       "unzip"
+      "wireguard-tools"
+      # "wireguird" Haven't found
       "wezterm"
       "syncthing"
       "flatpak"

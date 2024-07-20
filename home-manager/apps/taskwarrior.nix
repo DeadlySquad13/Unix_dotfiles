@@ -4,7 +4,7 @@
 
     # Files
     dataLocation = "~/.task";
-    colorTheme = /shared/archive-resources-/Shared/Configs/Wsl2_dotfiles/stow_home/taskwarrior/deadly-solarized-light.theme;
+    colorTheme = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/taskwarrior/deadly-solarized-light.theme;
 
     config = {
       # Contexts.
@@ -90,8 +90,4 @@
       };
     };
   };
-
-  # home.file = {
-  #   ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
-  # };
 }

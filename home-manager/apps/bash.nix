@@ -4,10 +4,12 @@
     # Completion script was causing errors on shell startup because of `[ "$vars" ]`.
     enableCompletion = true;
 
-    bashrcExtra = ''
-      # For environment variables.
-      [[ -f ~/.profile ]] && . ~/.profile
+    shellAliases = {
+      # https://joshtronic.com/2021/05/23/unlock-user-after-too-many-failed-sudo-attempts/
+      resetFailLock = "faillock --user $USER --reset";
+    };
 
+    bashrcExtra = ''
       # Personal profile.
       [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
     '';

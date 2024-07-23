@@ -90,4 +90,35 @@
       };
     };
   };
+
+  # TODO: Move into layer.
+  # REFACTOR: Move taskwarrior aliases from bashrc to here.
+  # Must guarantee then than all Unix systems are nix based. Otherwise alias
+  # will be lost.
+  programs.bash = {
+    bashrcExtra = ''
+      complete -F _complete_alias t
+      complete -F _complete_alias ta
+      complete -F _complete_alias taStep
+      complete -F _complete_alias tL
+      complete -F _complete_alias tA
+    '';
+    # https://www.reddit.com/r/taskwarrior/comments/uvwqlz/share_your_aliases/
+    shellAliases = {
+      ta = "task add";
+      # Task add step to the algorithm.
+      # For example, with this, you can chain tasks, so each depends on the one before it. Then you can do:
+      # tAddStep get bag
+      # tAddStep open door
+      # tAddStep go down stairs
+      # tAddStep get shopping
+      #
+      #   In this case, getting shopping depends on opening your door, so the door
+      # receives a higher priority, and you'll get a warning if you try to get down
+      # the stairs without your shopping bag.
+      taStep = "task add dep:\"$(task +LATEST uuids)\"";
+      tL = "task +LATEST";
+      tA = "task +ACTIVE";
+    };
+  };
 }

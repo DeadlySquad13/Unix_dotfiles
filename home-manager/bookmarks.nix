@@ -17,8 +17,18 @@
           "shared-configs" = "Shared/_configs";
           "shared-scripts" = "Shared/_scripts";
 
-          # ?: Should be in Shared too?
+          # QUESTION: Should be in Shared too?
           "kbd" = "Resources/KnowledgeBase__Data";
+          "kbn" = "Resources/KnowledgeBase__Data";
+
+          # QUESTION: Should be in Shared too?
+          "ChronoIndex" = "ChronoIndex";
+          "Taxonomy" = "Taxonomy";
+          "Taxonomy_hub" = "Taxonomy_hub";
+          "Taxonomy_hub{current}" = "Taxonomy_hub{current}";
+          "KnowledgeBase" = "KnowledgeBase";
+          "KnowledgeBase_hub" = "KnowledgeBase_hub";
+          "KnowledgeBase_hub{current}" = "KnowledgeBase_hub{current}";
 
           # More specific.
           "qmk" = "Shared/_configs/Keyboard__/ErgohavenVialQmk/keyboards/ergohaven/k02/keymaps/DeadlySquad13";
@@ -58,6 +68,7 @@
           "Programming_dotfiles.bootstrap" = "--personal/Programming_dotfiles.bootstrap";
         }
       ) //
+      # Non-bookmarks
       {
         "Projects/shared-" = /shared/soft-projects-/ds13/Projects;
       }

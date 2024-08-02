@@ -80,10 +80,15 @@
           recordsize = "64K";
           "com.sun:auto-snapshot" = "false";
         };
-        options.mountpoint = "/shared";
         postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zshared@blank$' || zfs snapshot zshared@blank";
 
         datasets = {
+          # Root relative to this pool. May be needed for other files that
+          # don't fit into structure defined below.
+          "root" = {
+            type = "zfs_fs";
+            options.mountpoint = "/shared";
+          };
           "configs_scripts" = {
             type = "zfs_fs";
             options.mountpoint = "/shared/_configs!scripts";
@@ -116,7 +121,6 @@
           atime = "off";
           recordsize = "64K";
         };
-        options.mountpoint = "/zcake";
         postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zcake@blank$' || zfs snapshot zcake@blank";
 
         # QUESTION: How to make multiple mountpoints? Maybe posthook?
@@ -163,11 +167,10 @@
           atime = "off";
           recordsize = "64K";
         };
-        options.mountpoint = "/";
         postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zroot@blank$' || zfs snapshot zroot@blank";
 
         datasets = {
-          root = {
+          ephemeral = {
             type = "zfs_fs";
             options.mountpoint = "/";
           };

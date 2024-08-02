@@ -41,9 +41,9 @@
             };
 
             # ## Zfs
-            #   It seems that final numbers are 6GB lover for zfs. Seems like it takes
-            # some of it (6GB) for snapshots or encryption... So I added some extra
-            # to level it properly.
+            #   Final size numbers are 6GB lover for zfs. Seems like it takes
+            # some of the space for it's internal structure, for example, for snapshots or encryption...
+            # So I added some extra to level it properly.
             shared = {
               label = "shared";
               size = "166G";
@@ -98,19 +98,19 @@
           # don't fit into structure defined below.
           "root" = {
             type = "zfs_fs";
-            options.mountpoint = "/shared";
+            mountpoint = "/shared";
           };
           "configs_scripts" = {
             type = "zfs_fs";
-            options.mountpoint = "/shared/_configs!scripts";
+            mountpoint = "/shared/_configs!scripts";
           };
           "projects" = {
             type = "zfs_fs";
-            options.mountpoint = "/shared/Projects";
+            mountpoint = "/shared/Projects";
           };
           "data" = {
             type = "zfs_fs";
-            options.mountpoint = "/shared/data";
+            mountpoint = "/shared/data";
             options = {
               # data is mostly big binary files like images or pdfs.
               recordsize = "1M";
@@ -150,25 +150,25 @@
           };
           "shared-" = {
             type = "zfs_fs";
-            options.mountpoint = "none";
+            mountpoint = "none";
           };
           "local-/nix" = {
             type = "zfs_fs";
-            options.mountpoint = "/nix";
+            mountpoint = "/nix";
           };
           "local-/var-" = {
             type = "zfs_fs";
-            options.mountpoint = "/var";
+            mountpoint = "/var";
           };
           "local-/var-/cache" = {
             type = "zfs_fs";
             # TODO: Also mount to home dir.
-            options.mountpoint = "/zsalt/local-/var-/cache";
+            mountpoint = "/zsalt/local-/var-/cache";
           };
           "local-/var-/share" = {
             type = "zfs_fs";
             # TODO: Also mount to home dir.
-            options.mountpoint = "/zsalt/local-/var-/share";
+            mountpoint = "/zsalt/local-/var-/share";
           };
         };
       };
@@ -190,8 +190,8 @@
 
         datasets = {
           ephemeral = {
-            type = "zfs_fs";
-            options.mountpoint = "/";
+            type = "zfs_volume";
+            mountpoint = "/";
           };
         };
       };

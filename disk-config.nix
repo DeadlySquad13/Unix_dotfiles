@@ -80,21 +80,21 @@
           recordsize = "64K";
           "com.sun:auto-snapshot" = "false";
         };
-        mountpoint = "/shared";
+        options.mountpoint = "/shared";
         postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zshared@blank$' || zfs snapshot zshared@blank";
 
         datasets = {
           "configs_scripts" = {
             type = "zfs_fs";
-            mountpoint = "/shared/_configs!scripts";
+            options.mountpoint = "/shared/_configs!scripts";
           };
           "projects" = {
             type = "zfs_fs";
-            mountpoint = "/shared/Projects";
+            options.mountpoint = "/shared/Projects";
           };
           "data" = {
             type = "zfs_fs";
-            mountpoint = "/shared/data";
+            options.mountpoint = "/shared/data";
             options = {
               # data is mostly big binary files like images or pdfs.
               recordsize = "1M";
@@ -116,7 +116,7 @@
           atime = "off";
           recordsize = "64K";
         };
-        mountpoint = "/zcake";
+        options.mountpoint = "/zcake";
         postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zcake@blank$' || zfs snapshot zcake@blank";
 
         # QUESTION: How to make multiple mountpoints? Maybe posthook?
@@ -124,8 +124,10 @@
         datasets = {
           "local-" = {
             type = "zfs_fs";
-            mountpoint = "/zsalt/local-";
-            options."com.sun:auto-snapshot" = "true";
+            options = {
+              mountpoint = "/zsalt/local-";
+              "com.sun:auto-snapshot" = "true";
+            };
           };
           "shared-" = {
             type = "zfs_fs";
@@ -136,34 +138,34 @@
             content = {
               type = "filesystem";
               format = "ext4";
-              mountpoint = "/nix";
             };
+            options.mountpoint = "/nix";
           };
           "local-/var-" = {
             type = "zfs_fs";
             content = {
               type = "filesystem";
               format = "ext4";
-              mountpoint = "/var";
             };
+            options.mountpoint = "/var";
           };
           "local-/var-/cache" = {
             type = "zfs_fs";
             content = {
               type = "filesystem";
               format = "ext4";
-              # TODO: Also mount to home dir.
-              mountpoint = "/zsalt/local-/var-/cache";
             };
+            # TODO: Also mount to home dir.
+            options.mountpoint = "/zsalt/local-/var-/cache";
           };
           "local-/var-/share" = {
             type = "zfs_fs";
             content = {
               type = "filesystem";
               format = "ext4";
-              # TODO: Also mount to home dir.
-              mountpoint = "/zsalt/local-/var-/share";
             };
+            # TODO: Also mount to home dir.
+            options.mountpoint = "/zsalt/local-/var-/share";
           };
         };
       };
@@ -177,13 +179,13 @@
           atime = "off";
           recordsize = "64K";
         };
-        mountpoint = "/";
+        options.mountpoint = "/";
         postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zroot@blank$' || zfs snapshot zroot@blank";
 
         datasets = {
           root = {
             type = "zfs_fs";
-            mountpoint = "/";
+            options.mountpoint = "/";
           };
         };
       };

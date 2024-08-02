@@ -135,35 +135,19 @@
           };
           "local-/nix" = {
             type = "zfs_fs";
-            content = {
-              type = "filesystem";
-              format = "ext4";
-            };
             options.mountpoint = "/nix";
           };
           "local-/var-" = {
             type = "zfs_fs";
-            content = {
-              type = "filesystem";
-              format = "ext4";
-            };
             options.mountpoint = "/var";
           };
           "local-/var-/cache" = {
             type = "zfs_fs";
-            content = {
-              type = "filesystem";
-              format = "ext4";
-            };
             # TODO: Also mount to home dir.
             options.mountpoint = "/zsalt/local-/var-/cache";
           };
           "local-/var-/share" = {
             type = "zfs_fs";
-            content = {
-              type = "filesystem";
-              format = "ext4";
-            };
             # TODO: Also mount to home dir.
             options.mountpoint = "/zsalt/local-/var-/share";
           };

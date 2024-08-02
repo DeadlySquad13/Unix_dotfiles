@@ -39,7 +39,6 @@
                 mountpoint = "/home";
               };
             };
-            # TODO: Add options for ashift and so on.
             shared = {
               label = "shared";
               size = "160G";
@@ -71,10 +70,17 @@
     zpool = {
       zshared = {
         type = "zpool";
-        rootFsOptions = {
-          # These are inherited to all child datasets as the default value.
-          compression = "lz4";
+        # These options inherited to all child datasets as the default value.
+        # Fine-tuned according to guide: zotero://select/library/items/KL7JXZFH = https://jrs-s.net/2018/08/17/zfs-tuning-cheat-sheet/
+
+        # - `-o` - pool properties or feature, see zpoolprops and zpool-features man pages respectively.
+        options = {
           ashift = "12";
+        };
+
+        # - `-O` - filesystem properties, see zfsprops man page.
+        rootFsOptions = {
+          compression = "lz4";
           xattr = "sa";
           atime = "off";
           recordsize = "64K";
@@ -113,10 +119,14 @@
       # are different.
       zcake = {
         type = "zpool";
+
+        options = {
+          ashift = "12";
+        };
+
         rootFsOptions = {
           compression = "lz4";
           "com.sun:auto-snapshot" = "false";
-          ashift = "12";
           xattr = "sa";
           atime = "off";
           recordsize = "64K";
@@ -159,10 +169,14 @@
       };
       zroot = {
         type = "zpool";
+
+        options = {
+          ashift = "12";
+        };
+
         rootFsOptions = {
           compression = "lz4";
           "com.sun:auto-snapshot" = "true";
-          ashift = "12";
           xattr = "sa";
           atime = "off";
           recordsize = "64K";

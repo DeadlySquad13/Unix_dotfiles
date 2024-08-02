@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs = {
-        url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
+        url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     };
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -52,11 +52,23 @@
         # system = "x86_64-linux";
         modules = [
           # ./home-manager/default.nix
-          ./home.nix
+          (./home-manager/profiles + "/ds13@salt.nix")
           #./hosts/buddha.nix
           #./modules
           # ./configuration.nix
-          #{ nixpkgs.config.allowUnfree = true; { nixpkgs.config.allowUnsupportedSystem = true; }}
+          # { nixpkgs.config.allowUnfree = true; }
+          {
+            nixpkgs.config = {
+              permittedInsecurePackages = [
+                "electron-27.3.11"
+              ];
+              allowUnfree = true;
+              # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+              #   "yEd"
+              # ];
+            };
+          }
+          # { nixpkgs.config.allowUnfree = true; { nixpkgs.config.allowUnsupportedSystem = true; }}
           # home-manager.nixosModules.home-manager
           # {
           #   home-manager.useGlobalPkgs = true;
@@ -72,8 +84,8 @@
         extraSpecialArgs = {inherit inputs outputs;};
         # system = "x86_64-linux";
         modules = [
-          # ./home-manager/default.nix
-          ./home-darwin.nix
+          (./home-manager/profiles + "/aspakalo@darwin.nix")
+          # import ./test.nix
           #./hosts/buddha.nix
           #./modules
           # ./configuration.nix

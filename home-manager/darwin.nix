@@ -4,8 +4,7 @@
   home.stateVersion = "24.11";
   imports =  
   [ 
-   ./misc.nix
-   ./git.nix 
+    ./bash.nix
    #./zsh.nix
    #./tmux.nix
    #./kitty.nix

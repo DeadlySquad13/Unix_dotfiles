@@ -39,9 +39,14 @@
                 mountpoint = "/home";
               };
             };
+
+            # ## Zfs
+            #   It seems that final numbers are 6GB lover for zfs. Seems like it takes
+            # some of it (6GB) for snapshots or encryption... So I added some extra
+            # to level it properly.
             shared = {
               label = "shared";
-              size = "160G";
+              size = "166G";
               content = {
                 type = "zfs";
                 pool = "zshared";
@@ -49,7 +54,7 @@
             };
             var = {
               label = "var";
-              size = "147G";
+              size = "153G";
               content = {
                 type = "zfs";
                 pool = "zcake";

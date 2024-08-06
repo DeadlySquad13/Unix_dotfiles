@@ -144,13 +144,13 @@
           "local-" = {
             type = "zfs_fs";
             options = {
-              mountpoint = "/zsalt/local-";
+              mountpoint = "/zcake/local-";
               "com.sun:auto-snapshot" = "true";
             };
           };
           "shared-" = {
             type = "zfs_fs";
-            mountpoint = "none";
+            options.mountpoint = "none";
           };
           "local-/nix" = {
             type = "zfs_fs";
@@ -163,12 +163,12 @@
           "local-/var-/cache" = {
             type = "zfs_fs";
             # TODO: Also mount to home dir.
-            mountpoint = "/zsalt/local-/var-/cache";
+            mountpoint = "/zcake/local-/var-/cache";
           };
           "local-/var-/share" = {
             type = "zfs_fs";
             # TODO: Also mount to home dir.
-            mountpoint = "/zsalt/local-/var-/share";
+            mountpoint = "/zcake/local-/var-/share";
           };
         };
       };
@@ -190,7 +190,7 @@
 
         datasets = {
           ephemeral = {
-            type = "zfs_volume";
+            type = "zfs_fs";
             mountpoint = "/";
           };
         };

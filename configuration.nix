@@ -16,10 +16,19 @@
     <nixos-wsl/modules>
     #(import "${home-manager}/nixos")
     #home-manager.nixosModules.default
+    ./hardware-configuration.nix
   ];
 
-  wsl.enable = true;
-  wsl.defaultUser = "ds13";
+  # https://nix-community.github.io/NixOS-WSL/options.html
+  wsl = {
+    enable = true;
+    defaultUser = "ds13";
+
+    docker-desktop.enable = true;
+  };
+
+  boot.loader.systemd-boot.enable = true; # (for UEFI systems only)
+  services.sshd.enable = true;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

@@ -72,6 +72,9 @@
       # Architecturing.
       "plantuml"
       "yed"
+      "drawio"
+      "inkscape"
+      "vue"
 
       # Development.
       "nodejs"

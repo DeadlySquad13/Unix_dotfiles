@@ -2,7 +2,7 @@
 
 {
   home.packages = with pkgs; [
-    yed
+    vue
   ];
   imports = [
     ./java-fonts-fix.nix

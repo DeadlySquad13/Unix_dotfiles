@@ -7,6 +7,9 @@ garbage-collect-old:
 garbage-collect:
 	nix-collect-garbage
 
+optimise:
+	nix-store --optimise
+
 # When want to migrate to a newer version of nixpkgs and home-manager.
 update:
 	nix flake update

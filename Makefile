@@ -1,6 +1,9 @@
 switch:
 	home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes'
 
+build:
+	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes'
+
 garbage-collect-old:
 	nix-collect-garbage --delete-older-than 10d
 

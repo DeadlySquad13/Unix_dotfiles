@@ -60,6 +60,7 @@
       "smug"
       "taskwarrior"
       "taskwarrior-tui"
+      # "mw" # Markwhen. Installed locally.
 
       # FIX: Doesn't detect gpu on Arch.
       # With yay it works, though. It also installed these packages alongside

@@ -3,28 +3,55 @@
 
   inputs = {
     nixpkgs = {
-        url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+      url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     };
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     snowfall-lib = {
-        url = "github:snowfallorg/lib";
-        inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:snowfallorg/lib";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  # outputs = inputs:
-  #   inputs.snowfall-lib.mkFlake {
-  #     # You must provide our flake inputs to Snowfall Lib.
-  #     inherit inputs;
+  outputs = inputs:
+    inputs.snowfall-lib.mkFlake {
+      # You must provide our flake inputs to Snowfall Lib.
+      inherit inputs;
 
-  #     # The `src` must be the root of the flake. See configuration
-  #     # in the next section for information on how you can move your
-  #     # Nix files to a separate directory.
-  #     src = ./.;
-  # };
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: let
+      # The `src` must be the root of the flake. See configuration
+      # in the next section for information on how you can move your
+      # Nix files to a separate directory.
+      src = ./.;
+
+      snowfall = {
+        namespace = "ds-omega";
+
+        meta = {
+          name = "ds-omega-flake";
+
+          title = "Unix dotfiles flake";
+        };
+      };
+
+      channels-config = {
+        allowUnfree = true;
+        permittedInsecurePackages = [
+          "electron-27.3.11"
+        ];
+        # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+        #   "yEd"
+        # ];
+      };
+    };
+
+  /*
+     outputs = {
+    self,
+    nixpkgs,
+    home-manager,
+    ...
+  } @ inputs: let
     inherit (self) outputs;
   in {
     nixosConfigurations = {
@@ -33,23 +60,24 @@
         modules = [
           #./hosts/buddha.nix
           #./modules
-	  ./configuration.nix
+          ./configuration.nix
           #{ nixpkgs.config.allowUnfree = true; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.ds13 = import ./home-manager/default.nix;
-            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.extraSpecialArgs = {inherit inputs;};
           }
         ];
       };
     };
-    homeConfigurations = {
+    homeConfigurations = let
+      system = "x86_64-linux";
+    in {
       "ds13@salt" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+        pkgs = nixpkgs.legacyPackages.${system}; # Home-manager requires 'pkgs' instance
         extraSpecialArgs = {inherit inputs outputs;};
-        # system = "x86_64-linux";
         modules = [
           # ./home-manager/default.nix
           (./home-manager/profiles + "/ds13@salt.nix")
@@ -101,6 +129,5 @@
       };
     };
   };
+  */
 }
-
-

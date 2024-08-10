@@ -18,20 +18,20 @@
     xclip
   ];
   # TODO: Move all these to layer.
-  imports =  
-  [ 
-      # Was required for rest.nvim (for luarocks to be more specific).
-      ../unzip/default.nix
+  # imports =  
+  # [ 
+  #     # Was required for rest.nvim (for luarocks to be more specific).
+  #     ../unzip/default.nix
 
-      # TODO: Move to a separate layer.
-      ../nil/default.nix
-      ../statix/default.nix
-      ../alejandra/default.nix
+  #     # TODO: Move to a separate layer.
+  #     ../nil/default.nix
+  #     ../statix/default.nix
+  #     ../alejandra/default.nix
 
-      # TODO: Move to a separate layer.
-      # Used for sniprun REPLs.
-      ../deno/default.nix
-  ];
+  #     # TODO: Move to a separate layer.
+  #     # Used for sniprun REPLs.
+  #     ../deno/default.nix
+  # ];
 
   programs.bash = {
     sessionVariables = {

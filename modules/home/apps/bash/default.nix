@@ -20,7 +20,7 @@
   };
 
   # TODO: Move all these to layer.
-  imports = [
-    ../complete-alias/default.nix
-  ];
+  # imports = [
+  #   ../complete-alias/default.nix
+  # ];
 }

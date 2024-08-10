@@ -92,6 +92,11 @@
   };
 
   # TODO: Move into layer.
+  # imports = [
+  #   ../taskopen/default.nix
+  # ];
+
+  # TODO: Move into layer.
   # REFACTOR: Move taskwarrior aliases from bashrc to here.
   # Must guarantee then than all Unix systems are nix based. Otherwise alias
   # will be lost.

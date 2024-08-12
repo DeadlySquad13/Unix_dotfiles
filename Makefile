@@ -10,6 +10,8 @@ garbage-collect-old:
 garbage-collect:
 	nix-collect-garbage
 
+# Saves a little bit of space by hardlinking deps. Judging from logs,
+# garbage-collect includes optimise.
 optimise:
 	nix-store --optimise
 

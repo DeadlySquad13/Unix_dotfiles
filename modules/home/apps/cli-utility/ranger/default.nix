@@ -52,6 +52,8 @@
       "fG" = "eval fm.copy(dirarg=dict(to=-1), narg=quantifier)";
       "fj" = "eval fm.copy(dirarg=dict(down=1), narg=quantifier)";
       "fk" = "eval fm.copy(dirarg=dict(up=1), narg=quantifier)";
+      # - YankContent of the file / image.
+      "fF" = "YankContent";
 
       "uf" = "uncut";
 

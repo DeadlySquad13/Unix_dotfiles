@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, lib, ...}: {
   home.file = {
     # As far as I can tell, I didn't do much configuration during wsl so it's
     # easier to just start over.
@@ -59,7 +59,7 @@
 
       # Remapping delete to "l".
       "lL" = "console delete";
-      "ll" = "console trash";
+      "ll" = lib.mkDefault "console trash";
       # - And mapping cut sub functions of a delete to n (like in NeoVim).
       "nn" = "cut";
       "na" = "cut mode=add";

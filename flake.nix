@@ -5,6 +5,9 @@
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     };
+    nixgl = {
+      url = "github:nix-community/nixGL";
+    };
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -23,6 +26,12 @@
       # in the next section for information on how you can move your
       # Nix files to a separate directory.
       src = ./.;
+
+      # 3rd party overlays.
+      overlays = with inputs; [
+        # Now you can reference pkgs.nixgl.nixGLNvidia and other wrappers.
+        nixgl.overlay
+      ];
 
       snowfall = {
         namespace = "ds-omega";

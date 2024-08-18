@@ -16,7 +16,8 @@
   # All other arguments come from the home home.
   config,
   ...
-}: {
+}:
+{
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -30,5 +31,15 @@
     # manage.
     username = "ds13";
     homeDirectory = "/home/ds13";
+  };
+
+  lib.${namespace}.modules = {
+    tools = {
+      ranger = {
+        enabled = true;
+        dev = true;
+        stage = true;
+      };
+    };
   };
 }

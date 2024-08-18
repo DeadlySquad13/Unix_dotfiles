@@ -41,5 +41,12 @@
         stage = true;
       };
     };
+    general = {
+      neovim = {
+        enabled = true;
+        dev = true;
+        stage = true;
+      };
+    };
   };
 }

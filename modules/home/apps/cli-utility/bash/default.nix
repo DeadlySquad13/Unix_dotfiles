@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   programs.bash = {
     enable = true;
     # Completion script was causing errors on shell startup because of `[ "$vars" ]`.
@@ -20,7 +20,15 @@
   };
 
   home.file = {
-    ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
+    # ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
+    ".bash".source =
+        pkgs.fetchFromGitHub {
+          owner = "DeadlySquad13";
+          repo = "Bash_config";
+          rev = "dcba041e1a0ef183a6c9d8af138f7838a22cbb15";
+          hash = "sha256-jIKemoaMlmrhCclVloNYwGN80w3DacYBVW5Lv5JFHuM=";
+        }
+        + "/stow_home/ranger/.config/ranger/commands.py";
   };
 
   # TODO: Move all these to layer.

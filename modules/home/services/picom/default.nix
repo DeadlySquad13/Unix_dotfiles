@@ -1,4 +1,4 @@
-{...}: {
+{ lib, ...}: lib.mkIf false {
   services.picom = {
     enable = true;
     # Tried to fix flickering

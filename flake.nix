@@ -45,9 +45,11 @@
 
       channels-config = {
         allowUnfree = true;
+        allowBroken = true;
         permittedInsecurePackages = [
           "electron-27.3.11"
         ];
+	allowUnsupportedSystem = true;
         # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
         #   "yEd"
         # ];

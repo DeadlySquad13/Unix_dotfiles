@@ -1,5 +1,15 @@
-{ pkgs, config, ... }:
-
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "productivity";
+  name = "smug";
+}
 {
   home.packages = with pkgs; [
     smug

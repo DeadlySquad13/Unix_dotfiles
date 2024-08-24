@@ -1,5 +1,14 @@
-{ pkgs, ... }:
-
+{
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "writing";
+  name = "pandoc";
+}
 {
   programs.pandoc = {
     enable = true;

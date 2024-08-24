@@ -14,10 +14,10 @@ in
       # Linked it here just for uniformity. Didn't find a way to point
       # NVIM_APPNAME to it.
       ".local/dotfiles-/_configs/nvim/-stage" = {
-        source = config.lib.file.mkOutOfStoreSymlink /shared/archive-resources-/Shared/_configs/NeoVim_config;
+        source = /shared/archive-resources-/Shared/_configs/NeoVim_config;
       };
       ".config/nvim-stage" = {
-        source = config.lib.file.mkOutOfStoreSymlink /shared/archive-resources-/Shared/_configs/NeoVim_config;
+        source = /shared/archive-resources-/Shared/_configs/NeoVim_config;
       };
     };
     home.shellAliases = {

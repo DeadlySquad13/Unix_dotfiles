@@ -17,6 +17,9 @@
   config,
   ...
 }:
+let
+  inherit (lib) disabled enabled;
+  in
 {
   home = {
     # This value determines the Home Manager release that your configuration is
@@ -34,15 +37,46 @@
   };
 
   lib.${namespace}.modules = {
-    tools = {
-      ranger = {
-        enabled = true;
+    architecturing = {
+      enable = true;
+    };
+    cli-utility = {
+      enable = true;
+    };
+    development = {
+      enable = true;
+    };
+    ecosystem = {
+      enable = true;
+    };
+    general = {
+      enable = true;
+
+      neovim = {
+        enabled = true; # TODO: Remove.
         dev = true;
         stage = true;
       };
+
+      openvpn3 = disabled;
     };
-    general = {
-      neovim = {
+    gui-utility = {
+      enable = true;
+    };
+    productivity = {
+      enable = true;
+    };
+    misc = {
+      qmk = enabled;
+    };
+    writing = {
+      enable = true;
+    };
+
+    tools = {
+      enabled = true;
+
+      ranger = {
         enabled = true;
         dev = true;
         stage = true;

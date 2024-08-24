@@ -51,17 +51,8 @@ in {
     categories = strings.splitString "." category;
     category-cfg = attrsets.attrByPath categories {} modules-cfg;
     module-cfg = category-cfg.${name} or {};
-  in {
-    # TODO: Ideally we should recurse over category parts: output ->
-    # { ...output, options = output.options.${category-part} }.
-    # Now we have: `options."development.nix".<name>`
-    # but want: `options.development.nix.<name>`
-    # For inspiration see https://github.com/NixOS/nixpkgs/blob/05405724efa137a0b899cce5ab4dde463b4fd30b/lib/attrsets.nix#L65
-    options.${category}.${name} = with lib.types; {
-      enable = mkBoolOpt false "Whether or not to enable ${name}.";
-    };
 
-    # TODO: In a similar to options manner, config should be recursively
+    # TODO: In a similar to `options` manner, config should be recursively
     # iterated: now we have only deepest sub-category options applied. For
     # example, in config:
     # {
@@ -81,6 +72,21 @@ in {
     # ranger will be disabled because tools is disabled but alejandra will not
     # be disabled even though a whole layer of development is disabled because
     # only the deepest category (nix) is taken into account.
-    config = mkIf (category-cfg ? enable && category-cfg.enable && module-cfg ? enable && module-cfg.enable) module;
+    # config = mkIf (category-cfg ? enable && category-cfg.enable && module-cfg ? enable && module-cfg.enable) module;
+    category-enabled = category-cfg ? enable && category-cfg.enable;
+    # Enable or disable module if it has an explicitly stated `enable`.
+    # Otherwise look at the category.
+    module-enabled = if module-cfg ? enable then module-cfg.enable else category-enabled;
+  in {
+    # TODO: Ideally we should recurse over category parts: output ->
+    # { ...output, options = output.options.${category-part} }.
+    # Now we have: `options."development.nix".<name>`
+    # but want: `options.development.nix.<name>`
+    # For inspiration see https://github.com/NixOS/nixpkgs/blob/05405724efa137a0b899cce5ab4dde463b4fd30b/lib/attrsets.nix#L65
+    options.${category}.${name} = with lib.types; {
+      enable = mkBoolOpt false "Whether or not to enable ${name}.";
+    };
+
+    config = mkIf module-enabled module;
   };
 }

@@ -18,7 +18,7 @@
   ...
 }:
 let
-  inherit (lib) disabled enabled;
+  inherit (lib.${namespace}) disabled enabled;
   in
 {
   home = {

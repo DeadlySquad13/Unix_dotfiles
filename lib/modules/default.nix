@@ -42,6 +42,7 @@ in {
     # `...aps/development/nix/<name>/default.nix`
     category,
     name,
+    extraPredicate ? { modules-cfg, module-cfg }: true
   }:
   # What you want to get when the module is enabled (module contents - app's configuration).
   module: let
@@ -83,10 +84,16 @@ in {
     # Now we have: `options."development.nix".<name>`
     # but want: `options.development.nix.<name>`
     # For inspiration see https://github.com/NixOS/nixpkgs/blob/05405724efa137a0b899cce5ab4dde463b4fd30b/lib/attrsets.nix#L65
-    options.${category}.${name} = with lib.types; {
+    options.${namespace}.${category}.${name} = with lib.types; {
       enable = mkBoolOpt false "Whether or not to enable ${name}.";
     };
 
-    config = mkIf module-enabled module;
+    config = mkIf (module-enabled && extraPredicate { inherit modules-cfg; inherit module-cfg; }) module;
   };
+
+
+  # Consider variant enabled if it's not stated otherwise. May change in the
+  # future hence this functions must be used.
+  mkIfDevEnabled = { module-cfg, ... }: if module-cfg ? dev then module-cfg.dev else true;
+  mkIfStageEnabled = { module-cfg, ... }: if module-cfg ? stage then module-cfg.stage else true;
 }

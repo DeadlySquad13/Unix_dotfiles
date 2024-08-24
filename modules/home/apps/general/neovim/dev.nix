@@ -1,15 +1,18 @@
 {
-  config,
   lib,
   namespace,
+  config,
   ...
-}: let
-  inherit (lib) mkIf;
-
-  modules-cfg = config.lib.${namespace}.modules;
-  cfg = modules-cfg.general.neovim;
-in
-  mkIf (cfg.enabled && cfg.dev) {
+}:
+let
+  inherit (lib.${namespace}) mkIfEnabled mkIfDevEnabled;
+in mkIfEnabled {
+  inherit config;
+  category = "general";
+  name = "neovim";
+  extraPredicate = mkIfDevEnabled;
+}
+{
     home.file = {
       # Reference: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
 

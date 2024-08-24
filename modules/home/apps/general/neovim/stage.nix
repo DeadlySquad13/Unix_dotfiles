@@ -1,15 +1,18 @@
 {
-  config,
   lib,
   namespace,
+  config,
   ...
-}: let
-  inherit (lib) mkIf;
-
-  modules-cfg = config.lib.${namespace}.modules;
-  cfg = modules-cfg.general.neovim;
-in
-  mkIf (cfg.enabled && cfg.stage) {
+}:
+let
+  inherit (lib.${namespace}) mkIfEnabled mkIfStageEnabled;
+in mkIfEnabled {
+  inherit config;
+  category = "general";
+  name = "neovim";
+  extraPredicate = mkIfStageEnabled;
+}
+{
     home.file = {
       # Linked it here just for uniformity. Didn't find a way to point
       # NVIM_APPNAME to it.

@@ -7,11 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "ecosystem";
-  name = "nurl";
+  category = "misc";
+  name = "qmk";
 }
 {
   home.packages = with pkgs; [
-    nurl
+    qmk
   ];
 }

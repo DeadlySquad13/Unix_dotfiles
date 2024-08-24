@@ -29,11 +29,18 @@
 #   };
 # }
 {
-  lib,
   pkgs,
+  lib,
+  namespace,
   config,
   ...
-}: {
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "development";
+  name = "zeal";
+}
+{
   home.packages = with pkgs; [
     # writeShellScriptBin
     # "zeal"

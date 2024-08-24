@@ -1,5 +1,14 @@
-{ ... }:
-
+{
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "general";
+  name = "flatpak";
+}
 {
   programs.bash = {
     sessionVariables = {

@@ -1,5 +1,15 @@
-{ pkgs, ... }:
-
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "general";
+  name = "obs-studio";
+}
   # FIX: Doesn't detect gpu on Arch.
   # With yay it works, though. It also installed these packages alongside
   # maybe they were missing:

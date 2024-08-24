@@ -1,5 +1,14 @@
-{ config, pkgs, lib, ... }:
-
+{
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "development";
+  name = "direnv";
+}
 {
   programs = {
     direnv = {

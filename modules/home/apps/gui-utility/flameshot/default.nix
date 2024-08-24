@@ -1,5 +1,15 @@
-{ pkgs, ... }:
-
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "gui-utility";
+  name = "flameshot";
+}
 {
   home.packages = with pkgs; [
     flameshot

@@ -7,11 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "ecosystem";
-  name = "nurl";
+  category = "general";
+  name = "openvpn3";
 }
 {
   home.packages = with pkgs; [
-    nurl
+    openvpn3
   ];
 }

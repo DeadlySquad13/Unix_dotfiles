@@ -11,12 +11,17 @@
 in
   mkIf (cfg.enabled && cfg.stage) {
     home.file = {
-      ".local/dotfiles-/_configs/nvim/stage-" = {
-        source =  ~/.bookmarks/shared-configs/NeoVim_config;
+      # Linked it here just for uniformity. Didn't find a way to point
+      # NVIM_APPNAME to it.
+      ".local/dotfiles-/_configs/nvim/-stage" = {
+        source = config.lib.file.mkOutOfStoreSymlink /shared/archive-resources-/Shared/_configs/NeoVim_config;
+      };
+      ".config/nvim-stage" = {
+        source = config.lib.file.mkOutOfStoreSymlink /shared/archive-resources-/Shared/_configs/NeoVim_config;
       };
     };
     home.shellAliases = {
-      nvim-stage = "nvim -u ~/.local/dotfiles-/_configs/nvim/stage-/init.vim";
-      vi-stage = "nvim -u ~/.local/dotfiles-/_configs/nvim/stage-/init.vim";
+      nvim-stage = "NVIM_APPNAME=nvim-stage nvim";
+      vi-stage = "NVIM_APPNAME=nvim-stage nvim";
     };
   }

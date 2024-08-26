@@ -10,8 +10,8 @@
 #   category = "gui-utility";
 #   name = "rofi";
 # }
-{...}:
-{
+{lib, ...}:
+lib.mkIf false {
   programs.rofi = {
     enable = true;
 

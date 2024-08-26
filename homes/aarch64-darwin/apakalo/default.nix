@@ -16,7 +16,9 @@
   # All other arguments come from the home home.
   config,
   ...
-}: {
+}: let
+  inherit (lib.${namespace}) disabled enabled;
+in {
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -33,19 +35,78 @@
   };
 
   lib.${namespace}.modules = {
-    tools = {
+    architecturing = {
+      enable = false;
+    };
+    cli-utility = {
+      enable = true;
+
       ranger = {
         enabled = true;
-        dev = true;
-        stage = true;
+        dev = false;
+        stage = false;
       };
     };
+    development = {
+      enable = true;
+
+      docker = disabled;
+      gh = disabled;
+      glab = disabled;
+
+      deno = disabled;
+      browser-sync = disabled;
+      zeal = disabled;
+      devdocs-desktop = disabled;
+
+      google-cloud-sdk = disabled;
+    };
+    ecosystem = {
+      enable = true;
+    };
     general = {
+      enable = true;
+
       neovim = {
-        enabled = true;
-        dev = true;
-        stage = true;
+        enabled = true; # TODO: Remove.
+        dev = false;
+        stage = false;
       };
+
+      keepassxc = disabled;
+      ferdium = disabled;
+      telegram-desktop = disabled;
+      zathura = disabled;
+      
+      wireguard-tools = disabled;
+      unzip = disabled;
+      vlc = disabled;
+      keychain = disabled;
+      numlockx = disabled;
+      obs-studio = disabled;
+      qbittorrent = disabled;
+      syncthing = disabled;
+      btop = disabled;
+      flatpak = disabled;
+      java-fonts-fix = disabled;
+      openvpn3 = disabled;
+      gpick = disabled;
+    };
+    gui-utility = {
+      enable = false;
+    };
+    productivity = {
+      taskopen = enabled;
+      taskwarrior = enabled;
+      smug = enabled;
+
+      uair = disabled;
+    };
+    misc = {
+      qmk = disabled;
+    };
+    writing = {
+      enable = false;
     };
   };
 }

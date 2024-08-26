@@ -1,4 +1,15 @@
-{pkgs, ...}: {
+{
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "cli-utility";
+  name = "bash";
+}
+{
   programs.bash = {
     enable = true;
     # Completion script was causing errors on shell startup because of `[ "$vars" ]`.

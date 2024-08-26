@@ -1,11 +1,33 @@
 {
   pkgs,
-  config,
   lib,
   namespace,
+  config,
   ...
-}: let
-  inherit (lib) mkIf;
+}: 
+{
+  imports = [
+    ./dev.nix
+    ./stage.nix
+  ];
+}
+// lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "cli-utility";
+  name = "ranger";
+}
+{
+  home.file = {
+    # Prod.
+    ".config/ranger/commands.py".source =
+      pkgs.fetchFromGitHub {
+        owner = "DeadlySquad13";
+        repo = "Wsl2_dotfiles";
+        rev = "af728d9f05f25656ab8fcefa66d767c5b558710e";
+        hash = "sha256-3hT3Gzh7vDRap1prJFyu+av4SS0kbu+HVYPbHRYw0YE=";
+      }
+      + "/stow_home/ranger/.config/ranger/commands.py";
+  };
 
   modules-cfg = config.lib.${namespace}.modules;
   cfg = modules-cfg.tools.ranger;

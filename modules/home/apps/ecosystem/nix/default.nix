@@ -1,5 +1,15 @@
-{ pkgs, ... }:
-
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "ecosystem";
+  name = "nix";
+}
 {
   nix = {
     package = pkgs.nix;

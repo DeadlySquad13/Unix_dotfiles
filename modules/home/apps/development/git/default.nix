@@ -1,4 +1,16 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "development";
+  name = "git";
+}
+{
   home.file = {
     # ".gitconfig".source =
       # pkgs.fetchFromGitHub {

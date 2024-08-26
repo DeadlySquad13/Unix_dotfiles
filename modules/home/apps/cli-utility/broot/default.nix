@@ -1,5 +1,14 @@
-{ ... }:
-
+{
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "cli-utility";
+  name = "broot";
+}
 {
   programs.broot = {
     enable = true;

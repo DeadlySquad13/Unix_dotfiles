@@ -20,14 +20,14 @@
   };
 
   home.file = {
-    # ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
-    ".bash".source =
-      pkgs.fetchFromGitHub {
-        owner = "DeadlySquad13";
-        repo = "Bash_config";
-        rev = "dcba041e1a0ef183a6c9d8af138f7838a22cbb15";
-        hash = "sha256-jIKemoaMlmrhCclVloNYwGN80w3DacYBVW5Lv5JFHuM=";
-      };
+    ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
+    # ".bash".source =
+    #   pkgs.fetchFromGitHub {
+    #     owner = "DeadlySquad13";
+    #     repo = "Bash_config";
+    #     rev = "1670b3214feaf69708add2f0978cb94472fb0bab";
+    #     hash = "sha256-zmkhIdSOvq+RR2Xri9lB8cZRPDBhH6VmvjPkRdVusFw=";
+    #   };
   };
 
   # TODO: Move all these to layer.

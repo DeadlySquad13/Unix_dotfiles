@@ -51,8 +51,6 @@ in {
       enable = true;
 
       docker = disabled;
-      gh = disabled;
-      glab = disabled;
 
       deno = disabled;
       browser-sync = disabled;

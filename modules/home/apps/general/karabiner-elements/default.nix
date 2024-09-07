@@ -2,7 +2,7 @@
   lib,
   namespace,
   config,
-  pkgs,
+  # pkgs,
   ...
 }:
 lib.${namespace}.mkIfEnabled {
@@ -10,22 +10,23 @@ lib.${namespace}.mkIfEnabled {
   category = "general";
   name = "karabiner-elements";
 }
+# TODO:Enable Fn keys.
 {
   # Prod.
   home.file = {
     # Dev.
-    ".config/karabiner/assets/complex_modifications" = lib.${namespace}.source {
+    ".config/karabiner" = lib.${namespace}.source {
       inherit config;
-      get-path = p: "~/.local/dotfiles-/home-/_scripts/Keymappings__Karabiner_scripts";
+      get-path = p: "${p.home-configs}/Keymappings__Karabiner_config";
       out-of-store = true;
     };
     # Prod.
     /*
-       pkgs.fetchFromGitHub {
+    pkgs.fetchFromGitHub {
       owner = "DeadlySquad13";
-      repo = "Keymappings__Karabiner_scripts";
-      rev = "81e44d824c41a63a7a798b6763455fe07647f807";
-      hash = "sha256-5bi8uXJYdK+l9SR6Rnr0kXMKsE9YnOop7dihJzgMjqY=";
+      repo = "Keymappings__Karabiner_config";
+      rev = "103baafc016bfab2bd57bf7027bf21f18ff463c1";
+      hash = "sha256-gYLMzR5MF9s4Lp70n39jA9OS8miEOi1FaK+0xg/5he4=";
     };
     */
   };

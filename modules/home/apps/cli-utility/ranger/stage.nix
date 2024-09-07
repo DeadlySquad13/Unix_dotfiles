@@ -15,7 +15,11 @@ in
   {
     home.file = {
       # Stage.
-      ".local/dotfiles-/_configs/ranger/-stage/commands.py".source = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/ranger/.config/ranger/commands.py;
+      ".local/dotfiles-/_configs/ranger/-stage/commands.py" = lib.${namespace}.source {
+        inherit config;
+        get-path = p: "${p.shared-configs}/Wsl2_dotfiles/stow_home/ranger/.config/ranger/commands.py";
+        out-of-store = false;
+      };
     };
 
     home.shellAliases = {

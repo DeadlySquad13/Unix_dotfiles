@@ -31,7 +31,12 @@ lib.${namespace}.mkIfEnabled {
   };
 
   home.file = {
-    ".bash".source = ~/.bookmarks/shared-configs/Bash_config;
+    ".bash" = lib.${namespace}.source {
+      inherit config;
+      get-path = p: "${p.shared-configs}/Bash_config";
+      out-of-store = true;
+    };
+    # ".bash".source = config.lib.${na"${config.lib.${namespace}.paths.shared-configs}/Bash_config"};
     # ".bash".source =
     #   pkgs.fetchFromGitHub {
     #     owner = "DeadlySquad13";

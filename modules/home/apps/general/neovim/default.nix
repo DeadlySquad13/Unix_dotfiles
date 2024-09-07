@@ -19,19 +19,12 @@
   name = "neovim";
 }
 {
-  # home.file = {
-  #   ".config/nvim".source = pkgs.fetchFromGitHub {
-  #     owner = "DeadlySquad13";
-  #     repo = "NeoVim_config";
-  #     rev = "1a5c52c46d55a266c2d2fef6b3c14c9bd533584a";
-  #     hash = "sha256-AgPQsJqw0IrSCaivPqdaDypu76e0vzcntuBzEV+zfZo=";
-  #   };
-  # };
   home.file = {
-    # Reference: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
-    ".config/nvim" = {
-      source = config.lib.file.mkOutOfStoreSymlink ~/.local/dotfiles-/shared-/_configs/NeoVim_config;
-      recursive = true;
+    ".config/nvim".source = pkgs.fetchFromGitHub {
+      owner = "DeadlySquad13";
+      repo = "NeoVim_config";
+      rev = "1a5c52c46d55a266c2d2fef6b3c14c9bd533584a";
+      hash = "sha256-AgPQsJqw0IrSCaivPqdaDypu76e0vzcntuBzEV+zfZo=";
     };
   };
 

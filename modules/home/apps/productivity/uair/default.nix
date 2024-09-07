@@ -13,9 +13,10 @@ lib.${namespace}.mkIfEnabled {
 {
   home = {
     file = {
-      ".config/uair" = {
-        source = config.lib.file.mkOutOfStoreSymlink ~/.bookmarks/home-configs/uair;
-        recursive = true;
+      ".config/uair" = lib.${namespace}.source {
+        inherit config;
+        get-path = p: "${p.home-configs}/uair";
+        out-of-store = true;
       };
     };
 

@@ -7,8 +7,8 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "architecturing";
-  name = "archi";
+  category = "general";
+  name = "iosevka";
 }
 {
   home.packages = with pkgs; [

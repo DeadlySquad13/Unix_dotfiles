@@ -1,5 +1,15 @@
-{ pkgs, ... }:
-
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "development";
+  name = "docker";
+}
 {
   home.packages = with pkgs; [
     docker

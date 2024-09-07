@@ -1,5 +1,15 @@
-{ pkgs, ... }:
-
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "general";
+  name = "wezterm";
+}
 {
   home.file = {
     # # xdg home should be set to "$HOME/.config", otherwise wezterm will look

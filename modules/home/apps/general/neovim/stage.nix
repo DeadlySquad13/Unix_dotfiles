@@ -1,22 +1,30 @@
 {
-  config,
   lib,
   namespace,
+  config,
   ...
-}: let
-  inherit (lib) mkIf;
-
-  modules-cfg = config.lib.${namespace}.modules;
-  cfg = modules-cfg.general.neovim;
-in
-  mkIf (cfg.enabled && cfg.stage) {
+}:
+let
+  inherit (lib.${namespace}) mkIfEnabled mkIfStageEnabled;
+in mkIfEnabled {
+  inherit config;
+  category = "general";
+  name = "neovim";
+  extraPredicate = mkIfStageEnabled;
+}
+{
     home.file = {
-      ".local/dotfiles-/_configs/nvim/stage-" = {
-        source =  ~/.bookmarks/shared-configs/NeoVim_config;
+      # Linked it here just for uniformity. Didn't find a way to point
+      # NVIM_APPNAME to it.
+      ".local/dotfiles-/_configs/nvim/-stage" = {
+        source = /shared/archive-resources-/Shared/_configs/NeoVim_config;
+      };
+      ".config/nvim-stage" = {
+        source = /shared/archive-resources-/Shared/_configs/NeoVim_config;
       };
     };
     home.shellAliases = {
-      nvim-stage = "nvim -u ~/.local/dotfiles-/_configs/nvim/stage-/init.vim";
-      vi-stage = "nvim -u ~/.local/dotfiles-/_configs/nvim/stage-/init.vim";
+      nvim-stage = "NVIM_APPNAME=nvim-stage nvim";
+      vi-stage = "NVIM_APPNAME=nvim-stage nvim";
     };
   }

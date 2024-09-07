@@ -1,4 +1,16 @@
-{...}: {
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "productivity";
+  name = "taskwarrior";
+}
+{
   programs.taskwarrior = {
     enable = true;
 

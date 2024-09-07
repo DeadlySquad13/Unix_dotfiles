@@ -1,4 +1,16 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  namespace,
+  config,
+  ...
+}:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "productivity";
+  name = "taskopen";
+}
+{
   home.packages = with pkgs; [
     ds-omega.taskopen2
   ];

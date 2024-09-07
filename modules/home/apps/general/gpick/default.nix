@@ -7,11 +7,12 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "ecosystem";
-  name = "nurl";
+  category = "general";
+  name = "gpick";
 }
 {
+
   home.packages = with pkgs; [
-    nurl
+    gpick
   ];
 }

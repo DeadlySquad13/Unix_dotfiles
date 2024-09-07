@@ -34,77 +34,105 @@ in {
     homeDirectory = "/Users/apakalo";
   };
 
-  lib.${namespace}.modules = {
-    architecturing = {
-      enable = false;
-    };
-    cli-utility = {
-      enable = true;
+  lib.${namespace} = {
+    paths =
+      rec {
+        config = ~/.config;
+        kbd = ~/KnowledgeBase__Notes;
+        projects = ~/Projects;
 
-      ranger = {
-        enabled = true;
-        dev = false;
-        stage = false;
-      };
-    };
-    development = {
-      enable = true;
+        dotfiles = "~/.local/dotfiles-";
+        shared-dotfiles = "${dotfiles}/shared-";
+        shared-configs = "${shared-dotfiles}/_configs";
+        shared-scripts = "${shared-dotfiles}/_scripts";
 
-      docker = disabled;
-
-      deno = disabled;
-      browser-sync = disabled;
-      zeal = disabled;
-      devdocs-desktop = disabled;
-
-      google-cloud-sdk = disabled;
-    };
-    ecosystem = {
-      enable = true;
-    };
-    general = {
-      enable = true;
-
-      neovim = {
-        enabled = true; # TODO: Remove.
-        dev = false;
-        stage = false;
+        home-dotfiles = "${dotfiles}/home-";
+        home-configs = "${home-dotfiles}/_configs";
+        home-scripts = "${home-dotfiles}/_scripts";
+      }
+      //
+      # More specific.
+      # # Projects
+      builtins.mapAttrs (name: value: "/Users/apakalo/Projects/${value}") {
+        # Namespaces.
+        "ephemeral-projects" = "ephemeral-";
+        "interim-projects" = "interim-";
       };
 
-      keepassxc = disabled;
-      ferdium = disabled;
-      telegram-desktop = disabled;
-      zathura = disabled;
-      
-      wireguard-tools = disabled;
-      unzip = disabled;
-      vlc = disabled;
-      keychain = disabled;
-      numlockx = disabled;
-      obs-studio = disabled;
-      qbittorrent = disabled;
-      syncthing = disabled;
-      btop = disabled;
-      flatpak = disabled;
-      java-fonts-fix = disabled;
-      openvpn3 = disabled;
-      gpick = disabled;
-    };
-    gui-utility = {
-      enable = false;
-    };
-    productivity = {
-      taskopen = enabled;
-      taskwarrior = enabled;
-      smug = enabled;
+    modules = {
+      architecturing = {
+        enable = false;
+      };
+      cli-utility = {
+        enable = true;
 
-      uair = disabled;
-    };
-    misc = {
-      qmk = disabled;
-    };
-    writing = {
-      enable = false;
+        ranger = {
+          enabled = true;
+          dev = false;
+          stage = false;
+        };
+      };
+      development = {
+        enable = true;
+
+        # FIX: Has to be enabled explicitly.
+        nix = enabled;
+
+        docker = disabled;
+
+        deno = disabled;
+        browser-sync = disabled;
+        zeal = disabled;
+        devdocs-desktop = disabled;
+
+        google-cloud-sdk = disabled;
+      };
+      ecosystem = {
+        enable = true;
+      };
+      general = {
+        enable = true;
+
+        neovim = {
+          dev = true;
+          stage = false;
+        };
+
+        keepassxc = disabled;
+        ferdium = disabled;
+        telegram-desktop = disabled;
+        zathura = disabled;
+
+        wireguard-tools = disabled;
+        unzip = disabled;
+        vlc = disabled;
+        keychain = disabled;
+        numlockx = disabled;
+        obs-studio = disabled;
+        qbittorrent = disabled;
+        syncthing = disabled;
+        btop = disabled;
+        flatpak = disabled;
+        java-fonts-fix = disabled;
+        openvpn3 = disabled;
+        gpick = disabled;
+      };
+      gui-utility = {
+        enable = false;
+      };
+      productivity = {
+        taskopen = enabled;
+        taskwarrior = enabled;
+        smug = enabled;
+
+        uair = disabled;
+      };
+      misc = {
+        qmk = disabled;
+      };
+      writing = {
+        enable = false;
+      };
     };
   };
 }

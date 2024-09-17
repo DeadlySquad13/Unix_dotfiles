@@ -19,3 +19,21 @@ optimise:
 update:
 	nix flake update
 	# Not sure if it was needed: `nix-channel --update`
+
+# Virtual Machines
+# # Qemu
+build-vm-qemu:
+	# Delete cached dynamic state of the virtual machine from previous build.
+	rm --force nixos.qcow2
+	nix-build '<nixpkgs/nixos>' -A vm -I nixpkgs=channel:nixos-24.11 -I nixos-config=./systems/x86_64-vm/simple/default.nix
+
+start-vm-qemu-console:
+	QEMU_KERNEL_PARAMS=console=ttyS0 ./result/bin/run-nixos-vm -nographic; reset
+
+# Not recommended: qemu is quite slow when working with graphics.
+start-vm-qemu:
+	./result/bin/run-nixos-vm
+
+# # VirtualBox
+build-vm-qemu:
+	nix-build '<nixpkgs/nixos>' -A config.system.build.virtualBoxOVA -I nixpkgs=channel:nixos-24.11 -I nixos-config=./systems/x86_64-vm/vpn/default.nix

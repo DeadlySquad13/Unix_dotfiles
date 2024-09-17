@@ -61,7 +61,18 @@ in {
 
     modules = {
       architecturing = {
-        enable = false;
+        enable = true;
+
+        mw = enabled;
+        plantuml = enabled;
+        drawio = enabled;
+        yed = enabled;
+
+        vue = disabled;
+        inkscape = disabled;
+        kroki-cli = disabled;
+        # FIX: Requires alsa for some reason.
+        staruml = disabled;
       };
       cli-utility = {
         enable = true;

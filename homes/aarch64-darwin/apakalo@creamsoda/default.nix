@@ -121,7 +121,7 @@ in {
         numlockx = disabled;
         obs-studio = disabled;
         qbittorrent = disabled;
-        syncthing = disabled;
+        syncthing = enabled;
         btop = disabled;
         flatpak = disabled;
         java-fonts-fix = disabled;

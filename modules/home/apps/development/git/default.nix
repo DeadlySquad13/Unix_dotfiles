@@ -24,8 +24,8 @@ lib.${namespace}.mkIfEnabled {
       pkgs.fetchFromGitHub {
         owner = "DeadlySquad13";
         repo = "Wsl2_dotfiles";
-        rev = "af728d9f05f25656ab8fcefa66d767c5b558710e";
-        hash = "sha256-3hT3Gzh7vDRap1prJFyu+av4SS0kbu+HVYPbHRYw0YE=";
+        rev = "fa02f0aa6eca98b39a13448a73003083d246b37d";
+        hash = "sha256-tg1VxLIgVfWK+vChX278p/4KvSPJfxY0f9wH3MJJ7Qo=";
       }
       + "/stow_home/git/.global_gitignore";
 

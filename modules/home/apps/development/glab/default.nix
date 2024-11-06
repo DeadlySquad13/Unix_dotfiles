@@ -43,4 +43,19 @@ lib.${namespace}.mkIfEnabled {
             api_protocol: https
             api_host: gitlab.rutube.ru
   '';
+
+  /* We provision tokens via Ansible because it's not
+  possible with nix-sops alone to include it into file securely.
+  https://discourse.nixos.org/t/how-to-set-environment-variables-with-sops-nix/38980
+  
+    We use env only for default host with personal token.
+  https://discourse.nixos.org/t/how-to-set-environment-variables-with-sops-nix/38980/2
+
+    But shellInit is not available for home-manager so it's only left to use bashrcExtra.
+  */
+  programs.bash = {
+    bashrcExtra = ''
+      export GITLAB_TOKEN="$(cat ${config.sops.secrets.glab_DeadlySquad13_token.path})"
+    '';
+  };
 }

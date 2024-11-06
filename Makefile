@@ -19,3 +19,6 @@ optimise:
 update:
 	nix flake update
 	# Not sure if it was needed: `nix-channel --update`
+
+edit-vault:
+	nix-shell -p sops --run "sops secrets/secrets.yaml"

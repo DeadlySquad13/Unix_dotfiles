@@ -20,37 +20,43 @@
 }: let
   inherit (lib.${namespace}) disabled enabled;
 in {
-  /* snowfallorg.user = {
+  /*
+     snowfallorg.user = {
     enable = true;
     name = "ds-omega";
-  }; */
+  };
+  */
 
-  /* home-manager = {
+  /*
+     home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-  }; */
+  };
+  */
 
-
- /* The value is used to conditionalize
+  system = {
+    /*
+    The value is used to conditionalize
        backwards‐incompatible changes in default settings. You should
        usually set this once when installing nix-darwin on a new system
        and then never change it (at least without reading all the relevant
-       entries in the changelog using `darwin-rebuild changelog`). */
-  system.stateVersion = 5;
+       entries in the changelog using `darwin-rebuild changelog`).
+    */
+    stateVersion = 5;
 
-  system.defaults.dock = {
-    autohide = true;
-    orientation = "bottom";
+    defaults.dock = {
+      autohide = true;
+      orientation = "bottom";
 
-    # Customize Hot Corners.
-    # wvous-tl-corner = 2;  # top-left - Mission Control
-    # wvous-tr-corner = 13; # top-right - Lock Screen
-    wvous-bl-corner = 10;  # bottom-left - Put Display to Sleep
-    wvous-br-corner = 13;  # bottom-right - Lock Screen
+      # Customize Hot Corners.
+      # wvous-tl-corner = 2;  # top-left - Mission Control
+      # wvous-tr-corner = 13; # top-right - Lock Screen
+      wvous-bl-corner = 10; # bottom-left - Put Display to Sleep
+      wvous-br-corner = 13; # bottom-right - Lock Screen
+    };
   };
 
   lib.ds-omega = {
-
     modules = {
       ecosystem = {
         enable = false;

@@ -37,16 +37,16 @@ in {
        and then never change it (at least without reading all the relevant
        entries in the changelog using `darwin-rebuild changelog`). */
   system.stateVersion = 5;
-  system.defaults.dock.orientation = "left";
+  system.defaults.dock.orientation = "bottom";
 
   system.defaults.dock = {
     autohide = true;
 
     # Customize Hot Corners.
     # wvous-tl-corner = 2;  # top-left - Mission Control
-    wvous-tr-corner = 13; # top-right - Lock Screen
-    # wvous-bl-corner = 3;  # bottom-left - Application Windows
-    # wvous-br-corner = 4;  # bottom-right - Desktop
+    # wvous-tr-corner = 13; # top-right - Lock Screen
+    wvous-bl-corner = 10;  # bottom-left - Put Display to Sleep
+    wvous-br-corner = 13;  # bottom-right - Lock Screen
   };
 
   lib.ds-omega = {

@@ -17,7 +17,7 @@
   config,
   ...
 }: let
-  inherit (lib.${namespace}) disabled enabled;
+  inherit (lib.ds-omega) disabled enabled;
 in {
   home = {
     # This value determines the Home Manager release that your configuration is
@@ -34,7 +34,7 @@ in {
     homeDirectory = "/Users/apakalo";
   };
 
-  lib.${namespace} = {
+  lib.ds-omega = {
     paths =
       rec {
         config = ~/.config;

@@ -25,6 +25,14 @@
       url = "github:snowfallorg/lib";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    #   `nixpkgs.follows` should be removed unfortunately.
+    # see: https://github.com/hraban/mac-app-util/issues/6
+    #   It's fine until you use sbcl for building lisp applications.
+    # Otherwise this small script would cost you about 1.6 GB. Use
+    # https://youtu.be/Z8BL8mdzWHI?t=1104.
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+    };
   };
 
   outputs = inputs:
@@ -67,6 +75,11 @@
 
       systems.modules.nixos = with inputs; [
         home-manager.nixosModules.home-manager
+      ];
+
+      # Add modules to all homes.
+      homes.modules = with inputs; [
+        mac-app-util.homeManagerModules.default
       ];
     };
 

@@ -4,6 +4,12 @@ switch:
 build:
 	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes'
 
+darwin-switch:
+	nix run nix-darwin -- switch --flake . --impure --show-trace
+
+darwin-build:
+	nix run nix-darwin -- built --flake . --impure --show-trace
+
 garbage-collect-old:
 	nix-collect-garbage --delete-older-than 10d
 

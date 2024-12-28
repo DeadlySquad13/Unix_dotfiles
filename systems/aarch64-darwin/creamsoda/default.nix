@@ -49,8 +49,8 @@ in {
       orientation = "bottom";
 
       # Customize Hot Corners.
-      # wvous-tl-corner = 2;  # top-left - Mission Control
-      # wvous-tr-corner = 13; # top-right - Lock Screen
+      wvous-tl-corner = 1;  # top-left - Disabled
+      wvous-tr-corner = 1; # top-right - Disabled
       wvous-bl-corner = 10; # bottom-left - Put Display to Sleep
       wvous-br-corner = 13; # bottom-right - Lock Screen
     };

@@ -7,8 +7,8 @@
 }:
 {
   imports = [
-    # ./dev.nix
-    # ./stage.nix
+    ./dev.nix
+    ./stage.nix
   ];
 }
 // lib.${namespace}.mkIfEnabled {

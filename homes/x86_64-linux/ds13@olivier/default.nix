@@ -36,51 +36,110 @@ let
     homeDirectory = "/home/ds13";
   };
 
-  lib.${namespace}.modules = {
+  lib.${namespace} = {
+      paths =
+      rec {
+        config = ~/.config;
+        kbd = /mnt/h/Resources/KnowledgeBase__Notes;
+        projects = ~/Projects;
+
+        dotfiles = "/mnt/h";
+        shared-dotfiles = "${dotfiles}/Shared";
+        shared-configs = "${shared-dotfiles}/Configs";
+        shared-scripts = "${shared-dotfiles}/_scripts";
+
+        home-dotfiles = "${dotfiles}/home-";
+        home-configs = "${home-dotfiles}/_configs";
+        home-scripts = "${home-dotfiles}/_scripts";
+      }
+      //
+      # More specific.
+      # # Projects
+      builtins.mapAttrs (name: value: "/Users/apakalo/Projects/${value}") {
+        # Namespaces.
+        "ephemeral-projects" = "ephemeral-";
+        "interim-projects" = "interim-";
+      };
+    modules = {
     architecturing = {
-      enable = true;
+      enable = false;
     };
     cli-utility = {
-      enable = true;
+      enable = false;
+
+      bat = enabled;
+      bash = enabled;
     };
     development = {
-      enable = true;
+      enable = false;
+
+      git = enabled;
     };
     ecosystem = {
-      enable = true;
+      enable = false;
     };
-    general = {
-      enable = true;
+    /*general = {
+      enable = false;
 
       neovim = {
         enabled = true; # TODO: Remove.
         dev = true;
-        stage = true;
+        stage = false;
       };
 
       openvpn3 = disabled;
-    };
+    };*/
+    general = {
+        enable = true;
+
+        neovim = {
+          dev = true;
+          stage = false;
+        };
+
+        keepassxc = disabled;
+        ferdium = disabled;
+        telegram-desktop = disabled;
+        zathura = disabled;
+
+        wireguard-tools = disabled;
+        unzip = disabled;
+        vlc = disabled;
+        keychain = disabled;
+        numlockx = disabled;
+        obs-studio = disabled;
+        qbittorrent = disabled;
+        syncthing = enabled;
+        btop = disabled;
+        flatpak = disabled;
+        java-fonts-fix = disabled;
+        openvpn3 = disabled;
+        gpick = disabled;
+      };
     gui-utility = {
-      enable = true;
+      enable = false;
     };
     productivity = {
-      enable = true;
+      enable = false;
+
+      taskwarrior = enabled;
     };
     misc = {
       qmk = enabled;
     };
     writing = {
-      enable = true;
+      enable = false;
     };
 
     tools = {
-      enabled = true;
+      enabled = false;
 
       ranger = {
-        enabled = true;
-        dev = true;
-        stage = true;
+        enabled = false;
+        dev = false;
+        stage = false;
       };
+    };
     };
   };
 }

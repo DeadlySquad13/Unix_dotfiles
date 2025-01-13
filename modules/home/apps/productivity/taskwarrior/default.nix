@@ -99,10 +99,10 @@ lib.${namespace}.mkIfEnabled {
       # context=soft
 
       # Sync.
-      taskd = {
-        certificate = "/home/ds13/.taskd/Deadly_Squad13.cert.pem";
-        key = "/home/ds13/.taskd/Deadly_Squad13.key.pem";
-        ca = "/home/ds13/.taskd/ca.cert.pem";
+      taskd = let taskdRootDir = "${config.home.homeDirectory}/.taskd"; in {
+        certificate = "${taskdRootDir}/Deadly_Squad13.cert.pem";
+        key = "${taskdRootDir}/Deadly_Squad13.key.pem";
+        ca = "${taskdRootDir}/ca.cert.pem";
         server = "46.8.19.152:53589";
         credentials = "Public/Deadly Squad13/6a44ae0c-f770-404b-8239-362afec3e867";
         trust = "ignore hostname";

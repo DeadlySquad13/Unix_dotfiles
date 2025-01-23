@@ -53,8 +53,10 @@ in {
   # https://nix-community.github.io/NixOS-WSL/options.html
   wsl = {
     enable = true;
-    # Hard to set: https://discourse.nixos.org/t/set-default-user-in-wsl2-nixos-distro/38328
-    # defaultUser = "ds13";
+    # Had to configure it properly:
+    # https://discourse.nixos.org/t/set-default-user-in-wsl2-nixos-distro/38328
+    # https://nix-community.github.io/NixOS-WSL/how-to/change-username.html
+    defaultUser = "ds13";
 
     docker-desktop.enable = true;
   };

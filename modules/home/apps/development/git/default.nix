@@ -82,14 +82,26 @@ lib.${namespace}.mkIfEnabled {
       show-option-origin = "config --show-origin --show-scope --get-all";
     };
 
-    includes = [
-      {
-        contents = {
+    includes = let 
+      rutube-config = {
           user = {
             name = "Пакало Александр";
             email = "apakalo@rutube.ru";
           };
         };
+      in [
+      {
+        contents = rutube-config;
+        condition = "hasconfig:remote.*.url:https://gitlab.rutube.ru/**";
+      }
+      {
+        contents = rutube-config;
+        condition = "hasconfig:remote.*.url:git@gitlab.rutube.ru:*/**";
+      }
+      # Folder specific settings. Works only with git folders (doesn't work with
+      # normal folders and worktrees).
+      {
+        contents = rutube-config;
         condition = "gitdir:~/Projects/--professional/Rutube__/";
       }
     ];

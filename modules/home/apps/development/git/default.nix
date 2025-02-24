@@ -28,12 +28,6 @@ lib.${namespace}.mkIfEnabled {
         hash = "sha256-tg1VxLIgVfWK+vChX278p/4KvSPJfxY0f9wH3MJJ7Qo=";
       }
       + "/stow_home/git/.global_gitignore";
-
-    "Projects/--professional/Rutube__/rutube_gitconfig.inc".text = ''
-      [user]
-        name = Пакало Александр
-        email = apakalo@rutube.ru
-    '';
   };
   programs.git = {
     enable = true;

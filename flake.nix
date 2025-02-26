@@ -11,8 +11,15 @@
     sops-nix = {
       url = "github:Mic92/sops-nix";
     };
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     snowfall-lib = {
       url = "github:snowfallorg/lib";
@@ -52,11 +59,15 @@
         permittedInsecurePackages = [
           "electron-27.3.11"
         ];
-	allowUnsupportedSystem = true;
+        allowUnsupportedSystem = true;
         # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
         #   "yEd"
         # ];
       };
+
+      systems.modules.nixos = with inputs; [
+        home-manager.nixosModules.home-manager
+      ];
     };
 
   /*

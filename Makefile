@@ -2,7 +2,19 @@ switch:
 	home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes'
 
 build:
-	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes'
+	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+switch-system:
+	nixos-rebuild switch --flake .#olivier --impure
+
+build-system:
+	nixos-rebuild build --flake .#olivier --impure --show-trace
+
+switch-darwin:
+	nix run nix-darwin -- switch --flake . --impure
+
+build-darwin:
+	nix run nix-darwin -- build --flake . --impure --show-trace
 
 garbage-collect-old:
 	nix-collect-garbage --delete-older-than 10d

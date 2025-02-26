@@ -16,9 +16,11 @@
   # All other arguments come from the home home.
   config,
   ...
-}: let
-  inherit (lib.ds-omega) disabled enabled;
-in {
+}:
+let
+  inherit (lib.${namespace}) disabled enabled;
+  in
+{
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -30,20 +32,20 @@ in {
     stateVersion = "24.11";
     # Home Manager needs a bit of information about you and the paths it should
     # manage.
-    username = "apakalo";
-    homeDirectory = "/Users/apakalo";
+    username = "ds13";
+    homeDirectory = "/home/ds13";
   };
 
-  lib.ds-omega = {
-    paths =
+  lib.${namespace} = {
+      paths =
       rec {
         config = ~/.config;
-        kbd = ~/KnowledgeBase__Notes;
+        kbd = /mnt/h/Resources/KnowledgeBase__Notes;
         projects = ~/Projects;
 
-        dotfiles = "~/.local/dotfiles-";
-        shared-dotfiles = "${dotfiles}/shared-";
-        shared-configs = "${shared-dotfiles}/_configs";
+        dotfiles = "/mnt/h";
+        shared-dotfiles = "${dotfiles}/Shared";
+        shared-configs = "${shared-dotfiles}/Configs";
         shared-scripts = "${shared-dotfiles}/_scripts";
 
         home-dotfiles = "${dotfiles}/home-";
@@ -58,50 +60,36 @@ in {
         "ephemeral-projects" = "ephemeral-";
         "interim-projects" = "interim-";
       };
-
     modules = {
-      architecturing = {
-        enable = true;
+    architecturing = {
+      enable = false;
+    };
+    cli-utility = {
+      enable = false;
 
-        mw = enabled;
-        plantuml = enabled;
-        drawio = enabled;
-        yed = enabled;
+      bat = enabled;
+      bash = enabled;
+    };
+    development = {
+      enable = false;
 
-        vue = disabled;
-        inkscape = disabled;
-        kroki-cli = disabled;
-        # FIX: Requires alsa for some reason.
-        staruml = disabled;
+      git = enabled;
+    };
+    ecosystem = {
+      enable = false;
+    };
+    /*general = {
+      enable = false;
+
+      neovim = {
+        enabled = true; # TODO: Remove.
+        dev = true;
+        stage = false;
       };
-      cli-utility = {
-        enable = true;
 
-        ranger = {
-          enabled = true;
-          dev = false;
-          stage = false;
-        };
-      };
-      development = {
-        enable = true;
-
-        # FIX: Has to be enabled explicitly.
-        nix = enabled;
-
-        docker = disabled;
-
-        deno = disabled;
-        browser-sync = disabled;
-        zeal = disabled;
-        devdocs-desktop = disabled;
-
-        google-cloud-sdk = disabled;
-      };
-      ecosystem = {
-        enable = true;
-      };
-      general = {
+      openvpn3 = disabled;
+    };*/
+    general = {
         enable = true;
 
         neovim = {
@@ -128,22 +116,30 @@ in {
         openvpn3 = disabled;
         gpick = disabled;
       };
-      gui-utility = {
-        enable = false;
-      };
-      productivity = {
-        taskopen = enabled;
-        taskwarrior = enabled;
-        smug = enabled;
+    gui-utility = {
+      enable = false;
+    };
+    productivity = {
+      enable = false;
 
-        uair = disabled;
+      taskwarrior = enabled;
+    };
+    misc = {
+      qmk = enabled;
+    };
+    writing = {
+      enable = false;
+    };
+
+    tools = {
+      enabled = false;
+
+      ranger = {
+        enabled = false;
+        dev = false;
+        stage = false;
       };
-      misc = {
-        qmk = disabled;
-      };
-      writing = {
-        enable = false;
-      };
+    };
     };
   };
 }

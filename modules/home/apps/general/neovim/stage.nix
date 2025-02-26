@@ -4,7 +4,7 @@
   config,
   ...
 }: let
-  inherit (lib.${namespace}) mkIfEnabled mkIfStageEnabled;
+  inherit (lib.ds-omega) mkIfEnabled mkIfStageEnabled;
 in
   mkIfEnabled {
     inherit config;

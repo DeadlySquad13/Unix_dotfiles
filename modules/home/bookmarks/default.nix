@@ -62,15 +62,20 @@
           # Specific projects.
           "mlops" = "--educational/MlOps_course__Tasks";
         } //
-        # # Shared Projects
+        # # Shared Projects.
         builtins.mapAttrs (name: value: "/shared/soft-projects-/ds13/Projects/${value}") {
           "shared-projects" = "";
           "Programming_dotfiles.bootstrap" = "--personal/Programming_dotfiles.bootstrap";
+        } //
+        # # Shared Project Assets.
+        builtins.mapAttrs (name: value: "/mnt/Project_assets/${value}") {
+          "shared-project-assets" = "";
         }
       ) //
       # Non-bookmarks
       {
         "Projects/shared-" = /shared/soft-projects-/ds13/Projects;
+        "Projects/shared-assets" = /mnt/Project_assets;
       }
     );
 }

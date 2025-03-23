@@ -12,6 +12,6 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    telegram-desktop
+    ds-omega.gl-telegram-desktop
   ];
 }

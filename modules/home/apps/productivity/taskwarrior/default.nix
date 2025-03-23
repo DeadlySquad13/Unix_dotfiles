@@ -14,6 +14,8 @@ lib.${namespace}.mkIfEnabled {
   programs.taskwarrior = {
     enable = true;
 
+    package = pkgs.taskwarrior2;
+
     # Files
     dataLocation = "~/.task";
     # colorTheme = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/taskwarrior/deadly-solarized-light.theme;

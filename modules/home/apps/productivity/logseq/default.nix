@@ -1,5 +1,5 @@
 {
-  pkgs,
+  pkgs-stable,
   lib,
   namespace,
   config,
@@ -11,7 +11,7 @@ lib.${namespace}.mkIfEnabled {
   name = "logseq";
 }
 {
-  home.packages = with pkgs; [
+  home.packages = with pkgs-stable; [
     logseq
   ];
 }

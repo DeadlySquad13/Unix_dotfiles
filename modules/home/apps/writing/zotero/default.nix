@@ -12,6 +12,6 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    zotero
+    ds-omega.gl-zotero
   ];
 }

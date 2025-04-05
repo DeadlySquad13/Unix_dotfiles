@@ -21,5 +21,9 @@ lib.${namespace}.mkIfEnabled {
     profileExtra = ''
       [[ -f $HOME/.nix-profile/bin/complete_alias ]] && . /home/ds13/.nix-profile/bin/complete_alias
     '';
+
+    bashrcExtra = ''
+      complete -F _complete_alias sct
+    '';
   };
 }

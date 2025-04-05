@@ -14,4 +14,14 @@ lib.${namespace}.mkIfEnabled {
   home.packages = with pkgs; [
     ripgrep
   ];
+
+  # Need at least something in $RIPGREP_CONFIG_PATH to avoid error of ripgrep
+  # "No such file or directory".
+  home.file = {
+    ".ripgreprc".text = ''
+        # Add my 'web' type.
+        --type-add
+        web:*.{html,css,js}*
+      '';
+  };
 }

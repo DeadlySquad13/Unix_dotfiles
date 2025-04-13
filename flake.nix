@@ -11,12 +11,27 @@
     sops-nix = {
       url = "github:Mic92/sops-nix";
     };
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     snowfall-lib = {
       url = "github:snowfallorg/lib";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    #   `nixpkgs.follows` should be removed unfortunately.
+    # see: https://github.com/hraban/mac-app-util/issues/6
+    #   It's fine until you use sbcl for building lisp applications.
+    # Otherwise this small script would cost you about 1.6 GB. Use
+    # https://youtu.be/Z8BL8mdzWHI?t=1104.
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
     };
   };
 
@@ -52,11 +67,20 @@
         permittedInsecurePackages = [
           "electron-27.3.11"
         ];
-	allowUnsupportedSystem = true;
+        allowUnsupportedSystem = false;
         # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
         #   "yEd"
         # ];
       };
+
+      systems.modules.nixos = with inputs; [
+        home-manager.nixosModules.home-manager
+      ];
+
+      # Add modules to all homes.
+      homes.modules = with inputs; [
+        mac-app-util.homeManagerModules.default
+      ];
     };
 
   /*

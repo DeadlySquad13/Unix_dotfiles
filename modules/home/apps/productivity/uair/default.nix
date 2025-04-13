@@ -9,6 +9,7 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "productivity";
   name = "uair";
+  extraPredicate = lib.${namespace}.mkIfLinux;
 }
 {
   home = {

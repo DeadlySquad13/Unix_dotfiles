@@ -20,13 +20,9 @@ lib.${namespace}.mkIfEnabled {
       resetFailLock = "faillock --user $USER --reset";
     };
 
-    # TODO: Move pixi to a separate layer.
     bashrcExtra = ''
       # Personal profile.
       [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
-
-      # Pixi completion.
-      eval "$(pixi completion --shell bash)"
     '';
   };
 

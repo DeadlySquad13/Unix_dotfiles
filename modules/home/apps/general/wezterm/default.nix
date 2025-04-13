@@ -9,6 +9,9 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
   name = "wezterm";
+  # TODO: Doesn't work with gpu out of the box, needs gl wrapper to properly
+  # work on Linux.
+  extraPredicate = lib.${namespace}.mkIfDarwin;
 }
 {
   home.file = {
@@ -24,7 +27,6 @@ lib.${namespace}.mkIfEnabled {
   };
 
   home.packages = with pkgs; [
-    # TODO: Doesn't work with gpu out of the box, needs gl wrapper.
-    # wezterm
+    wezterm
   ];
 }

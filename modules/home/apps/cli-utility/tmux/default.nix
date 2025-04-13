@@ -15,7 +15,6 @@ lib.${namespace}.mkIfEnabled {
     enable = true;
 
     plugins = with pkgs; [
-      tmuxPlugins.sensible
       tmuxPlugins.resurrect
     ];
 

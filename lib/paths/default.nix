@@ -22,7 +22,7 @@ in {
   @example
     home.file.".config/karabiner" = lib.${namespace}.source {
       inherit config;
-      get-path = p: "~/.local/dotfiles-/home-/_scripts/Keymappings__Karabiner_scripts";
+      get-path = p: p.home-configs and "${p.home-configs}/YabaiWm_config" or "~/.config/.yabai";
       out-of-store = true;
     };
 

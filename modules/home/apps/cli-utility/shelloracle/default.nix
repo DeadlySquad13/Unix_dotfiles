@@ -22,6 +22,8 @@ lib.${namespace}.mkIfEnabled {
       # https://github.com/djcopley/ShellOracle/blob/16535e262ac7a3379bc5fa56426f225bb83da4ff/src/shelloracle/shell/shelloracle.bash
       url = "https://raw.githubusercontent.com/djcopley/ShellOracle/16535e262ac7a3379bc5fa56426f225bb83da4ff/src/shelloracle/shell/shelloracle.bash";
     };
+
+    ".shelloracle/config.toml".source = ./config.toml;
   };
 
 }

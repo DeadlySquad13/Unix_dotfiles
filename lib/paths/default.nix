@@ -5,16 +5,20 @@
   ...
 }: let
   inherit (inputs.nixpkgs.lib) strings;
+  inherit (lib.${namespace}) disabled enabled;
 in {
   get-path = {
     config,
     cb,
   }: let
-    path = cb config.lib.${namespace}.paths;
+    config-paths = config.lib.${namespace}.paths or {};
+    path = if config-paths != {} then cb config-paths else builtins.null;
   in
-    if strings.hasPrefix "~/" path
-    then /${config.home.homeDirectory}/${strings.removePrefix "~/" path}
-    else /${strings.removePrefix "/" path};
+    if path == builtins.null then path
+    else
+      if strings.hasPrefix "~/" path
+      then /${config.home.homeDirectory}/${strings.removePrefix "~/" path}
+      else /${strings.removePrefix "/" path};
 
   /*
   @usage
@@ -36,12 +40,14 @@ in {
       inherit config;
       cb = get-path;
     };
-  in {
-    # Reference for mkOutOfStoreSymlink: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
-    source =
-      if !out-of-store
-      then path
-      else config.lib.file.mkOutOfStoreSymlink path;
-    recursive = out-of-store;
-  };
+  in
+    if path == builtins.null then {} else
+    {
+      # Reference for mkOutOfStoreSymlink: https://www.reddit.com/r/NixOS/comments/104l0w9/comment/jhfxdq4/?utm_source=share&utm_medium=web2x&context=3
+      source =
+        if !out-of-store
+        then path
+        else config.lib.file.mkOutOfStoreSymlink path;
+      recursive = out-of-store;
+    };
 }

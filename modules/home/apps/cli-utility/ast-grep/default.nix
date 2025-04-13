@@ -7,12 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "general";
-  name = "numlockx";
-  extraPredicate = lib.${namespace}.mkIfLinux;
+  category = "cli-utility";
+  name = "ast-grep";
 }
 {
   home.packages = with pkgs; [
-    numlockx
+    ast-grep
   ];
 }

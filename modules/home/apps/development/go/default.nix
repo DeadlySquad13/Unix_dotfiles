@@ -7,12 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "general";
-  name = "numlockx";
-  extraPredicate = lib.${namespace}.mkIfLinux;
+  category = "development";
+  name = "go";
 }
 {
   home.packages = with pkgs; [
-    numlockx
+    go
   ];
 }

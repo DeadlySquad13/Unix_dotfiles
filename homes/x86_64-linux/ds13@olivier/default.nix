@@ -104,9 +104,7 @@ let
       writing = {
         enable = true;
       };
-      graphics = {
-        enable = true;
-      };
+
       tools = {
         enabled = true;
 
@@ -116,11 +114,6 @@ let
           stage = true;
         };
       };
-    };
-
-
-    services.zapret = {
-      enable = true;
     };
   };
 }

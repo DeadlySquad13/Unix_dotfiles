@@ -9,6 +9,7 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
   name = "karabiner-elements";
+  extraPredicate = lib.${namespace}.mkIfDarwin;
 }
 # TODO:Enable Fn keys.
 {

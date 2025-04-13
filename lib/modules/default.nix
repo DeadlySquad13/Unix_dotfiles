@@ -5,6 +5,7 @@
   ...
 }: let
   inherit (inputs.nixpkgs.lib) attrsets strings;
+  inherit (lib.${namespace}) disabled enabled;
 in {
   # Just some syntax sugar.
   # Reference: https://github.com/jakehamilton/config/blob/f8f8d3d70a7ef58f9d030fe36d35caa7054fdcec/lib/module/default.nix
@@ -48,7 +49,7 @@ in {
   module: let
     inherit (lib) mkIf;
 
-    modules-cfg = config.lib.${namespace}.modules;
+    modules-cfg = config.lib.${namespace}.modules or {};
     categories = strings.splitString "." category;
     category-cfg = attrsets.attrByPath categories {} modules-cfg;
     module-cfg = category-cfg.${name} or {};
@@ -96,4 +97,8 @@ in {
   # future hence this functions must be used.
   mkIfDevEnabled = { module-cfg, ... }: if module-cfg ? dev then module-cfg.dev else true;
   mkIfStageEnabled = { module-cfg, ... }: if module-cfg ? stage then module-cfg.stage else true;
+
+  # Platform specific modules.
+  mkIfDarwin = _: lib.snowfall.system.is-darwin builtins.currentSystem;
+  mkIfLinux = _: lib.snowfall.system.is-linux builtins.currentSystem;
 }

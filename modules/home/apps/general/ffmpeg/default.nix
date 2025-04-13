@@ -8,11 +8,11 @@
 lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
-  name = "numlockx";
-  extraPredicate = lib.${namespace}.mkIfLinux;
+  name = "ffmpeg";
 }
 {
+
   home.packages = with pkgs; [
-    numlockx
+    ffmpeg_6
   ];
 }

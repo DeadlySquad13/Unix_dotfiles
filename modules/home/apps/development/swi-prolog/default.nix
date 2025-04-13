@@ -12,7 +12,9 @@ lib.${namespace}.mkIfEnabled {
 }
 {
 
-  home.packages = with pkgs; [
-    swi-prolog
-  ];
+  # FIX: For some reason doesn't work, throws "error: undefined variable
+  # 'swi-prolog"
+  # home.packages = with pkgs; [
+  #   swi-prolog
+  # ];
 }

@@ -93,8 +93,6 @@ in {
 
         deno = disabled;
         browser-sync = disabled;
-        zeal = disabled;
-        devdocs-desktop = disabled;
 
         google-cloud-sdk = disabled;
       };

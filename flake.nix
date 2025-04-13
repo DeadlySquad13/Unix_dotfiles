@@ -68,9 +68,9 @@
         allowUnfree = true;
         allowBroken = true;
         allowUnsupportedSystem = true;
-        permittedInsecurePackages = [
-          "electron-27.3.11"
-        ];
+        # permittedInsecurePackages = [
+        #   "electron-27.3.11"
+        # ];
         # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
         #   "yEd"
         # ];

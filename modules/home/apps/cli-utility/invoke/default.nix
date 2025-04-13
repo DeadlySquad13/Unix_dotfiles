@@ -16,9 +16,12 @@ lib.${namespace}.mkIfEnabled {
   ];
 
   home.file = {
+    # If you set `out-of-store = false` (or omit it), it will make a "prod"
+    # version: a whole directory with scripts will be copied into nix store and
+    # reference to it will be inserted.
     ".invoke.yaml".text = ''
       tasks:
-        search_root: ${lib.${namespace}.get-path { inherit config; cb = p: p.shared-scripts; }}
+        search_root: ${(lib.${namespace}.source { inherit config; get-path = p: p.shared-scripts; out-of-store = true; }).source}
     '';
   };
 

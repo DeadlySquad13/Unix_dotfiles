@@ -1,8 +1,10 @@
+run-switch: switch optimise garbage-collect-old
+
 switch:
-	home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes'
+	home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 build:
-	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes'
+	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 darwin-switch:
 	nix run nix-darwin -- switch --flake . --impure --show-trace

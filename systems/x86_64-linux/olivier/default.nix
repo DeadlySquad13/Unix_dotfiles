@@ -86,6 +86,9 @@ in {
 
         nix = disabled;
       };
+      development = {
+        enable = true;
+      };
     };
   };
 }

@@ -7,10 +7,10 @@ build:
 	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 switch-system:
-	nixos-rebuild switch --flake .#olivier --impure
+	sudo nixos-rebuild switch --flake .#olivier --impure
 
 build-system:
-	nixos-rebuild build --flake .#olivier --impure --show-trace
+	sudo nixos-rebuild build --flake .#olivier --impure --show-trace
 
 switch-darwin:
 	nix run nix-darwin -- switch --flake . --impure

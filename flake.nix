@@ -5,6 +5,9 @@
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     };
+    # TODO: Remove after release of Logseq
+    # https://discuss.logseq.com/t/nixos-logseq-has-been-removed-due-to-lack-of-maintenance-and-blocking-the-electron-27-removal/31605/3
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     nixgl = {
       url = "github:nix-community/nixGL";
     };
@@ -43,6 +46,24 @@
         nixgl.overlay
       ];
 
+      # The `specialArgs` parameter passes the
+      # non-default nixpkgs instances to other nix modules
+      # system.hosts.x86_64-linux.specialArgs = {
+      #   # To use packages from nixpkgs-stable,
+      #   # we configure some parameters for it first
+      #   pkgs-stable = import inputs.nixpkgs-stable {
+      #   };
+      # };
+      homes.users."ds13@salt".specialArgs = {
+        # To use packages from nixpkgs-stable,
+        # we configure some parameters for it first
+        pkgs-stable = import inputs.nixpkgs-stable {
+          config.permittedInsecurePackages = [
+            "electron-27.3.11"
+          ];
+        };
+      };
+
       snowfall = {
         namespace = "ds-omega";
 
@@ -56,10 +77,10 @@
       channels-config = {
         allowUnfree = true;
         allowBroken = true;
-        permittedInsecurePackages = [
-          "electron-27.3.11"
-        ];
-        allowUnsupportedSystem = true;
+        # permittedInsecurePackages = [
+        #   "electron-27.3.11"
+        # ];
+        allowUnsupportedSystem = false;
         # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
         #   "yEd"
         # ];
@@ -68,91 +89,9 @@
       systems.modules.nixos = with inputs; [
         home-manager.nixosModules.home-manager
       ];
-    };
 
-  /*
-     outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    ...
-  } @ inputs: let
-    inherit (self) outputs;
-  in {
-    nixosConfigurations = {
-      nixos = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          #./hosts/buddha.nix
-          #./modules
-          ./configuration.nix
-          #{ nixpkgs.config.allowUnfree = true; }
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.ds13 = import ./home-manager/default.nix;
-            home-manager.extraSpecialArgs = {inherit inputs;};
-          }
-        ];
-      };
+      system.modules.darwin = with inputs; [
+        mac-app-util.homeManagerModules.default
+      ];
     };
-    homeConfigurations = let
-      system = "x86_64-linux";
-    in {
-      "ds13@salt" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system}; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [
-          # ./home-manager/default.nix
-          (./home-manager/profiles + "/ds13@salt.nix")
-          #./hosts/buddha.nix
-          #./modules
-          # ./configuration.nix
-          # { nixpkgs.config.allowUnfree = true; }
-          {
-            nixpkgs.config = {
-              permittedInsecurePackages = [
-                "electron-27.3.11"
-              ];
-              allowUnfree = true;
-              # allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-              #   "yEd"
-              # ];
-            };
-          }
-          # { nixpkgs.config.allowUnfree = true; { nixpkgs.config.allowUnsupportedSystem = true; }}
-          # home-manager.nixosModules.home-manager
-          # {
-          #   home-manager.useGlobalPkgs = true;
-          #   home-manager.useUserPackages = true;
-          #   home-manager.users.ds13 = import ./home-manager/default.nix;
-          #   home-manager.extraSpecialArgs = { inherit inputs; };
-          # }
-        ];
-      };
-
-      "aspakalo" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-darwin; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
-        # system = "x86_64-linux";
-        modules = [
-          (./home-manager/profiles + "/aspakalo@darwin.nix")
-          # import ./test.nix
-          #./hosts/buddha.nix
-          #./modules
-          # ./configuration.nix
-          #{ nixpkgs.config.allowUnfree = true; }
-          # home-manager.nixosModules.home-manager
-          # {
-          #   home-manager.useGlobalPkgs = true;
-          #   home-manager.useUserPackages = true;
-          #   home-manager.users.ds13 = import ./home-manager/default.nix;
-          #   home-manager.extraSpecialArgs = { inherit inputs; };
-          # }
-        ];
-      };
-    };
-  };
-  */
 }

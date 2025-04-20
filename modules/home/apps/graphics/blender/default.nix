@@ -7,11 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "writing";
-  name = "zotero";
+  category = "graphics";
+  name = "blender";
 }
 {
   home.packages = with pkgs; [
-    ds-omega.gl-zotero
+    ds-omega.gl-blender
   ];
 }

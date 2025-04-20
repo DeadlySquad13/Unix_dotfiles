@@ -14,6 +14,8 @@ lib.${namespace}.mkIfEnabled {
   programs.taskwarrior = {
     enable = true;
 
+    package = pkgs.taskwarrior2;
+
     # Files
     dataLocation = "~/.task";
     # colorTheme = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/taskwarrior/deadly-solarized-light.theme;
@@ -100,7 +102,9 @@ lib.${namespace}.mkIfEnabled {
       # context=soft
 
       # Sync.
-      taskd = let taskdRootDir = "${config.home.homeDirectory}/.taskd"; in {
+      taskd = let
+        taskdRootDir = "${config.home.homeDirectory}/.taskd";
+      in {
         certificate = "${taskdRootDir}/Deadly_Squad13.cert.pem";
         key = "${taskdRootDir}/Deadly_Squad13.key.pem";
         ca = "${taskdRootDir}/ca.cert.pem";

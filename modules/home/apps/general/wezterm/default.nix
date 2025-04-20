@@ -24,7 +24,6 @@ lib.${namespace}.mkIfEnabled {
   };
 
   home.packages = with pkgs; [
-    # Had some problems with package from nixpkgs in 2023.
-    wezterm
+    # wezterm
   ];
 }

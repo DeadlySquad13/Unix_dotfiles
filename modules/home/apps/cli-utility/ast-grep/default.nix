@@ -7,11 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "writing";
-  name = "zotero";
+  category = "cli-utility";
+  name = "ast-grep";
 }
 {
   home.packages = with pkgs; [
-    ds-omega.gl-zotero
+    ast-grep
   ];
 }

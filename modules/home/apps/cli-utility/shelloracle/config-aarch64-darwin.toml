@@ -1,0 +1,7 @@
+[shelloracle]
+provider = "Ollama"
+
+[provider.Ollama]
+host = "localhost"
+model = "llama3.2"
+port = 11434

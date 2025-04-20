@@ -61,12 +61,17 @@ in {
     docker-desktop.enable = true;
   };
 
+  # programs.ssh.startAgent = true;
   users.users.ds13 = {
-  isNormalUser  = true;
-  home  = "/home/ds13";
-  extraGroups  = [ "wheel" "networkmanager" ];
-  #initialPassword = "test";
-  password = "test";
+    isNormalUser  = true;
+    home  = "/home/ds13";
+    extraGroups  = [ "wheel" "networkmanager" ];
+    #initialPassword = "test";
+    password = "test";
+    description = "Main admin user";
+    # openssh.authorizedKeys.keyFiles = [
+      # authorizedkeys file.
+    # ];
   };
 
   # boot.loader.systemd-boot.enable = true; # (for UEFI systems only)

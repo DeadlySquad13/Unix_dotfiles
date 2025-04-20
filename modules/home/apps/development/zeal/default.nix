@@ -39,6 +39,9 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "development";
   name = "zeal";
+  # Doesn't `make` on Darwin unfortunately (v0.7.2).
+  # On Darwin also needs tweaking (or removing) gl-* variant.
+  extraPredicate = lib.${namespace}.mkIfLinux;
 }
 {
   home.packages = with pkgs; [

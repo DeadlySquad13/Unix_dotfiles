@@ -12,6 +12,6 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    logseq
+    ds-omega.gl-logseq
   ];
 }

@@ -36,51 +36,91 @@ let
     homeDirectory = "/home/ds13";
   };
 
-  lib.${namespace}.modules = {
-    architecturing = {
-      enable = true;
-    };
-    cli-utility = {
-      enable = true;
-    };
-    development = {
-      enable = true;
-    };
-    ecosystem = {
-      enable = true;
-    };
-    general = {
-      enable = true;
+  lib.${namespace} = {
+    paths =
+      rec {
+        # config = ~/.config;
+        # kbd = ~/KnowledgeBase__Notes;
+        # projects = ~/Projects;
 
-      neovim = {
-        enabled = true; # TODO: Remove.
-        dev = true;
-        stage = true;
+        dotfiles = "~/.local/dotfiles-";
+
+        # TODO: MAke like in @creamsoda.
+        # shared-dotfiles = "${dotfiles}/shared-";
+        shared-configs = "~/.bookmarks/shared-configs";
+        shared-scripts = "~/.bookmarks/shared-scripts";
+
+        # TODO: Append home- like in @creamsoda.
+        # As far as I can tell, we would need at least change paths in Ansible
+        # Keyszer templates.
+        home-dotfiles = "${dotfiles}";
+        home-configs = "${home-dotfiles}/_configs";
+        home-scripts = "${home-dotfiles}/_scripts";
       };
 
-      openvpn3 = disabled;
-    };
-    gui-utility = {
-      enable = true;
-    };
-    productivity = {
-      enable = true;
-    };
-    misc = {
-      qmk = enabled;
-    };
-    writing = {
-      enable = true;
-    };
+    modules = {
+      architecturing = {
+        enable = true;
+      };
+      cli-utility = {
+        enable = true;
+      };
+      development = {
+        enable = true;
+      };
+      ecosystem = {
+        enable = true;
+      };
+      general = {
+        enable = true;
 
-    tools = {
-      enabled = true;
+        neovim = {
+          enabled = true; # TODO: Remove.
+          dev = true;
+          stage = true;
+        };
 
-      ranger = {
+        # TODO: Repair.
+        openvpn3 = disabled;
+        # App works fine but it doesn't connect to server. Seems like an issue
+        # with ports, systemd or something like this. Hard to investigate as logs are
+        # quite lacking.
+        amnezia-client = disabled;
+
+        # MacOs Specific things.
+        karabiner-elements = disabled;
+        skhd = disabled;
+        yabai = disabled;
+      };
+      gui-utility = {
+        enable = true;
+      };
+      productivity = {
+        enable = true;
+      };
+      misc = {
+        qmk = enabled;
+      };
+      writing = {
+        enable = true;
+      };
+      graphics = {
+        enable = true;
+      };
+      tools = {
         enabled = true;
-        dev = true;
-        stage = true;
+
+        ranger = {
+          enabled = true;
+          dev = true;
+          stage = true;
+        };
       };
+    };
+
+
+    services.zapret = {
+      enable = true;
     };
   };
 }

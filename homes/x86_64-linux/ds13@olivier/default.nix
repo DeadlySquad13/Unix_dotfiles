@@ -74,6 +74,7 @@ let
       enable = false;
 
       git = enabled;
+      lazygit = enabled;
     };
     ecosystem = {
       enable = false;

@@ -22,7 +22,7 @@
   ];
 
   sops = {
-    age.keyFile = "/Users/apakalo/.config/sops/age/keys.txt"; # must have no password!
+    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!
     # REFACTOR: Targeting root of Unix_dotfiles.
     defaultSopsFile = ../../../../../secrets/secrets.yaml;
     secrets.glab_DeadlySquad13_token = {

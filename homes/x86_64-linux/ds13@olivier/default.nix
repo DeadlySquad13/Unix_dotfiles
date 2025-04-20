@@ -16,11 +16,9 @@
   # All other arguments come from the home home.
   config,
   ...
-}:
-let
+}: let
   inherit (lib.${namespace}) disabled enabled;
-  in
-{
+in {
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -37,7 +35,7 @@ let
   };
 
   lib.${namespace} = {
-      paths =
+    paths =
       rec {
         config = ~/.config;
         kbd = /mnt/h/Resources/KnowledgeBase__Notes;
@@ -61,36 +59,43 @@ let
         "interim-projects" = "interim-";
       };
     modules = {
-    architecturing = {
-      enable = false;
-    };
-    cli-utility = {
-      enable = false;
-
-      bat = enabled;
-      bash = enabled;
-    };
-    development = {
-      enable = false;
-
-      git = enabled;
-      lazygit = enabled;
-    };
-    ecosystem = {
-      enable = false;
-    };
-    /*general = {
-      enable = false;
-
-      neovim = {
-        enabled = true; # TODO: Remove.
-        dev = true;
-        stage = false;
+      architecturing = {
+        enable = false;
       };
+      cli-utility = {
+        enable = false;
 
-      openvpn3 = disabled;
-    };*/
-    general = {
+        bat = enabled;
+        bash = enabled;
+      };
+      development = {
+        enable = false;
+
+        git = enabled;
+        lazygit = enabled;
+        nodejs = enabled;
+        direnv = enabled;
+        pixi = disabled;
+        gh = enabled;
+        nix = enabled;
+      };
+      ecosystem = {
+        enable = false;
+      };
+      /*
+        general = {
+        enable = false;
+
+        neovim = {
+          enabled = true; # TODO: Remove.
+          dev = true;
+          stage = false;
+        };
+
+        openvpn3 = disabled;
+      };
+      */
+      general = {
         enable = true;
 
         neovim = {
@@ -117,30 +122,30 @@ let
         openvpn3 = disabled;
         gpick = disabled;
       };
-    gui-utility = {
-      enable = false;
-    };
-    productivity = {
-      enable = false;
-
-      taskwarrior = enabled;
-    };
-    misc = {
-      qmk = enabled;
-    };
-    writing = {
-      enable = false;
-    };
-
-    tools = {
-      enabled = false;
-
-      ranger = {
-        enabled = false;
-        dev = false;
-        stage = false;
+      gui-utility = {
+        enable = false;
       };
-    };
+      productivity = {
+        enable = false;
+
+        taskwarrior = enabled;
+      };
+      misc = {
+        qmk = enabled;
+      };
+      writing = {
+        enable = false;
+      };
+
+      tools = {
+        enabled = false;
+
+        ranger = {
+          enabled = false;
+          dev = false;
+          stage = false;
+        };
+      };
     };
   };
 }

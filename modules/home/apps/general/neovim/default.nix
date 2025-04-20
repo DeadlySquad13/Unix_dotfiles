@@ -31,6 +31,8 @@
   home.packages = with pkgs; [
     neovim
     xclip
+    # REFACTOR: Required on nixos but not necessary on other systems.
+    zig
   ];
   # TODO: Move all these to layer.
   # imports =

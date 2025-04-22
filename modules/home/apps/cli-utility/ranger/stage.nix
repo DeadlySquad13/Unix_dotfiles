@@ -23,7 +23,7 @@ in
     };
 
     home.shellAliases = {
-      ranger-stage = "ranger --confdir=~/.local/dotfiles-/_configs/ranger/-stage";
-      r-stage = "ranger --confdir=~/.local/dotfiles-/_configs/ranger/-stage";
+      ranger-stage = "ranger --confdir=${config.home.homeDirectory}/.local/dotfiles-/_configs/ranger/-stage";
+      r-stage = "ranger --confdir=${config.home.homeDirectory}/.local/dotfiles-/_configs/ranger/-stage";
     };
   }

@@ -10,15 +10,24 @@ in {
   get-path = {
     config,
     cb,
+    # By default get-path returns path stored in nix store. If you need a plain
+    # string, set to true. Useful, for example, in `home.file`:
+    # home.file."${lib.${namespace}.get-path { inherit config; cb = p: p.home-scripts; as-string = true; }}" = ''some script'';
+    # Without this setting it would store it will try to first store it into
+    # path. Because we're trying to create it to begin with, it will of course
+    # fail. In the end we're just trimming "~/..." from our strings in `paths` to get them in
+    # a form of "/home/user/..." that is compatible (along with "./...") in this context.
+    as-string ? false,
   }: let
     config-paths = config.lib.${namespace}.paths or {};
     path = if config-paths != {} then cb config-paths else builtins.null;
   in
-    if path == builtins.null then path
-    else
-      if strings.hasPrefix "~/" path
+  rec {
+    store-path = if strings.hasPrefix "~/" path
       then /${config.home.homeDirectory}/${strings.removePrefix "~/" path}
       else /${strings.removePrefix "/" path};
+    result = if !as-string then store-path else builtins.toString store-path;
+  }.result;
 
   /*
   @usage

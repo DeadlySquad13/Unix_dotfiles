@@ -98,6 +98,7 @@
         };
       }
     ];
+
     extraConfig = ''
       default_linemode devicons
     '';
@@ -109,9 +110,18 @@
       pkgs.fetchFromGitHub {
         owner = "DeadlySquad13";
         repo = "Wsl2_dotfiles";
-        rev = "af728d9f05f25656ab8fcefa66d767c5b558710e";
-        hash = "sha256-3hT3Gzh7vDRap1prJFyu+av4SS0kbu+HVYPbHRYw0YE=";
+        rev = "2a69a7a3b22cb6efe7926d874b92708962dd1aa7";
+        hash = "sha256-0I+P1aPZaQXsc9vDKnQK+/IKjENmsLZBPA85s/4d7Js=";
       }
       + "/stow_home/ranger/.config/ranger/commands.py";
+
+    ".config/ranger/rifle.conf".source =
+      pkgs.fetchFromGitHub {
+        owner = "DeadlySquad13";
+        repo = "Wsl2_dotfiles";
+        rev = "2a69a7a3b22cb6efe7926d874b92708962dd1aa7";
+        hash = "sha256-0I+P1aPZaQXsc9vDKnQK+/IKjENmsLZBPA85s/4d7Js=";
+      }
+      + "/stow_home/ranger/.config/ranger/rifle.conf";
   };
 }

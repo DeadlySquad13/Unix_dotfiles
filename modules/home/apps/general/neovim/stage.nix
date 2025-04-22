@@ -5,6 +5,8 @@
   ...
 }: let
   inherit (lib.ds-omega) mkIfEnabled mkIfStageEnabled;
+  home-scripts = lib.${namespace}.get-path { inherit config; cb = p: p.home-scripts; as-string = true; };
+  nvimScript = "${home-scripts}/NeoVim__/nvimStage.sh";
 in
   mkIfEnabled {
     inherit config;
@@ -19,15 +21,22 @@ in
       ".local/dotfiles-/_configs/nvim/-stage" = lib.${namespace}.source {
         inherit config;
         get-path = p: "${p.shared-configs}/NeoVim_config";
-        out-of-store = true;
       };
       ".config/nvim-stage" = lib.${namespace}.source {
         inherit config;
         get-path = p: "${p.shared-configs}/NeoVim_config";
       };
+
+      ${nvimScript} = {
+        text = ''
+          #!/usr/bin/env bash
+          NVIM_APPNAME=nvim-stage nvim "$@"
+        '';
+        executable = true;
+      };
     };
     home.shellAliases = {
-      nvim-stage = "NVIM_APPNAME=nvim-stage nvim";
-      vi-stage = "NVIM_APPNAME=nvim-stage nvim";
+      nvim-stage = nvimScript;
+      vi-stage = nvimScript;
     };
   }

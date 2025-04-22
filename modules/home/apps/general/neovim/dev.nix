@@ -5,6 +5,8 @@
   ...
 }: let
   inherit (lib.ds-omega) mkIfEnabled mkIfDevEnabled;
+  home-scripts = lib.${namespace}.get-path { inherit config; cb = p: p.home-scripts; as-string = true; };
+  nvimScript = "${home-scripts}/NeoVim__/nvimDev.sh";
 in
   mkIfEnabled {
     inherit config;
@@ -30,9 +32,17 @@ in
         get-path = p: "${p.shared-configs}/NeoVim_config";
         out-of-store = true;
       };
+
+      ${nvimScript} = {
+        text = ''
+          #!/usr/bin/env bash
+          NVIM_APPNAME=nvim-dev nvim "$@"
+        '';
+        executable = true;
+      };
     };
     home.shellAliases = {
-      nvim-dev = "NVIM_APPNAME=nvim-dev nvim";
-      vi-dev = "NVIM_APPNAME=nvim-dev nvim";
+      nvim-dev = nvimScript;
+      vi-dev = nvimScript;
     };
   }

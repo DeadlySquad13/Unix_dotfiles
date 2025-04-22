@@ -29,9 +29,10 @@
   };
 
   home.packages = with pkgs; [
-    # Had some problems with version from nixpkgs in 2023.
-    # neovim
+    neovim
     xclip
+    # REFACTOR: Required on nixos but not necessary on other systems.
+    zig
   ];
   # TODO: Move all these to layer.
   # imports =

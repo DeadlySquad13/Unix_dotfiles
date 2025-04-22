@@ -1,60 +1,94 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
-# NixOS-WSL specific options are documented on the NixOS-WSL repository:
-# https://github.com/nix-community/NixOS-WSL
-
-{ config, lib, pkgs, home-manager, ... }:
-
-#let
-#  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/master.tar.gz";
-#in
 {
+  # Snowfall Lib provides a customized `lib` instance with access to your flake's library
+  # as well as the libraries available from your flake's inputs.
+  lib,
+  # An instance of `pkgs` with your overlays and packages applied is also available.
+  pkgs,
+  # You also have access to your flake's inputs.
+  inputs,
+  # Additional metadata is provided by Snowfall Lib.
+  namespace, # The namespace used for your flake, defaulting to "internal" if not set.
+  home, # The home architecture for this host (eg. `x86_64-linux`).
+  target, # The Snowfall Lib target for this home (eg. `x86_64-home`).
+  format, # A normalized name for the home target (eg. `home`).
+  virtual, # A boolean to determine whether this home is a virtual target using nixos-generators.
+  host, # The host name for this home.
+  # All other arguments come from the home home.
+  config,
+  ...
+}: let
+  inherit (lib.${namespace}) disabled enabled;
+in {
+
   imports = [
     # include NixOS-WSL modules
     <nixos-wsl/modules>
-    #(import "${home-manager}/nixos")
-    #home-manager.nixosModules.default
-    # ./hardware-configuration.nix
   ];
+  /*
+     snowfallorg.user = {
+    enable = true;
+    name = "ds-omega";
+  };
+  */
+
+  /*
+     home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+  };
+  */
+  system = {
+    # This value determines the Home Manager release that your configuration is
+    # compatible with. This helps avoid breakage when a new Home Manager release
+    # introduces backwards incompatible changes.
+    #
+    # You should not change this value, even if you update Home Manager. If you do
+    # want to update the value, then make sure to first check the Home Manager
+    # release notes.
+    stateVersion = "24.11";
+  };
+
+  networking.hostName = "olivier";
 
   # https://nix-community.github.io/NixOS-WSL/options.html
   wsl = {
     enable = true;
+    # Had to configure it properly:
+    # https://discourse.nixos.org/t/set-default-user-in-wsl2-nixos-distro/38328
+    # https://nix-community.github.io/NixOS-WSL/how-to/change-username.html
     defaultUser = "ds13";
 
-    # docker-desktop.enable = true;
+    docker-desktop.enable = true;
   };
 
-  # boot.loader.systemd-boot.enable = true; # (for UEFI systems only)
-  # services.sshd.enable = true;
-
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
   # programs.ssh.startAgent = true;
-  users.users.ds13 = rec {
-    isNormalUser = true;
-    home = "/home/ds13";
+  users.users.ds13 = {
+    isNormalUser  = true;
+    home  = "/home/ds13";
+    extraGroups  = [ "wheel" "networkmanager" ];
+    #initialPassword = "test";
+    password = "test";
     description = "Main admin user";
-    extraGroups = [ "wheel" ];
     # openssh.authorizedKeys.keyFiles = [
-    	# authorizedkeys file.
+      # authorizedkeys file.
     # ];
   };
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.11"; # Did you read the comment?
+  # boot.loader.systemd-boot.enable = true; # (for UEFI systems only)
+  services.sshd.enable = true;
 
-  home-manager.users.ds13 = { pkgs, ... }: {
-    home.packages = with pkgs; [ bat ];
-    # programs.bash.enable = true;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-    #home.stateVersion = "24.11";
+  lib.ds-omega = {
+    modules = {
+      ecosystem = {
+        enable = false;
+
+        nix = disabled;
+      };
+      development = {
+        enable = true;
+      };
+    };
   };
 }

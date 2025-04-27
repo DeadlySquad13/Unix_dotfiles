@@ -67,6 +67,9 @@ let
       };
       development = {
         enable = true;
+
+        # FIX: Has to be enabled explicitly.
+        nix = enabled;
       };
       ecosystem = {
         enable = true;

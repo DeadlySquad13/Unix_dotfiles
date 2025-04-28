@@ -20,6 +20,11 @@ in
         get-path = p: "${p.shared-configs}/Wsl2_dotfiles/stow_home/ranger/.config/ranger/commands.py";
         out-of-store = false;
       };
+      ".local/dotfiles-/_configs/ranger/-stage/rifle.conf" = lib.${namespace}.source {
+        inherit config;
+        get-path = p: "${p.shared-configs}/Wsl2_dotfiles/stow_home/ranger/.config/ranger/rifle.conf";
+        out-of-store = false;
+      };
     };
 
     home.shellAliases = {

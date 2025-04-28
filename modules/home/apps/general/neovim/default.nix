@@ -1,4 +1,4 @@
-# TODO: Move to programs.neovim. Use unstable channel. set .defaultEditor, .viAlias and
+# TODO: Move to programs.neovim. Set .defaultEditor, .viAlias and
 # .withPython3 to true.
 {
   pkgs,
@@ -9,8 +9,10 @@
 }:
 {
   imports = [
+    # Overrides next modules.
     ./dev.nix
     ./stage.nix
+    ./prod.nix
   ];
 }
 // lib.${namespace}.mkIfEnabled {
@@ -19,15 +21,6 @@
   name = "neovim";
 }
 {
-  home.file = {
-    ".config/nvim".source = pkgs.fetchFromGitHub {
-      owner = "DeadlySquad13";
-      repo = "NeoVim_config";
-      rev = "1a5c52c46d55a266c2d2fef6b3c14c9bd533584a";
-      hash = "sha256-AgPQsJqw0IrSCaivPqdaDypu76e0vzcntuBzEV+zfZo=";
-    };
-  };
-
   home.packages = with pkgs; [
     neovim
     xclip
@@ -49,11 +42,4 @@
   #     # Used for sniprun REPLs.
   #     ../deno/default.nix
   # ];
-
-  programs.bash = {
-    sessionVariables = {
-      # Use neovim as a man pager.
-      MANPAGER = "nvim +Man!";
-    };
-  };
 }

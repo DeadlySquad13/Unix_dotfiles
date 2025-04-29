@@ -119,8 +119,10 @@ let
           stage = true;
         };
       };
+      network = {
+        enable = true;
+      };
     };
-
 
     services.zapret = {
       enable = true;

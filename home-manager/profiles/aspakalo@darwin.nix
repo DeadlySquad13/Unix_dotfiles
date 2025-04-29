@@ -1,9 +1,12 @@
-{ pkgs, config, lib, ... }:
-
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 # Everything else is already moved.
 {
-  imports =  
-  [ 
+  imports = [
     ../share.nix
 
     ../apps/nix.nix
@@ -32,18 +35,19 @@
 
   programs = {
     # FIX: Nix wasn't enabled until sourced it manually.
-    bash.bashrcExtra = 
-      ''
-        [[ -f /etc/bashrc ]] && . /etc/bashrc
-      '';
+    bash.bashrcExtra = /*bash*/ ''
+      [[ -f /etc/bashrc ]] && . /etc/bashrc
+    '';
   };
 
-  /* Was needed for vivaldi.
+  /*
+     Was needed for vivaldi.
    * nixpkgs.config = {
       allowUnsupportedSystem = true;
       allowUnfreePredicate = pkg:
         builtins.elem (lib.getName pkg) [
             "vivaldi"
         ];
-  }; */
+  };
+  */
 }

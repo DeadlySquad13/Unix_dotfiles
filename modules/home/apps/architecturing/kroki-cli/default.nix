@@ -28,7 +28,7 @@ in
     };
 
     home.file = {
-      ${kroki-config-path}.text = ''
+      ${kroki-config-path}.text = /*yaml*/ ''
         endpoint: 'http://localhost:8010'
         timeout: 5s
       '';

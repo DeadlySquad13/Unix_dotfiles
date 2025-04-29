@@ -25,7 +25,7 @@ lib.${namespace}.mkIfEnabled {
 
     # QUESTION: Better to be moved to ferdium directly but it requires that
     # this module is loaded. How to organize such cases better?
-    ".config/autostart/ferdium.desktop".text = ''
+    ".config/autostart/ferdium.desktop".text = /*desktop*/ ''
       [Desktop Entry]
       Type=Application
       Name=Ferdium

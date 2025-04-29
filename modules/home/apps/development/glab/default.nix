@@ -15,7 +15,7 @@ lib.${namespace}.mkIfEnabled {
     glab # GitLab Cli.
   ];
 
-  home.file.".config/glab-cli/config.yml".text = ''
+  home.file.".config/glab-cli/config.yml".text = /*yaml*/ ''
     # What protocol to use when performing Git operations. Supported values: ssh, https.
     git_protocol: ssh
     # What editor glab should run when creating issues, merge requests, etc. This global config cannot be overridden by hostname.
@@ -54,7 +54,7 @@ lib.${namespace}.mkIfEnabled {
     But shellInit is not available for home-manager so it's only left to use bashrcExtra.
   */
   programs.bash = {
-    bashrcExtra = ''
+    bashrcExtra = /*bash*/ ''
       export GITLAB_TOKEN="$(cat ${config.sops.secrets.glab_DeadlySquad13_token.path})"
     '';
   };

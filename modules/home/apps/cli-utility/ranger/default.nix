@@ -110,8 +110,8 @@
       pkgs.fetchFromGitHub {
         owner = "DeadlySquad13";
         repo = "Wsl2_dotfiles";
-        rev = "2a69a7a3b22cb6efe7926d874b92708962dd1aa7";
-        hash = "sha256-0I+P1aPZaQXsc9vDKnQK+/IKjENmsLZBPA85s/4d7Js=";
+        rev = "7079beaa8e778da3561cb1b7afb09010869f1570";
+        hash = "sha256-RByMMSR9T5PnEYqsq8S2rVuYj1HVYIJlYYZZ3Cdqikk=";
       }
       + "/stow_home/ranger/.config/ranger/commands.py";
 
@@ -119,8 +119,8 @@
       pkgs.fetchFromGitHub {
         owner = "DeadlySquad13";
         repo = "Wsl2_dotfiles";
-        rev = "2a69a7a3b22cb6efe7926d874b92708962dd1aa7";
-        hash = "sha256-0I+P1aPZaQXsc9vDKnQK+/IKjENmsLZBPA85s/4d7Js=";
+        rev = "7079beaa8e778da3561cb1b7afb09010869f1570";
+        hash = "sha256-RByMMSR9T5PnEYqsq8S2rVuYj1HVYIJlYYZZ3Cdqikk=";
       }
       + "/stow_home/ranger/.config/ranger/rifle.conf";
   };

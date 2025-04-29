@@ -18,7 +18,7 @@ lib.${namespace}.mkIfEnabled {
   # ];
   # TODO: Ideally check our preferred shells and do for each...
   programs.bash = {
-    bashrcExtra = ''
+    bashrcExtra = /*bash*/ ''
       # Pixi completion.
       eval "$(pixi completion --shell bash)"
     '';

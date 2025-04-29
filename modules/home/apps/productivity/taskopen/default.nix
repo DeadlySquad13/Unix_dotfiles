@@ -16,7 +16,7 @@ lib.${namespace}.mkIfEnabled {
   ];
 
   home.file = {
-    ".config/taskopen/taskopenrc".text = ''
+    ".config/taskopen/taskopenrc".text = /*ini*/ ''
         [Actions]
         # note.regex = "^Note\\.(.*)"
         note.regex = "^Note"

@@ -16,9 +16,8 @@ lib.${namespace}.mkIfEnabled {
   ];
 
   programs.bash = {
-    bashrcExtra = 
-      ''
-        eval $(thefuck --alias pls)
-      '';
+    bashrcExtra = /*bash*/ ''
+      eval $(thefuck --alias pls)
+    '';
   };
 }

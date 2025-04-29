@@ -15,7 +15,9 @@ lib.${namespace}.mkIfEnabled {
 
     # Good for converting notebooks via html (webkit) to pdf route.
 
-    defaults = ''
+    # It's stated that it's json but actually it's *converted* to it. Defined
+    # I guess in a Nix afterall...
+    defaults = /*nix*/ ''
       {
         metadata = {
           author = "John Doe";

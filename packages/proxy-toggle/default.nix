@@ -2,50 +2,68 @@
   writeShellScriptBin,
   buildEnv,
 }: let
+  # Some programs look at variable with specific case.
+  _PROXY_ENV="http_proxy ftp_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY";
+
   # Reference: https://wiki.archlinux.org/title/Proxy_server
   proxyOn = writeShellScriptBin "proxyOn" ''
-    export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+    function _assignProxy() {
+       for envar in ${_PROXY_ENV}
+       do
+          export $envar=$1
+       done
 
-    if (( $# > 0 )); then
-        valid=$(echo $@ | sed -n 's/\([0-9]\{1,3\}.\?\)\{4\}:\([0-9]\+\)/&/p')
-        if [[ $valid != $@ ]]; then
-            >&2 echo "Invalid address"
-            return 1
-        fi
-        local proxy=$1
-        export http_proxy="$proxy" \
-               https_proxy=$proxy \
-               ftp_proxy=$proxy \
-               rsync_proxy=$proxy
-        echo "Proxy environment variable set."
-        return 0
-    fi
+       for envar in "no_proxy NO_PROXY"
+       do
+          export $envar=$2
+       done
+    }
 
-    # We don't need auth.
-    # echo -n "username: "; read username
-    # if [[ $username != "" ]]; then
-    #     echo -n "password: "
-    #     read -es password
-    #     local pre="$username:$password@"
-    # fi
+    function proxyOn() {
+      export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
-    echo -n "server: "; read server
-    echo -n "port: "; read port
-    local proxy=$pre$server:$port
-    export http_proxy="$proxy" \
-           https_proxy=$proxy \
-           ftp_proxy=$proxy \
-           rsync_proxy=$proxy \
-           HTTP_PROXY=$proxy \
-           HTTPS_PROXY=$proxy \
-           FTP_PROXY=$proxy \
-           RSYNC_PROXY=$proxy
+      if (( $# > 0 )); then
+          # Validation.
+          valid=$(echo $@ | sed -n 's/\([0-9]\{1,3\}.\?\)\{4\}:\([0-9]\+\)/&/p')
+          if [[ $valid != $@ ]]; then
+              >&2 echo "Invalid address"
+              return 1
+          fi
+
+          local proxy=$1
+
+          _assignProxy $proxy $no_proxy
+          echo "Proxy environment variable set."
+
+          return 0
+      fi
+
+      echo -n "username: "; read username
+      if [[ $username != "" ]]; then
+          echo -n "password: "
+          read -es password
+          local pre="$username:$password@"
+      fi
+
+      read -e -p "server: " -i "socks5://127.0.0.1" server
+      read -e -p "port: " -i "10808" port
+      local proxy=$pre$server:$port
+
+      # TODO: Add validation of an address.
+      _assignProxy $proxy $no_proxy
+      echo "Proxy environment variable set."
+    }
   '';
 
   proxyOff = writeShellScriptBin "proxyOff" ''
-    unset http_proxy https_proxy ftp_proxy rsync_proxy \
-          HTTP_PROXY HTTPS_PROXY FTP_PROXY RSYNC_PROXY
-    echo -e "Proxy environment variable removed."
+    function proxyOff() {
+      for envar in ${_PROXY_ENV}
+      do
+         unset $envar
+      done
+
+      echo -e "Proxy environment variable removed."
+    }
   '';
 in
   # Combine scripts to a single package.

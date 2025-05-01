@@ -142,6 +142,13 @@ in {
       writing = {
         enable = false;
       };
+      network = {
+        enable = false;
+      };
+
+      services = {
+        enable = false;
+      };
     };
   };
 }

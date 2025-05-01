@@ -40,12 +40,13 @@ let
     paths =
       rec {
         # config = ~/.config;
-        # kbd = ~/KnowledgeBase__Notes;
+        kbd = ~/.bookmarks/kbn;
+        kbn = ~/.bookmarks/kbn;
         # projects = ~/Projects;
 
         dotfiles = "~/.local/dotfiles-";
 
-        # TODO: MAke like in @creamsoda.
+        # TODO: Make like in @creamsoda.
         # shared-dotfiles = "${dotfiles}/shared-";
         shared-configs = "~/.bookmarks/shared-configs";
         shared-scripts = "~/.bookmarks/shared-scripts";
@@ -120,6 +121,10 @@ let
         };
       };
       network = {
+        enable = true;
+      };
+
+      services = {
         enable = true;
       };
     };

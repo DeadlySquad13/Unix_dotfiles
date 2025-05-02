@@ -125,6 +125,8 @@ in {
       };
       writing = {
         enable = false;
+
+        markdown-oxide = enabled;
       };
 
       tools = {

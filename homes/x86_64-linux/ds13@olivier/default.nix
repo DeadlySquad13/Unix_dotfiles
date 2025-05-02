@@ -67,6 +67,8 @@ in {
 
         bat = enabled;
         bash = enabled;
+        zoxide = enabled;
+        complete-alias = enabled;
       };
       development = {
         enable = false;
@@ -82,23 +84,11 @@ in {
       ecosystem = {
         enable = false;
       };
-      /*
-        general = {
-        enable = false;
-
-        neovim = {
-          enabled = true; # TODO: Remove.
-          dev = true;
-          stage = false;
-        };
-
-        openvpn3 = disabled;
-      };
-      */
       general = {
         enable = true;
 
         neovim = {
+          enabled = true; # TODO: Remove.
           dev = true;
           stage = false;
         };

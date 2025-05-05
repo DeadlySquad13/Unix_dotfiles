@@ -15,6 +15,7 @@ lib.${namespace}.mkIfEnabled {
 
     options = {
       default-bg = "#EDE2CC";
+      selection-clipboard = "clipboard";
     };
 
     mappings = {

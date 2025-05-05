@@ -18,6 +18,9 @@ switch-darwin:
 build-darwin:
 	nix run nix-darwin -- build --flake . --impure --show-trace
 
+check:
+	nix flake check
+
 garbage-collect-old:
 	nix-collect-garbage --delete-older-than 10d
 

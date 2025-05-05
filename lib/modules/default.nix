@@ -40,7 +40,7 @@ in {
     # `modules/home/apps/<category>/<name>/default.nix.
     # Category can be nested:
     # category = "development.nix" will result in
-    # `...aps/development/nix/<name>/default.nix`
+    # `...apps/development/nix/<name>/default.nix`
     category,
     name,
     extraPredicate ? { modules-cfg, module-cfg }: true

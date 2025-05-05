@@ -13,7 +13,7 @@ let
   logseq = pkgs-stable.logseq;
 in
 writeShellApplication {
-  name = "gl-logseq";
+  name = "logseq";
   runtimeInputs = [
     logseq
     nixGLNvidia

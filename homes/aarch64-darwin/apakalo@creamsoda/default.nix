@@ -142,6 +142,9 @@ in {
       writing = {
         enable = false;
       };
+      bookmarks = {
+        enable = true;
+      };
     };
   };
 }

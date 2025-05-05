@@ -1,4 +1,10 @@
-{ config, lib, ... }:
+{ config, lib, namespace, ... }:
+lib.${namespace}.mkIfEnabled {
+  inherit config;
+  category = "bookmarks";
+  name = "linux";
+  extraPredicate = lib.${namespace}.mkIfLinux;
+}
 {
   # TODO: Fix links with "shared-configs/..." on empty system without existing shared-configs
   # link.

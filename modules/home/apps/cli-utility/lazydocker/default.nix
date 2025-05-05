@@ -8,16 +8,15 @@
 lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "cli-utility";
-  name = "thefuck";
+  name = "lazydocker";
 }
 {
   home.packages = with pkgs; [
-    thefuck
+    lazydocker
   ];
 
-  programs.bash = {
-    bashrcExtra = /*bash*/ ''
-      eval $(thefuck --alias pls)
-    '';
+  home.shellAliases = {
+    # ld is already taken by system utility.
+    lzd = "lazydocker";
   };
 }

@@ -20,7 +20,7 @@ lib.${namespace}.mkIfEnabled {
       resetFailLock = "faillock --user $USER --reset";
     };
 
-    bashrcExtra = ''
+    bashrcExtra = /*bash*/ ''
       # Personal profile.
       [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
     '';

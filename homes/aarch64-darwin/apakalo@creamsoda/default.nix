@@ -142,8 +142,16 @@ in {
       writing = {
         enable = false;
       };
+      network = {
+        enable = false;
+      };
+
       bookmarks = {
         enable = true;
+      };
+
+      services = {
+        enable = false;
       };
     };
   };

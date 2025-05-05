@@ -26,11 +26,11 @@ lib.${namespace}.mkIfEnabled {
         # aliases (it seems it doesn't source bashrc) and doesn't work with `NVIM_APPNAME=nvim-dev nvim`
         # (it says "No such file or directory" - I assume it interprets
         # variable set incorrectly).
-        { invocation = "es"; execution = "vi-stage {file}"; from_shell = true; leave_broot = true; }
-        { invocation = "edit-stage"; execution = "vi-stage {file}"; from_shell = true; leave_broot = true; }
+        { invocation = "es"; execution = "nvim-stage {file}"; from_shell = true; leave_broot = true; }
+        { invocation = "edit-stage"; execution = "nvim-stage {file}"; from_shell = true; leave_broot = true; }
 
-        { invocation = "edit-dev"; execution = "vi-dev {file}"; from_shell = true; leave_broot = true; }
-        { invocation = "ed"; execution = "vi-dev {file}"; from_shell = true; leave_broot = true; }
+        { invocation = "edit-dev"; execution = "nvim-dev {file}"; from_shell = true; leave_broot = true; }
+        { invocation = "ed"; execution = "nvim-dev {file}"; from_shell = true; leave_broot = true; }
       ];
     };
   };

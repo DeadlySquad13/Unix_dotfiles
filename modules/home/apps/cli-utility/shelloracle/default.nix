@@ -13,7 +13,7 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   programs.bash = {
-    bashrcExtra = ''
+    bashrcExtra = /*bash*/ ''
       # Shelloracle.
       [ -f ~/.shelloracle.bash ] && . ~/.shelloracle.bash
     '';

@@ -1,18 +1,21 @@
 {
+  pkgs,
   lib,
   namespace,
   config,
-  pkgs,
   ...
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
-  name = "eog";
-  extraPredicate = lib.${namespace}.mkIfLinux;
+  name = "proxychains-ng";
 }
 {
   home.packages = with pkgs; [
-    eog
+    proxychains-ng
   ];
+
+  home.file = {
+    ".proxychains/proxychains.conf".source = ./proxychains.conf;
+  };
 }

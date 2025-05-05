@@ -15,10 +15,9 @@ lib.${namespace}.mkIfEnabled {
     docker
   ];
   programs = {
-    bash.bashrcExtra = 
-      ''
-          # Docker in rootless mode.
-          export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-      '';
+    bash.bashrcExtra = /*bash*/ ''
+      # Docker in rootless mode.
+      export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+    '';
   };
 }

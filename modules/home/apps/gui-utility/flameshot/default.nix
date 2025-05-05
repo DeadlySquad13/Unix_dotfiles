@@ -16,14 +16,14 @@ lib.${namespace}.mkIfEnabled {
   ];
   home.file = {
     ".config/flameshot/flameshot.ini" = {
-      text = ''
+      text = /*ini*/ ''
         [General]
         contrastOpacity=188
         startupLaunch=true
-
-        [Shortcuts]
-        TAKE_SCREENSHOT=F13
         '';
+
+        # [Shortcuts]
+        # TAKE_SCREENSHOT=F13
     };
   };
 }

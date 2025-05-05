@@ -125,7 +125,7 @@ lib.${namespace}.mkIfEnabled {
   # Must guarantee then than all Unix systems are nix based. Otherwise alias
   # will be lost.
   programs.bash = {
-    bashrcExtra = ''
+    bashrcExtra = /*bash*/ ''
       complete -F _complete_alias t
       complete -F _complete_alias ta
       complete -F _complete_alias taStep

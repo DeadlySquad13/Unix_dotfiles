@@ -98,8 +98,7 @@
         home-manager.nixosModules.home-manager
       ];
 
-      # Add modules to all homes.
-      homes.modules = with inputs; [
+      system.modules.darwin = with inputs; [
         mac-app-util.homeManagerModules.default
       ];
     };

@@ -27,6 +27,6 @@ lib.${namespace}.mkIfEnabled {
   };
 
   home.packages = with pkgs; [
-    wezterm
+    # wezterm
   ];
 }

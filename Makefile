@@ -6,6 +6,13 @@ switch:
 build:
 	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+deploy-dry:
+	deploy --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+deploy:
+	mkdir -p ./logs
+	deploy --log-dir ./logs -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
 switch-system:
 	sudo nixos-rebuild switch --flake .#olivier --impure
 

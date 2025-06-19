@@ -177,6 +177,7 @@
 
         options = {
           ashift = "12";
+          mountpoint = "none"; # Don't want /zroot mounted
         };
 
         rootFsOptions = {

@@ -68,6 +68,7 @@ in {
         bat = enabled;
         bash = enabled;
         zoxide = enabled;
+        invoke = enabled;
         complete-alias = enabled;
       };
       development = {

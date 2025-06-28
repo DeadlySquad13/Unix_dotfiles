@@ -146,6 +146,10 @@ in {
         enable = false;
       };
 
+      bookmarks = {
+        enable = true;
+      };
+
       services = {
         enable = false;
       };

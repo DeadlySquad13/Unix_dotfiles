@@ -124,6 +124,10 @@ let
         enable = true;
       };
 
+      bookmarks = {
+        enable = true;
+      };
+
       services = {
         enable = true;
       };

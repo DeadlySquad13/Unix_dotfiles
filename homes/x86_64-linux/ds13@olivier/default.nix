@@ -120,6 +120,7 @@ in {
         enable = false;
 
         taskwarrior = enabled;
+        bugwarrior = enabled;
       };
       misc = {
         qmk = enabled;

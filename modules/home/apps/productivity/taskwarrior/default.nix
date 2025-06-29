@@ -28,16 +28,34 @@ lib.${namespace}.mkIfEnabled {
       }
       + "/stow_home/taskwarrior/deadly-solarized-light";
 
+    extraConfig =
+      /*
+      ini
+      */
+      ''
+        # Default context.
+        context=manual
+      '';
+
     config = {
       # Contexts.
       context = {
+        # Bugwarrior entities add custom UDAs.
+        # TODO: Make it more specific. UDA can be used in manual tasks too.
+        # Moreover, we would need to filter out certain services specifically.
+        # Ideally, we want to check if certain UDA is *not* present in task.
+        manual = "-UDA";
+
         side = "+side";
         personal = "project:PrX";
         soft = "+soft";
         work = "project:OGP or +work";
-        fs = "project:fs";
-        KB = "project:personal.KB";
         lessons = "+lessons";
+
+        # By groups of projects.
+        fs = "project:fs or +filesystem";
+        infofield = "project:InfoField or project:kbn or project:kbd";
+        music-fs = "project:MusicLibrary or project:MusicDownload";
       };
 
       # Aliases.
@@ -99,7 +117,6 @@ lib.${namespace}.mkIfEnabled {
         # - Projects.
         project.coefficient = 1.0;
       };
-      # context=soft
 
       # Sync.
       taskd = let
@@ -125,13 +142,17 @@ lib.${namespace}.mkIfEnabled {
   # Must guarantee then than all Unix systems are nix based. Otherwise alias
   # will be lost.
   programs.bash = {
-    bashrcExtra = /*bash*/ ''
-      complete -F _complete_alias t
-      complete -F _complete_alias ta
-      complete -F _complete_alias taStep
-      complete -F _complete_alias tL
-      complete -F _complete_alias tA
-    '';
+    bashrcExtra =
+      /*
+      bash
+      */
+      ''
+        complete -F _complete_alias t
+        complete -F _complete_alias ta
+        complete -F _complete_alias taStep
+        complete -F _complete_alias tL
+        complete -F _complete_alias tA
+      '';
     # https://www.reddit.com/r/taskwarrior/comments/uvwqlz/share_your_aliases/
     shellAliases = {
       ta = "task add";

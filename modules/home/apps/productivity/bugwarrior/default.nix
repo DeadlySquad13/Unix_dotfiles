@@ -60,7 +60,6 @@ lib.${namespace}.mkIfEnabled {
         service = "logseq"
         token = "token"
         host = "172.18.208.1"
-        task_state = "WAITING, DOING"
         project_template = ""
       '';
   };

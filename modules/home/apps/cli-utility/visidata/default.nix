@@ -7,6 +7,7 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
+  # Layers: math, data-science.
   category = "cli-utility";
   name = "visidata";
 }

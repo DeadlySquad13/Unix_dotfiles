@@ -12,6 +12,6 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    obsidian
+    ds-omega.gl-obsidian
   ];
 }

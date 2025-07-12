@@ -67,6 +67,9 @@ in {
 
         nix = disabled;
       };
+      services = {
+        enable = true;
+      };
     };
   };
 }

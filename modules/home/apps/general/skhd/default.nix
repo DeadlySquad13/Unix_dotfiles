@@ -24,6 +24,8 @@ lib.${namespace}.mkIfEnabled {
       ".config/skhd" = builtins.trace config-source config-source;
     };
 
+    # Managed by service too. I think these configurations are merged if the
+    # inputs are the same (they are) so left it as it for modularity.
     home.packages = with pkgs; [
       skhd
     ];

@@ -56,8 +56,3 @@ in
       };
     };
   }
-/*
-References:
-[@KeybaseArchWiki]: <https://wiki.archlinux.org/title/Keybase> 'Keybase - ArchWiki'
-[z@KeybaseArchWiki]: <zotero://select/library/items/@/KeybaseArchWiki> 'Select in Zotero: Keybase - ArchWiki'
-*/

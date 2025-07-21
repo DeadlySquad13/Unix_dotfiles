@@ -7,11 +7,12 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "productivity";
-  name = "obsidian";
+  category = "cli-utility";
+  # Docker tui aka `docker ps`.
+  name = "dry";
 }
 {
   home.packages = with pkgs; [
-    ds-omega.gl-obsidian
+    dry
   ];
 }

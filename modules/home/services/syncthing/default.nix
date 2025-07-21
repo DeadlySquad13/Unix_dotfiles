@@ -18,6 +18,7 @@ lib.${namespace}.mkIfEnabled {
     settings = {
       devices = {
         "POCO X6 Pro 5G" = {id = "HC3AI3I-M5MX4QG-XK2GLZZ-XK3ATLW-3VRXKPR-VATN3Q3-UKUCPYJ-B77VEQK";};
+        "@creamsoda" = {id = "EU6MIGT-GWHH4FB-AWEOFS3-F7QS552-JDDBNTM-YOXMAQC-CGMPR5F-NDTZAQK";};
       };
       folders = {
         "-secrets" = {
@@ -28,7 +29,7 @@ lib.${namespace}.mkIfEnabled {
         "KnowledgeBase" = {
           path = "/home/ds13/.bookmarks/kbn";
           id = "tqoqm-gyfov";
-          devices = ["POCO X6 Pro 5G"];
+          devices = ["POCO X6 Pro 5G" "@creamsoda"];
         };
         "CurrentTerm" = {
           path = "/shared/archive-resources-/Projects/CurrentTerm";

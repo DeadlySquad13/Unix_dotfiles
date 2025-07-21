@@ -34,6 +34,10 @@ in {
   };
   */
 
+  # Was required to set manually because I installed nix-darwin on top of nix
+  # and default ids of their builders don't match (nix - 30000, darwin - 350).
+  ids.gids.nixbld = 30000;
+
   system = {
     /*
     The value is used to conditionalize
@@ -62,6 +66,9 @@ in {
         enable = false;
 
         nix = disabled;
+      };
+      services = {
+        enable = true;
       };
     };
   };

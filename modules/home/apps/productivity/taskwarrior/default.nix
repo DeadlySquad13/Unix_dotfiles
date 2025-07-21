@@ -41,10 +41,10 @@ lib.${namespace}.mkIfEnabled {
       # Contexts.
       context = {
         # Bugwarrior entities add custom UDAs.
-        # TODO: Make it more specific. UDA can be used in manual tasks too.
-        # Moreover, we would need to filter out certain services specifically.
-        # Ideally, we want to check if certain UDA is *not* present in task.
-        manual = "-UDA";
+        all = "id.any:";
+        # manual = "-UDA";
+        manual = "logsequuid.none:";
+        logseq = "logsequuid.any:";
 
         side = "+side";
         personal = "project:PrX";
@@ -79,7 +79,7 @@ lib.${namespace}.mkIfEnabled {
         };
 
         # * Time.
-        # overdue or near due date.
+        # Overdue or near due date.
         due.coefficient = 12.0;
         scheduled.coefficient = 5.0;
         active.coefficient = 4.0;

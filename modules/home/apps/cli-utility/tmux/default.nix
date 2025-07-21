@@ -22,7 +22,10 @@ lib.${namespace}.mkIfEnabled {
     # (Actually <c-space>)
     shortcut = "Space";
 
-    extraConfig = "source ~/.config/tmux/old.conf";
+    extraConfig = ''
+      source ~/.config/tmux/old.conf
+      source ${./config.conf}
+    '';
   };
 
   # TODO: Configure properly via nix: https://nix-community.github.io/home-manager/options.xhtml#opt-programs.tmux.enable

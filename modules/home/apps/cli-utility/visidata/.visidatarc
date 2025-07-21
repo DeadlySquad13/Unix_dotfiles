@@ -1,0 +1,58 @@
+"""
+Was created from a template of a ASCII monochrome theme but without disabling Unicode symbols, colors only'
+Reference: https://github.com/saulpw/visidata/blob/654eb8707961f35b48a8caf7019180417a880ec5/visidata/themes/asciimono.py
+"""
+
+from visidata import vd
+
+
+vd.themes['ds-omega'] = dict(
+    color_note_pending='bold',
+    color_note_type='',
+    color_note_row='',
+    color_default='',
+    color_default_hdr='bold',
+    color_bottom_hdr='underline',
+    color_current_row='reverse',
+    color_current_col='bold',
+    color_current_hdr='bold reverse',
+    color_column_sep='',
+    color_key_col='bold',
+    color_hidden_col='8',
+    color_selected_row='',
+    color_edit_cell='',
+    color_edit_unfocused='',
+    color_graph_hidden='',
+    color_graph_selected='bold',
+    color_status_replay='',
+    color_currency_neg='',
+    color_match='',
+    color_cmdpalette='',
+    color_graph_axis='bold',
+    color_sidebar='reverse',
+    color_change_pending='reverse',
+    color_delete_pending='underline',
+    color_keystrokes='bold reverse',
+    color_status='bold reverse',
+    color_error='bold',
+    color_warning='bold',
+    color_top_status='underline',
+    color_active_status='reverse',
+    color_inactive_status='8',
+    color_working='',
+    color_highlight_status='',
+    color_sidebar_title='',
+    color_heading='',
+    color_guide_unwritten='',
+    color_code='',
+    color_menu='reverse',
+    color_menu_active='',
+    color_menu_spec='reverse',
+    color_menu_help='reverse',
+    color_add_pending='',
+    plot_colors = 'white',
+)
+
+options.theme = "ds-omega"
+
+# vi:ft=python

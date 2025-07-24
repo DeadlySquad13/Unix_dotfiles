@@ -57,6 +57,9 @@ in {
       wvous-tr-corner = 1; # top-right - Disabled
       wvous-bl-corner = 10; # bottom-left - Put Display to Sleep
       wvous-br-corner = 13; # bottom-right - Lock Screen
+
+      # Don't autoarrange windows by spaces based on recency.
+      mru-spaces = false;
     };
   };
 

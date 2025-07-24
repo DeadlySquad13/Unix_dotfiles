@@ -7,11 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "general";
-  name = "ferdium";
+  category = "network";
+  name = "deskflow";
 }
 {
   home.packages = with pkgs; [
-    ds-omega.gl-ferdium
+    deskflow
   ];
 }

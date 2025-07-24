@@ -70,6 +70,7 @@ in {
         zoxide = enabled;
         invoke = enabled;
         complete-alias = enabled;
+        fdupes = enabled;
       };
       development = {
         enable = false;

@@ -7,11 +7,11 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "general";
-  name = "ferdium";
+  category = "cli-utility";
+  name = "fdupes";
 }
 {
   home.packages = with pkgs; [
-    ds-omega.gl-ferdium
+    fdupes
   ];
 }

@@ -5,6 +5,7 @@
   ...
 }: let
   inherit (lib.${namespace}) source;
+  inherit (config.lib.${namespace}) paths;
 
   # In most cases we jump directly into folder. This way common .envrc wouldn't
   # be hooked. This envrc allows us to source it from a central point in each
@@ -93,6 +94,7 @@ in
           "KnowledgeBase__Data" = "~/KnowledgeBase__Data";
           "kbd" = "~/KnowledgeBase__Data";
           "kbn" = "~/KnowledgeBase__Data/Notes";
+          "shared-configs" = paths.shared-configs;
         }
       )
       // woodpecker-corepack;

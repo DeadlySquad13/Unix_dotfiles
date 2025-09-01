@@ -70,6 +70,9 @@ in {
 
         nix = disabled;
       };
+      network = {
+        enable = true;
+      };
       services = {
         enable = true;
       };

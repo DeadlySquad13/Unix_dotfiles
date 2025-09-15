@@ -27,7 +27,7 @@ lib.${namespace}.mkIfEnabled {
           devices = ["POCO X6 Pro 5G"];
         };
         "KnowledgeBase" = {
-          path = "/home/ds13/.bookmarks/kbn";
+          path = "/home/ds13/.bookmarks/kbd";
           id = "tqoqm-gyfov";
           devices = ["POCO X6 Pro 5G" "@creamsoda"];
         };
@@ -44,6 +44,14 @@ lib.${namespace}.mkIfEnabled {
         "taskd" = {
           path = "/home/ds13/.taskd";
           id = "4r7wr-n7ei5";
+          devices = ["POCO X6 Pro 5G"];
+        };
+
+        # TODO: Currently should work only on @salt. May be neeed from within
+        # Wsl on @pepper but not yet.
+        "resources-book-leisuring" = {
+          path = "/shared/archive-resources-/Resources/-books/-leisuring";
+          id = "arfqd-gwsgl";
           devices = ["POCO X6 Pro 5G"];
         };
       };

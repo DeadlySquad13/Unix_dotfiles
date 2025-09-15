@@ -25,7 +25,7 @@ lib.${namespace}.mkIfEnabled {
 
           # QUESTION: Should be in Shared too?
           "kbd" = "Resources/KnowledgeBase__Data";
-          "kbn" = "Resources/KnowledgeBase__Data";
+          "kbn" = "Resources/KnowledgeBase__Data/Notes";
 
           # QUESTION: Should be in Shared too?
           "ChronoIndex" = "ChronoIndex";

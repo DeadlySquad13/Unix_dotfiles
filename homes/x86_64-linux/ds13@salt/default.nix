@@ -111,6 +111,9 @@ let
       graphics = {
         enable = true;
       };
+      system = {
+        enable = true;
+      };
       tools = {
         enabled = true;
 

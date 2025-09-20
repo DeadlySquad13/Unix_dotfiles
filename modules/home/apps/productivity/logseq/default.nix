@@ -20,11 +20,9 @@ lib.${namespace}.mkIfEnabled {
   # but it doesn't work. Maybe my gl overlay ruins it...
   xdg.desktopEntries.logesq = {
       name = "Logseq";
-      desktopName = "Logseq";
       exec = "logseq %U";
       terminal = false;
       icon = "logseq";
-      startupWMClass = "Logseq";
       comment = "A privacy-first, open-source platform for knowledge management and collaboration.";
       mimeType = [ "x-scheme-handler/logseq" ];
       categories = [ "Utility" ];

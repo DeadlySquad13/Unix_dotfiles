@@ -61,13 +61,37 @@ in {
     kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
   };
 
+  sops = {
+    # age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!
+    age.keyFile = "/home/ds13/.config/sops/age/keys.txt"; # must have no password!
+    # # REFACTOR: Targeting root of Unix_dotfiles.
+    defaultSopsFile = ../../../secrets/secrets.yaml;
+    secrets = {
+      glab_DeadlySquad13_token = {
+        #   sopsFile = ../../../../../secrets/secrets.yaml; # optionally define per-secret files
+
+        #   # %r gets replaced with a runtime directory, use %% to specify a '%'
+        #   # sign. Runtime dir is $XDG_RUNTIME_DIR on linux and $(getconf
+        #   # DARWIN_USER_TEMP_DIR) on darwin.
+        # path = "%r/test.txt";
+      };
+
+      cake_ds13_password = {};
+      "wireless.secretsFile" = {};
+    };
+  };
+  sops.secrets.cake_ds13_password.neededForUsers = true;
+  users.mutableUsers = false;
+
   networking = {
     hostId = "37564573";
     hostName = "cake";
 
     wireless = {
       enable = true;
-      networks."DS13_5G".psk = config.sops.secrets.DS13_5G_password.path;
+      # `ext:` prefix mark special variable of a wpa that is read from secrets file.
+      secretsFile = config.sops.secrets."wireless.secretsFile".path;
+      networks.DS13_5G.pskRaw = "ext:DS13_5G_psk";
       extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
     };
     networkmanager.enable = false;
@@ -81,9 +105,18 @@ in {
     isNormalUser  = true;
     home  = "/home/ds13";
     extraGroups  = [ "wheel" ];
-    #initialPassword = "test";
-    password = config.sops.secrets.cake_ds13_password.path;
+    hashedPasswordFile = config.sops.secrets.cake_ds13_password.path;
     description = "Main admin user";
+    # openssh.authorizedKeys.keyFiles = [
+      # authorizedkeys file.
+    # ];
+  };
+  users.users.admin = {
+    isNormalUser  = true;
+    home  = "/home/admin";
+    extraGroups  = [ "wheel" ];
+    hashedPasswordFile = config.sops.secrets.cake_ds13_password.path;
+    description = "Emergency admin user";
     # openssh.authorizedKeys.keyFiles = [
       # authorizedkeys file.
     # ];

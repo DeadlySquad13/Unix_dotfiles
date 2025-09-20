@@ -2,10 +2,9 @@
   config,
   pkgs,
   lib,
-  namespace,
   ...
 }:
-lib.${namespace}.mkIfEnabled {
+lib.ds-omega.mkIfEnabled {
   inherit config;
   category = "general";
   name = "neovim";

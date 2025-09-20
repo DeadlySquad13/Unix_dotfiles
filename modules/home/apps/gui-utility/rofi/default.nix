@@ -1,17 +1,18 @@
-# FIX: For some reason wasn't working only here...
-{
-  lib,
-  namespace,
-  config,
-  ...
-}:
-lib.${namespace}.mkIfEnabled {
-  inherit config;
-  category = "gui-utility";
-  name = "rofi";
-  extraPredicate = lib.${namespace}.mkIfLinux;
-}
-{
+# FIX: For some reason not working only here...
+# {
+#   lib,
+#   namespace,
+#   config,
+#   ...
+# }:
+# lib.${namespace}.mkIfEnabled {
+#   inherit config;
+#   category = "gui-utility";
+#   name = "rofi";
+  # extraPredicate = lib.ds-omega.mkIfLinux;
+# }
+{lib, ...}:
+lib.mkIf true {
   programs.rofi = {
     enable = true;
 

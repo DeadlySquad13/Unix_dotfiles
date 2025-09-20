@@ -7,11 +7,13 @@ build:
 	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 deploy-dry:
-	deploy --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run github:serokell/deploy-rs -- --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
-deploy:
+deploy-with-activate:
 	mkdir -p ./logs
-	deploy --log-dir ./logs -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run github:serokell/deploy-rs -- --log-dir ./logs -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+deploy: deploy-dry deploy-activate
 
 switch-system:
 	sudo nixos-rebuild switch --flake .#olivier --impure

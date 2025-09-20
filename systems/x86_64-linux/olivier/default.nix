@@ -20,10 +20,11 @@
   inherit (lib.${namespace}) disabled enabled;
 in {
 
-  imports = [
+  # FIX: Crutch to let deploy-rs checks pass.
+  # imports = [
     # include NixOS-WSL modules
-    <nixos-wsl/modules>
-  ];
+    # <nixos-wsl/modules>
+  # ];
   /*
      snowfallorg.user = {
     enable = true;

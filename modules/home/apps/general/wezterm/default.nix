@@ -14,13 +14,19 @@ lib.${namespace}.mkIfEnabled {
   home.file = {
     # # xdg home should be set to "$HOME/.config", otherwise wezterm will look
     # in another location.
-    # ".config/wezterm".source = "${config.lib.${namespace}.paths.shared-configs}/WezTerm_config";
-    ".config/wezterm".source = pkgs.fetchFromGitHub {
-      owner = "DeadlySquad13";
-      repo = "WezTerm_config";
-      rev = "a62f98f6451fd678b7454a3c91cb6a27a9952915";
-      hash = "sha256-BBuG5ukBp0pCkpENttevE1q2DSXy+Pg5qazbiVlQBOQ=";
+    # TODO: Add dev and stage versions.
+    ".config/wezterm" = lib.${namespace}.source {
+      inherit config;
+      get-path = p: "${p.shared-configs}/Wezterm_config";
+      out-of-store = true;
     };
+
+    # ".config/wezterm".source = pkgs.fetchFromGitHub {
+    #   owner = "DeadlySquad13";
+    #   repo = "WezTerm_config";
+    #   rev = "d27f692904fea31ffdb1a457e7f9117f2eb02099";
+    #   hash = "sha256-Vzow3+EzU21VczWEjzMSEXcOL/DGzA2N8q7mySjpqTA=";
+    # };
   };
 
   home.packages = with pkgs; [

@@ -97,6 +97,7 @@ in {
   # future hence this functions must be used.
   mkIfDevEnabled = { module-cfg, ... }: if module-cfg ? dev then module-cfg.dev else true;
   mkIfStageEnabled = { module-cfg, ... }: if module-cfg ? stage then module-cfg.stage else true;
+  mkIfProdEnabled = { module-cfg, ... }: if module-cfg ? prod then module-cfg.prod else true;
 
   # Platform specific modules.
   mkIfDarwin = _: lib.snowfall.system.is-darwin builtins.currentSystem;

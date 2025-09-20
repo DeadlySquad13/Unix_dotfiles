@@ -99,10 +99,13 @@
 
       systems.modules.nixos = with inputs; [
         nixos-wsl.nixosModules.wsl
+        sops-nix.nixosModules.sops
+        # Enable home-manager modules.
         home-manager.nixosModules.home-manager
       ];
 
       system.modules.darwin = with inputs; [
+        # Enable home-manager modules.
         mac-app-util.homeManagerModules.default
       ];
 

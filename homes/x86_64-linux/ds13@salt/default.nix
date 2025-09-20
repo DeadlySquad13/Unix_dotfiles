@@ -134,6 +134,16 @@ let
       services = {
         enable = true;
       };
+      system-services = {
+        enable = true;
+
+        awesomewm = {
+          enabled = true;
+          dev = true;
+          stage = false;
+          prod = false;
+        };
+      };
     };
 
     services.zapret = {

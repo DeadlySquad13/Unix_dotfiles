@@ -109,6 +109,16 @@ in {
       services = {
         enable = true;
       };
+      system-services = {
+        enable = true;
+
+        awesomewm = {
+          enabled = true;
+          dev = false;
+          stage = false;
+          prod = true;
+        };
+      };
     };
   };
 }

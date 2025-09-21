@@ -35,6 +35,8 @@
         #   # DARWIN_USER_TEMP_DIR) on darwin.
         # path = "%r/test.txt";
       };
+      yandex_disk_username = {};
+      yandex_disk_password = {};
     };
   };
 }

@@ -63,8 +63,11 @@ in {
 
   sops = {
     # age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!
-    age.keyFile = "/home/ds13/.config/sops/age/keys.txt"; # must have no password!
+    # Because we use sops on a system level for users, it should be persisted.
+    # Read on deployed system itself.
+    age.keyFile = "/var/lib/sops/age/keys.txt"; # must have no password!
     # # REFACTOR: Targeting root of Unix_dotfiles.
+    # Read while deploying (on a system we deploy from).
     defaultSopsFile = ../../../secrets/secrets.yaml;
     secrets = {
       glab_DeadlySquad13_token = {
@@ -76,11 +79,12 @@ in {
         # path = "%r/test.txt";
       };
 
-      cake_ds13_password = {};
+      cake_ds13_password = {
+        neededForUsers = true;
+      };
       "wireless.secretsFile" = {};
     };
   };
-  sops.secrets.cake_ds13_password.neededForUsers = true;
   users.mutableUsers = false;
 
   networking = {
@@ -115,7 +119,8 @@ in {
     isNormalUser  = true;
     home  = "/home/admin";
     extraGroups  = [ "wheel" ];
-    hashedPasswordFile = config.sops.secrets.cake_ds13_password.path;
+    password = "admin";
+    # hashedPasswordFile = config.sops.secrets.cake_ds13_password.path;
     description = "Emergency admin user";
     # openssh.authorizedKeys.keyFiles = [
       # authorizedkeys file.

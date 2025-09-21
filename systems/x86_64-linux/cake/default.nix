@@ -117,6 +117,14 @@ in {
 
       yandex_disk_username = {};
       yandex_disk_password = {};
+
+      # REFACTOR: Move user specific things out of system.
+      # REFACTOR: Separate into specific @cake file.
+      "private_keys/Personal__DeadlySquad13_gitHub" = {
+        path = "/home/ds13/.ssh/Personal__DeadlySquad13_gitHub";
+        # REFACTOR: Remove hardcode.
+        owner = "ds13";
+      };
     };
   };
   users.mutableUsers = false;
@@ -141,13 +149,14 @@ in {
   # I don't like this setting, but it's hard to use deploy-rs without it.
   home-manager.backupFileExtension = "backup";
 
-  # programs.ssh.startAgent = true;
+  programs.ssh.startAgent = true;
   users.users.ds13 = {
     isNormalUser = true;
     home = "/home/ds13";
     extraGroups = ["wheel"];
     hashedPasswordFile = config.sops.secrets.cake_ds13_password.path;
     description = "Main admin user";
+
     # openssh.authorizedKeys.keyFiles = [
     # authorizedkeys file.
     # ];

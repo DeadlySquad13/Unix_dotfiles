@@ -138,7 +138,9 @@
         };
         postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zcake@blank$' || zfs snapshot zcake@blank";
 
-        # QUESTION: How to make multiple mountpoints? Maybe posthook?
+        # QUESTION: How to make multiple mountpoints? Maybe posthook? Currently
+        # we have, for instance, `/shared/data` but no folder at
+        # `/zshared/data`.
         # QUESTION: How to mount to home when it's not yet created?
         datasets = {
           "local-" = {

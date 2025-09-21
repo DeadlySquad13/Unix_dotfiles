@@ -132,6 +132,8 @@ let
       };
       network = {
         enable = false;
+
+        yandex-disk = enabled;
       };
 
       bookmarks = {

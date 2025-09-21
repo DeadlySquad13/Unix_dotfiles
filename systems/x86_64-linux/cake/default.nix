@@ -82,7 +82,11 @@ in {
       cake_ds13_password = {
         neededForUsers = true;
       };
+
       "wireless.secretsFile" = {};
+
+      yandex_disk_username = {};
+      yandex_disk_password = {};
     };
   };
   users.mutableUsers = false;

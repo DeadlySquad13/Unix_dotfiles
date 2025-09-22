@@ -9,6 +9,7 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
   name = "zapret";
+  extraPredicate = lib.ds-omega.mkIfLinux;
 }
 {
   home.packages = with pkgs; [

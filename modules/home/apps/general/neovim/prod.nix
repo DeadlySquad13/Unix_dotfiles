@@ -4,6 +4,7 @@
   lib,
   ...
 }:
+# FIX: Infinite recursion when using namespace...
 lib.ds-omega.mkIfEnabled {
   inherit config;
   category = "general";

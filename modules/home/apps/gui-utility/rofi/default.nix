@@ -12,7 +12,7 @@
   # extraPredicate = lib.ds-omega.mkIfLinux;
 # }
 {lib, ...}:
-lib.mkIf true {
+lib.mkIf (lib.ds-omega.mkIfLinux {}) {
   programs.rofi = {
     enable = true;
 

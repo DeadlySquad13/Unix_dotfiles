@@ -99,7 +99,10 @@ in {
       enable = true;
       # `ext:` prefix mark special variable of a wpa that is read from secrets file.
       secretsFile = config.sops.secrets."wireless.secretsFile".path;
+
       networks.DS13_5G.pskRaw = "ext:DS13_5G_psk";
+      networks."POCO X6 Pro 5G".pskRaw = "ext:POCO_X6_Pro_5G_psk";
+
       extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
     };
     networkmanager.enable = false;
@@ -170,6 +173,9 @@ in {
         nix = disabled;
       };
       development = {
+        enable = true;
+      };
+      xserver = {
         enable = true;
       };
       services = {

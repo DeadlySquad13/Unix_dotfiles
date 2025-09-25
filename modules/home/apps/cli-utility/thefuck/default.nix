@@ -11,13 +11,14 @@ lib.${namespace}.mkIfEnabled {
   name = "thefuck";
 }
 {
-  home.packages = with pkgs; [
-    thefuck
-  ];
+  # TODO: Change to pay-respects?
+  # home.packages = with pkgs; [
+  #   thefuck
+  # ];
 
-  programs.bash = {
-    bashrcExtra = /*bash*/ ''
-      eval $(thefuck --alias pls)
-    '';
-  };
+  # programs.bash = {
+  #   bashrcExtra = /*bash*/ ''
+  #     eval $(thefuck --alias pls)
+  #   '';
+  # };
 }

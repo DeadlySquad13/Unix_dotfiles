@@ -79,8 +79,8 @@ in {
 
         ranger = {
           enabled = true;
-          dev = false;
-          stage = false;
+          dev = true;
+          stage = true;
         };
       };
       development = {
@@ -117,7 +117,7 @@ in {
         vlc = disabled;
         keychain = disabled;
         numlockx = disabled;
-        obs-studio = disabled;
+        obs-studio = disabled; # enabled; # For demo recordings.
         qbittorrent = disabled;
         syncthing = enabled;
         btop = disabled;

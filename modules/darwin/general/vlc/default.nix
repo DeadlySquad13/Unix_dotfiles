@@ -1,5 +1,4 @@
 {
-  pkgs,
   lib,
   namespace,
   config,
@@ -8,10 +7,13 @@
 lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
-  name = "telegram-desktop";
+  name = "vlc";
 }
 {
-  home.packages = with pkgs; [
-    telegram-desktop
-  ];
+  homebrew = {
+    enable = true;
+    casks = [
+      "vlc"
+    ];
+  };
 }

@@ -22,9 +22,9 @@ lib.ds-omega.mkIfEnabled {
 
   programs.bash = {
     sessionVariables = {
-      EDITOR = "nvim";
+      EDITOR = lib.mkDefault "nvim";
       # Use neovim as a man pager.
-      MANPAGER = "nvim +Man!";
+      MANPAGER = lib.mkDefault "nvim +Man!";
     };
   };
 }

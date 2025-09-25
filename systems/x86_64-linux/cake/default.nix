@@ -19,7 +19,6 @@
 }: let
   inherit (lib.${namespace}) disabled enabled;
 in {
-
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -57,8 +56,22 @@ in {
       efi.canTouchEfiVariables = true;
     };
 
-    supportedFilesystems = [ "zfs" ];
-    kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+    supportedFilesystems = ["zfs"];
+    initrd.supportedFilesystems = ["zfs"];
+    initrd.kernelModules = ["zfs"];
+    # Deprecated(
+    # kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
+
+    # zfs.package = pkgs.zfs.latestCompatibleLinuxPackages;
+    kernelPackages = pkgs.linuxPackages_6_16;
+    # Ensure ZFS is properly configured
+    zfs = {
+      # Allow force importing if pools don't import cleanly
+      forceImportAll = true;
+      forceImportRoot = true;
+    };
+    # Ensure ZFS is properly configured
+    # zfs.package = "zfs-2.3.4";
   };
 
   sops = {
@@ -113,24 +126,24 @@ in {
 
   # programs.ssh.startAgent = true;
   users.users.ds13 = {
-    isNormalUser  = true;
-    home  = "/home/ds13";
-    extraGroups  = [ "wheel" ];
+    isNormalUser = true;
+    home = "/home/ds13";
+    extraGroups = ["wheel"];
     hashedPasswordFile = config.sops.secrets.cake_ds13_password.path;
     description = "Main admin user";
     # openssh.authorizedKeys.keyFiles = [
-      # authorizedkeys file.
+    # authorizedkeys file.
     # ];
   };
   users.users.admin = {
-    isNormalUser  = true;
-    home  = "/home/admin";
-    extraGroups  = [ "wheel" ];
+    isNormalUser = true;
+    home = "/home/admin";
+    extraGroups = ["wheel"];
     password = "admin";
     # hashedPasswordFile = config.sops.secrets.cake_ds13_password.path;
     description = "Emergency admin user";
     # openssh.authorizedKeys.keyFiles = [
-      # authorizedkeys file.
+    # authorizedkeys file.
     # ];
   };
 
@@ -161,8 +174,8 @@ in {
   services.sshd.enable = true;
 
   nix.settings = {
-    trusted-users = [ "root" "@wheel" ];
-    experimental-features = [ "nix-command" "flakes" ];
+    trusted-users = ["root" "@wheel"];
+    experimental-features = ["nix-command" "flakes"];
   };
 
   lib.ds-omega = {
@@ -180,6 +193,8 @@ in {
       };
       services = {
         enable = true;
+
+        yandex-disk = disabled;
       };
       system-services = {
         enable = true;

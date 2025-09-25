@@ -52,7 +52,24 @@ in {
 
   boot = {
     loader = {
-      systemd-boot.enable = true; # (for UEFI systems only)
+      systemd-boot.enable = false; # (for UEFI systems only)
+      # Enable GRUB
+      grub = {
+        enable = true;
+        efiSupport = true;
+        device = "nodev"; # For UEFI systems
+        useOSProber = true; # Detect other OSes (like Windows)
+        # or specify the exact device:
+        # device = "/dev/nvme0n1";
+
+        # Zfs support.
+        zfsSupport = true;
+
+        # Extra configuration for ZFS
+        extraConfig = ''
+          insmod zfs
+        '';
+      };
       efi.canTouchEfiVariables = true;
     };
 
@@ -67,7 +84,7 @@ in {
     # Ensure ZFS is properly configured
     zfs = {
       # Allow force importing if pools don't import cleanly
-      forceImportAll = true;
+      # forceImportAll = true;
       forceImportRoot = true;
     };
     # Ensure ZFS is properly configured

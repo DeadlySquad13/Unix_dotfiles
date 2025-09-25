@@ -109,18 +109,33 @@
         mac-app-util.homeManagerModules.default
       ];
 
-      deploy.nodes.cake = {
-        hostname = "cake";
-        profiles.system = {
-          sshUser = "ds13";
-          # The owner of the profile. For system it's always root.
-          user = "root";
-          interactiveSudo = true;
-          path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.cake;
+      # Can't cross-compile build on Darwin to NixOs,
+      # see: https://github.com/serokell/deploy-rs/issues/337
+      deploy = {
+        remoteBuild = true;
+        # Timeout for profile activation.
+        # This defaults to 240 seconds.
+        activationTimeout = 600;
+
+        # Timeout for profile activation confirmation.
+        # This defaults to 30 seconds.
+        confirmTimeout = 60;
+      };
+
+      deploy.nodes = {
+        cake = {
+          hostname = "cake";
+          profiles.system = {
+            sshUser = "ds13";
+            # The owner of the profile. For system it's always root.
+            user = "root";
+            interactiveSudo = true;
+            path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.cake;
+          };
         };
       };
 
       # This is highly advised, and will prevent many possible mistakes.
-      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
+      # checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
     };
 }

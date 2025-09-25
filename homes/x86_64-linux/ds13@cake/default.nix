@@ -67,6 +67,8 @@ let
     modules = {
       architecturing = {
         enable = true;
+
+        staruml = disabled;
       };
       cli-utility = {
         enable = true;
@@ -133,7 +135,7 @@ let
       network = {
         enable = false;
 
-        yandex-disk = enabled;
+        yandex-disk = disabled;
       };
 
       bookmarks = {

@@ -208,7 +208,7 @@ in {
       xserver = {
         enable = true;
       };
-      services = {
+      services ={
         enable = true;
 
         yandex-disk = disabled;

@@ -42,7 +42,7 @@
   };
 
   outputs = inputs:
-    inputs.snowfall-lib.mkFlake {
+    inputs.snowfall-lib.mkFlake rec {
       # You must provide our flake inputs to Snowfall Lib.
       inherit inputs;
 
@@ -109,33 +109,47 @@
         mac-app-util.homeManagerModules.default
       ];
 
-      # Can't cross-compile build on Darwin to NixOs,
-      # see: https://github.com/serokell/deploy-rs/issues/337
+      inherit (inputs.snowfall-lib.snowfall.internal-lib.system) is-darwin;
+      isCurrentSystemDarwin = is-darwin builtins.currentSystem;
+      # Instead of direct matching, we make a louse matching via snowfall
+      # builtins. Because otherwise we wouldn't get match in a lot of cases
+      # while we actually just need to check that we're not deploying from
+      # Darwin to Linux and vice versa.
+      deploySystemsMatch = systemToDeploy: is-darwin builtins.currentSystem && is-darwin systemToDeploy;
+      # TODO: Get platform from system definition.
+      systemToDeploy = "x86_64-linux";
+
       deploy = {
-        remoteBuild = true;
         # Timeout for profile activation.
         # This defaults to 240 seconds.
         activationTimeout = 600;
 
-        # Timeout for profile activation confirmation.
-        # This defaults to 30 seconds.
-        confirmTimeout = 60;
-      };
+        nodes = {
+          cake = {
+            # Can't cross-compile when building from Darwin to NixOs,
+            # see: https://github.com/serokell/deploy-rs/issues/337
+            remoteBuild = !deploySystemsMatch systemToDeploy;
 
-      deploy.nodes = {
-        cake = {
-          hostname = "cake";
-          profiles.system = {
-            sshUser = "ds13";
-            # The owner of the profile. For system it's always root.
-            user = "root";
-            interactiveSudo = true;
-            path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.cake;
+            hostname = "cake";
+            profiles.system = {
+              sshUser = "ds13";
+              # The owner of the profile. For system it's always root.
+              user = "root";
+              interactiveSudo = true;
+              path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.cake;
+            };
           };
         };
       };
 
       # This is highly advised, and will prevent many possible mistakes.
-      # checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
+      # Checks are always local even if build is remote. This eliminates any
+      # purpose so disable it for such systems.
+      # TODO: Disable for specific systemms: currently it won't work if at
+      # least one doesn't match.
+      checks = let
+        inherit (inputs.nixkpgs.lib) mkIf;
+      in
+        mkIf (deploySystemsMatch systemToDeploy) (builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib);
     };
 }

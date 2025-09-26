@@ -7,11 +7,19 @@ build:
 	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 deploy-dry:
-	nix run github:serokell/deploy-rs -- --skip-checks --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run github:serokell/deploy-rs -- --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 deploy-with-activate:
 	mkdir -p ./logs
+	nix run github:serokell/deploy-rs -- --log-dir ./logs -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+deploy-dry-non-matching:
+	nix run github:serokell/deploy-rs -- --skip-checks --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+deploy-with-activate-non-matching:
+	mkdir -p ./logs
 	nix run github:serokell/deploy-rs -- --skip-checks --log-dir ./logs -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
 
 deploy: deploy-dry deploy-activate
 

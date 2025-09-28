@@ -61,13 +61,13 @@ in {
       home-scripts = "${home-dotfiles}/_scripts";
     };
 
-    modules = let
-      # WARN: On `stage` variants throws error:
-      # path '/System/Volumes/Data/home/ds13/.bookmarks/shared-configs/NeoVim_config' does not exist
-      # I assume it tries to get folder from host store when deploying to
-      # target thus breaking *symlink*.
-      deployed = true;
-    in {
+    # WARN: On `stage` variants throws error:
+    # path '/System/Volumes/Data/home/ds13/.bookmarks/shared-configs/NeoVim_config' does not exist
+    # I assume it tries to get folder from host store when deploying to
+    # target thus breaking *symlink*.
+    isDeployedFromDarwin = true;
+
+    modules = {
       architecturing = {
         enable = true;
 
@@ -96,7 +96,7 @@ in {
         neovim = {
           enabled = true; # TODO: Remove.
           dev = true;
-          stage = !deployed;
+          stage = false;
         };
 
         # TODO: Repair.
@@ -132,7 +132,7 @@ in {
         ranger = {
           enabled = true;
           dev = true;
-          stage = !deployed;
+          stage = false;
         };
       };
       network = {

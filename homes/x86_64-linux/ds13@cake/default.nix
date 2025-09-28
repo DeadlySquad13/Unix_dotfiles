@@ -61,11 +61,14 @@ in {
       home-scripts = "${home-dotfiles}/_scripts";
     };
 
-    # WARN: On `stage` variants throws error:
-    # path '/System/Volumes/Data/home/ds13/.bookmarks/shared-configs/NeoVim_config' does not exist
-    # I assume it tries to get folder from host store when deploying to
-    # target thus breaking *symlink*.
-    isDeployedFromDarwin = true;
+    deploymentOptions = rec {
+      # WARN: On `stage` variants throws error:
+      # path '/System/Volumes/Data/home/ds13/.bookmarks/shared-configs/NeoVim_config' does not exist
+      # I assume it tries to get folder from host store when deploying to
+      # target thus breaking *symlink*.
+      isDeployedFromDarwin = true;
+      isNixGlNotWorking = isDeployedFromDarwin;
+    };
 
     modules = {
       architecturing = {
@@ -107,6 +110,7 @@ in {
         amnezia-client = disabled;
 
         # MacOs Specific things.
+        # TODO: Handle inside modules.
         karabiner-elements = disabled;
         skhd = disabled;
         yabai = disabled;

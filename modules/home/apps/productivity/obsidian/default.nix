@@ -12,7 +12,7 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    obsidian
+    ds-omega.gl-obsidian
   ];
   # Needed for [web clipper](https://help.obsidian.md/web-clipper/troubleshoot#Obsidian+does+not+open) on Linux.
   # There's very similar entry in [source code](https://github.com/NixOS/nixpkgs/blob/20075955deac2583bb12f07151c2df830ef346b4/pkgs/by-name/ob/obsidian/package.nix#L49)

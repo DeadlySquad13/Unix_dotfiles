@@ -12,6 +12,6 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    blender
+    ds-omega.gl-blender
   ];
 }

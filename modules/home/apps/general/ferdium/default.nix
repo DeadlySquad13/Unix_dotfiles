@@ -12,6 +12,6 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    ferdium
+    ds-omega.gl-ferdium
   ];
 }

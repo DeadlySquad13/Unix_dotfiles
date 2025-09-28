@@ -52,6 +52,6 @@ lib.${namespace}.mkIfEnabled {
 
     #   ${nixgl.nixGLIntel}/bin/nixGL ${zeal}/bin/zeal "$@"
     # ''
-    zeal
+    ds-omega.gl-zeal
   ];
 }

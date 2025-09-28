@@ -12,7 +12,7 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    ds-omega.gl-logseq
+    logseq
   ];
   # Very similar to obsidian.
   # Needed for web clipper on Linux.

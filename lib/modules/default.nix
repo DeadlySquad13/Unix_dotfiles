@@ -95,6 +95,8 @@ in {
 
   # Consider variant enabled if it's not stated otherwise. May change in the
   # future hence this functions must be used.
+  # STYLE: These are not actually mkIf's, see: our ranger module and
+  # https://discourse.nixosstag.fcio.net/t/mkif-vs-if-then/28521/2
   mkIfDevEnabled = { module-cfg, ... }: if module-cfg ? dev then module-cfg.dev else true;
   mkIfStageEnabled = { module-cfg, ... }: if module-cfg ? stage then module-cfg.stage else true;
   mkIfProdEnabled = { module-cfg, ... }: if module-cfg ? prod then module-cfg.prod else true;

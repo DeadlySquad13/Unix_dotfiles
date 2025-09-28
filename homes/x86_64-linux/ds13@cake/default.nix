@@ -16,11 +16,9 @@
   # All other arguments come from the home home.
   config,
   ...
-}:
-let
+}: let
   inherit (lib.${namespace}) disabled enabled;
-  in
-{
+in {
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -42,29 +40,34 @@ let
   ];
 
   lib.${namespace} = {
-    paths =
-      rec {
-        # config = ~/.config;
-        kbd = ~/.bookmarks/kbn;
-        kbn = ~/.bookmarks/kbn;
-        # projects = ~/Projects;
+    paths = rec {
+      # config = ~/.config;
+      kbd = ~/.bookmarks/kbn;
+      kbn = ~/.bookmarks/kbn;
+      # projects = ~/Projects;
 
-        dotfiles = "~/.local/dotfiles-";
+      dotfiles = "~/.local/dotfiles-";
 
-        # TODO: Make like in @creamsoda.
-        # shared-dotfiles = "${dotfiles}/shared-";
-        shared-configs = "~/.bookmarks/shared-configs";
-        shared-scripts = "~/.bookmarks/shared-scripts";
+      # TODO: Make like in @creamsoda.
+      # shared-dotfiles = "${dotfiles}/shared-";
+      shared-configs = "~/.bookmarks/shared-configs";
+      shared-scripts = "~/.bookmarks/shared-scripts";
 
-        # TODO: Append home- like in @creamsoda.
-        # As far as I can tell, we would need at least change paths in Ansible
-        # Keyszer templates.
-        home-dotfiles = "${dotfiles}";
-        home-configs = "${home-dotfiles}/_configs";
-        home-scripts = "${home-dotfiles}/_scripts";
-      };
+      # TODO: Append home- like in @creamsoda.
+      # As far as I can tell, we would need at least change paths in Ansible
+      # Keyszer templates.
+      home-dotfiles = "${dotfiles}";
+      home-configs = "${home-dotfiles}/_configs";
+      home-scripts = "${home-dotfiles}/_scripts";
+    };
 
-    modules = {
+    modules = let
+      # WARN: On `stage` variants throws error:
+      # path '/System/Volumes/Data/home/ds13/.bookmarks/shared-configs/NeoVim_config' does not exist
+      # I assume it tries to get folder from host store when deploying to
+      # target thus breaking *symlink*.
+      deployed = true;
+    in {
       architecturing = {
         enable = true;
 
@@ -93,7 +96,7 @@ let
         neovim = {
           enabled = true; # TODO: Remove.
           dev = true;
-          stage = true;
+          stage = !deployed;
         };
 
         # TODO: Repair.
@@ -129,7 +132,7 @@ let
         ranger = {
           enabled = true;
           dev = true;
-          stage = true;
+          stage = !deployed;
         };
       };
       network = {

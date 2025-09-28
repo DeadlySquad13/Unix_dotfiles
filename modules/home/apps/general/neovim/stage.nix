@@ -15,18 +15,18 @@ in
   }
   {
     home = {
-      # file = {
-      #   # Linked it here just for uniformity. Didn't find a way to point
-      #   # NVIM_APPNAME to it.
-      #   ".local/dotfiles-/_configs/nvim/-stage" = lib.${namespace}.source {
-      #     inherit config;
-      #     get-path = p: "${p.shared-configs}/NeoVim_config";
-      #   };
-      #   ".config/nvim-stage" = lib.${namespace}.source {
-      #     inherit config;
-      #     get-path = p: "${p.shared-configs}/NeoVim_config";
-      #   };
-      # };
+      file = {
+        # Linked it here just for uniformity. Didn't find a way to point
+        # NVIM_APPNAME to it.
+        ".local/dotfiles-/_configs/nvim/-stage" = lib.${namespace}.source {
+          inherit config;
+          get-path = p: "${p.shared-configs}/NeoVim_config";
+        };
+        ".config/nvim-stage" = lib.${namespace}.source {
+          inherit config;
+          get-path = p: "${p.shared-configs}/NeoVim_config";
+        };
+      };
 
       packages = with pkgs; [
         ds-omega.neovim-stage

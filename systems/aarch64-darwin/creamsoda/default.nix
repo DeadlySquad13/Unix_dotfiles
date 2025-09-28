@@ -48,6 +48,9 @@ in {
     */
     stateVersion = 5;
 
+    # System options will apply to this user.
+    primaryUser = "apakalo";
+
     defaults.dock = {
       autohide = true;
       orientation = "bottom";

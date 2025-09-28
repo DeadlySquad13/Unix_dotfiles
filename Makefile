@@ -30,7 +30,7 @@ build-system:
 	sudo nixos-rebuild build --flake .#olivier --impure --show-trace
 
 switch-darwin:
-	nix run nix-darwin -- switch --flake . --impure
+	sudo nix run nix-darwin -- switch --flake . --impure
 
 build-darwin:
 	nix run nix-darwin -- build --flake . --impure --show-trace

@@ -11,7 +11,10 @@ lib.${namespace}.mkIfEnabled {
   name = "telegram-desktop";
 }
 {
-  home.packages = with pkgs; [
-    ds-omega.gl-telegram-desktop
+  home.packages = [
+    (lib.${namespace}.packageGLify {
+      inherit config;
+      inherit pkgs;
+    } "telegram-desktop")
   ];
 }

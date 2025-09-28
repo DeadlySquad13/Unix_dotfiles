@@ -11,7 +11,10 @@ lib.${namespace}.mkIfEnabled {
   name = "ferdium";
 }
 {
-  home.packages = with pkgs; [
-    ds-omega.gl-ferdium
+  home.packages = [
+    (lib.${namespace}.packageGLify {
+      inherit config;
+      inherit pkgs;
+    } "ferdium")
   ];
 }

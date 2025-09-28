@@ -13,7 +13,7 @@ in
     extraPredicate = mkIfStageEnabled;
   }
   {
-    home.file = if config.lib.${namespace}.isDeployedFromDarwin then {} else {
+    home.file = if config.lib.${namespace}.deploymentOptions.isDeployedFromDarwin then {} else {
       # Stage.
       ".local/dotfiles-/_configs/ranger/-stage/commands.py" = lib.${namespace}.source {
         inherit config;

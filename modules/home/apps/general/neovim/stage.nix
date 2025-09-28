@@ -15,7 +15,7 @@ in
   }
   {
     home = {
-      file = if config.lib.${namespace}.isDeployedFromDarwin then {} else {
+      file = if config.lib.${namespace}.deploymentOptions.isDeployedFromDarwin then {} else {
         # Linked it here just for uniformity. Didn't find a way to point
         # NVIM_APPNAME to it.
         ".local/dotfiles-/_configs/nvim/-stage" = lib.${namespace}.source {

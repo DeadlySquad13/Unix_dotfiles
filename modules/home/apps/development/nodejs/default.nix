@@ -1,11 +1,13 @@
 {
-  pkgs,
   lib,
   namespace,
   config,
+  inputs,
+  pkgs,
   ...
 }:
-lib.${namespace}.mkIfEnabled {
+lib.${namespace}.mkIfEnabled
+{
   inherit config;
   category = "development";
   name = "nodejs";
@@ -13,9 +15,7 @@ lib.${namespace}.mkIfEnabled {
 {
   home.packages = with pkgs; [
     # pkgs.node-18_x.pkgs.pnpm
-    nodejs_22
-    corepack_22
-    # nodejs_18
-    # corepack_18
+    nodejs_24
+    corepack_24
   ];
 }

@@ -12,6 +12,7 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    plantuml
+    # plantuml
+    plantuml-c4
   ];
 }

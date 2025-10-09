@@ -67,10 +67,10 @@ in {
         plantuml = enabled;
         drawio = enabled;
         yed = enabled;
+        kroki-cli = enabled;
 
         vue = disabled;
         inkscape = disabled;
-        kroki-cli = disabled;
         # FIX: Requires alsa for some reason.
         staruml = disabled;
       };

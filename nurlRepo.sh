@@ -2,10 +2,7 @@
 
 set -e
 
-spin[0]="-"
-spin[1]="\\"
-spin[2]="|"
-spin[3]="/"
+REQUEST_RESPONSE_PATH="/tmp/nurlRepo__Repositories.json"
 
 # Alternative way. It's slower but checks for auth (useful for private repos)
 # user=$(gh api user -q .login)
@@ -39,24 +36,13 @@ QUERY='
 gh api graphql --paginate \
     -F owner="${1:-$owner}" -f query="${QUERY}" \
     --jq '.data.repositoryOwner.repositories.nodes' \
-    > .repos.json & PID=$!
-
-# Find longest nameWithOwner.
-# To do this we:
-# 1. Get object with maximum nameWithOwner.
-# 2. Get value of nameWithOwner from this object.
-# 3. Calculate length.
-# columnLength=$(cat .repos.json | jq 'max_by(.nameWithOwner | length) | .nameWithOwner | length')
-# echo $columnLength
+    > "$REQUEST_RESPONSE_PATH" & PID=$!
 
 echo "This may take a while. Please be patient while it runs" >&2
 printf "[" >&2
 while kill -0 $PID 2>/dev/null; do
-  # for i in "${spin[@]}"; do
-  # echo -ne "\b$i"
   printf "▓" >&2
   sleep 0.5
-  # done
 done
 printf "] done!\n" >&2
 
@@ -64,7 +50,7 @@ printf "] done!\n" >&2
 # To determine columns, a separator (-s) '\t' is used.
 # [Using jq and column][@/AnswertoHowtoformataJSONstringasatableusingjq?:Rahmatullin/AnswerHowFormat.2019]
 # [Zotero][z@/AnswertoHowtoformataJSONstringasatableusingjq?:Rahmatullin/AnswerHowFormat.2019]
-selected=$(cat .repos.json | jq -r '.[] | "\(.nameWithOwner)\t\(.description)"' \
+selected=$(cat "$REQUEST_RESPONSE_PATH" | jq -r '.[] | "\(.nameWithOwner)\t\(.description)"' \
     | sed "s,${owner}/,," \
     | column -ts $'\t' \
     | fzf)
@@ -88,12 +74,6 @@ if [ -n "$selected" ]; then
     nurl "git@github.com:$repoNameWithOwner.git"
     # nix-shell -p nurl --run "nurl git@github.com:DeadlySquad13/Unix_dotfiles.git"
 fi
-
-# option=$(echo "clone view fork archive" | tr " " "\n" | fzf)
-# if [ -z $option ]; then
-#   echo "Please choose an option"
-#   exit 1
-# fi
 
 # References:
 # Main inspiration: https://github.com/kavinvalli/gh-repo-fzf/blob/eceb769efecee53e559d66b1b09fcab5b26c2d0e/gh-repo-fzf

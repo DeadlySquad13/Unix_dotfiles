@@ -46,10 +46,12 @@ while kill -0 $PID 2>/dev/null; do
 done
 printf "] done!\n" >&2
 
-# Get all fields in a single column like view.
+#   Get all fields in a single column like view.
 # To determine columns, a separator (-s) '\t' is used.
 # [Using jq and column][@/AnswertoHowtoformataJSONstringasatableusingjq?:Rahmatullin/AnswerHowFormat.2019]
 # [Zotero][z@/AnswertoHowtoformataJSONstringasatableusingjq?:Rahmatullin/AnswerHowFormat.2019]
+#   If the owner name of the repo is the same as the owner name we've selected in
+# fzf, trim it to remove noise (sometimes owner!=creator).
 selected=$(cat "$REQUEST_RESPONSE_PATH" | jq -r '.[] | "\(.nameWithOwner)\t\(.description)"' \
     | sed "s,${owner}/,," \
     | column -ts $'\t' \
@@ -72,7 +74,6 @@ if [ -n "$selected" ]; then
       repoNameWithOwner="$owner/$repo"
     fi
     nurl "git@github.com:$repoNameWithOwner.git"
-    # nix-shell -p nurl --run "nurl git@github.com:DeadlySquad13/Unix_dotfiles.git"
 fi
 
 # References:

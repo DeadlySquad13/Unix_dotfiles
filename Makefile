@@ -55,3 +55,9 @@ update:
 
 edit-vault:
 	nix-shell -p sops --run "sops secrets/secrets.yaml"
+
+# Edit in vault, change some content, save -> mac is updated.
+# Use with care, only when you're sure you've just mistaken while
+# resolving conflicts.
+fix-vault-mac:
+	nix-shell -p sops --run "sops --ignore-mac secrets/secrets.yaml"

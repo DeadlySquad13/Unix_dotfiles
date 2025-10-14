@@ -10,6 +10,6 @@ writeShellApplication {
     pkgs.telegram-desktop
     nixGLNvidia
   ];
-  text = ''exec -a telegram-desktop ${nixGLNvidia}/bin/${nixGLNvidia.name} telegram-desktop "$@"'';
+  text = ''exec -a ${pkgs.telegram-desktop}/bin/Telegram ${nixGLNvidia}/bin/${nixGLNvidia.name} ${pkgs.telegram-desktop}/bin/Telegram "$@"'';
   meta.priority = (pkgs.telegram-desktop.meta.priority or 5) - 1;
 }

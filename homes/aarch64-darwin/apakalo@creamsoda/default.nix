@@ -111,6 +111,8 @@ in {
         ferdium = disabled;
         telegram-desktop = disabled;
         zathura = disabled;
+        anki = disabled;
+        musescore = disabled;
 
         wireguard-tools = disabled;
         unzip = disabled;

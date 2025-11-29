@@ -6,7 +6,8 @@
 }: let
   padding = 4;
 in
-  lib.${namespace}.mkIfEnabled {
+  lib.${namespace}.mkIfEnabled
+  {
     inherit config;
     category = "services";
     name = "yabai";
@@ -54,5 +55,42 @@ in
         right_padding = padding;
         window_gap = padding;
       };
+
+      extraConfig = /*bash*/''
+        # Autostart layout.
+        # INFO: Selectors are case sensitive!
+
+        # One-shot rules.
+        # * Space 1
+        yabai -m rule --apply app='Logseq' space=1
+        # Didn't check
+        yabai -m rule --apply app='Ferdium' space=1
+        # * Space 2
+        yabai -m rule --apply app='Vivaldi' space=2
+        # * Space 3
+        yabai -m rule --apply app='WezTerm' space=3
+        yabai -m rule --apply app='wezterm-gui' space=3
+        # * Space 4
+        yabai -m rule --apply app='Zotero' space=4
+        # * Space 5
+        yabai -m rule --apply app='Telegram' space=5
+        yabai -m rule --apply app='Microsoft Outlook' space=1
+
+        # Rules.
+        # * Space 1
+        yabai -m rule --add app='Logseq' space=1
+        # Didn't check
+        yabai -m rule --add app='Ferdium' space=1
+        # * Space 2
+        yabai -m rule --add app='Vivaldi' space=2
+        # * Space 3
+        yabai -m rule --add app='WezTerm' space=3
+        yabai -m rule --add app='wezterm-gui' space=3
+        # * Space 4
+        yabai -m rule --add app='Zotero' space=4
+        # * Space 5
+        yabai -m rule --add app='Telegram' space=5
+        yabai -m rule --add app='Microsoft Outlook' space=1
+      '';
     };
   }

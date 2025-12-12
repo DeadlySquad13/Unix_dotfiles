@@ -10,11 +10,20 @@
   # In most cases we jump directly into folder. This way common .envrc wouldn't
   # be hooked. This envrc allows us to source it from a central point in each
   # subdirectory.
+  # But we use flake here instead of in common .envrc for two reasons:
+  # 1. I don't need to source into flake shell when working in parent dir and their configs
+  # (outside of worktree).
+  # 2. We may need to separate them per worktree in the future
   envrc =
     /*
     bash
     */
     ''
+      # Flake must be inside git repo (and not ignored), otherwise it would need to clone
+      # a whole repo to the nix store. Hence we move it to parent dir with
+      # a subdir that has git initialized.
+      use flake ../_configs/Nix/flake.nix
+
       source_env_if_exists ../.envrc
 
       # vi:ft=bash
@@ -33,6 +42,8 @@
           */
           ''
             dotenv ./.env.dev
+            # TODO: Remove temporary workaround when it's properly fixed https://github.com/NixOS/nixpkgs/issues/376958
+            unset DEVELOPER_DIR
 
             # vi:ft=bash
           '';
@@ -69,8 +80,9 @@
           */
           ''
             # Usually not ignored, but our members don't use it, it's for our personal
-            # solution of a corepack issue.
+            # solution of a corepack issue and flake configs.
             .envrc
+            .direnv
           '';
       }
     );

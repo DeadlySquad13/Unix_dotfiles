@@ -63,6 +63,7 @@ lib.${namespace}.mkIfEnabled {
       co = "checkout";
       sw = "switch";
       br = "branch";
+      br-current = "branch --show-current";
       st = "status";
       cm = "commit -m";
       pl = "pull";

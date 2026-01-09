@@ -51,7 +51,7 @@ lib.${namespace}.mkIfEnabled {
         directory = "*";
       };
       pull = {
-        rebase = false;
+        rebase = true;
       };
     };
 

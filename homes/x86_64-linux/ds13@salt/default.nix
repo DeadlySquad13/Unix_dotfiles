@@ -59,6 +59,12 @@ let
         home-scripts = "${home-dotfiles}/_scripts";
       };
 
+    # TODO: Add as default value.
+    deploymentOptions = rec {
+      isDeployedFromDarwin = false;
+      isNixGlNotWorking = isDeployedFromDarwin;
+    };
+
     modules = {
       architecturing = {
         enable = true;

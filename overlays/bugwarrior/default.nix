@@ -3,7 +3,7 @@
   inputs,
   ...
 }: final: prev: rec {
-  python3 = prev.python3.override {
+  python312 = prev.python312.override {
     packageOverrides = finalPackage: prevPackage: {
       bugwarrior-develop = prevPackage.bugwarrior.overrideAttrs (finalAttrs: prevAttrs: {
         version = "develop";
@@ -23,5 +23,5 @@
     };
   };
 
-  python3Packages = python3.pkgs;
+  python312Packages = python312.pkgs;
 }

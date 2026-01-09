@@ -17,7 +17,10 @@ lib.${namespace}.mkIfEnabled {
     # Last version 1.8.0 was released in 2020.
     # https://github.com/GothenburgBitFactory/bugwarrior/issues/1030
     # python311Packages.bugwarrior
-    python3Packages.bugwarrior-develop
+    # Doesn't work after 3.13 update where `future` package was deprecated
+    # (fully absorbed into Python).
+    # python3Packages.bugwarrior-develop
+    python312Packages.bugwarrior-develop
   ];
   programs.taskwarrior = {
     extraConfig =

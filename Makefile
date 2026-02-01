@@ -80,3 +80,7 @@ start-vm-qemu:
 # # VirtualBox
 build-vm-qemu:
 	nix-build '<nixpkgs/nixos>' -A config.system.build.virtualBoxOVA -I nixpkgs=channel:nixos-24.11 -I nixos-config=./systems/x86_64-vm/vpn/default.nix
+
+# # Docker
+build-NikolaiGogol-hm:
+	home-manager build --flake .#ds13@NikolaiGogol --impure --extra-experimental-features 'nix-command flakes' --show-trace

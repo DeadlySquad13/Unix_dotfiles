@@ -21,6 +21,9 @@ lib.${namespace}.mkIfEnabled {
 
       # REFACTOR:
       fonts = "nix-shell -p fontconfig --command fc-list";
+      # Things that I rarely use and don't want to store permanently as a package.
+      speedtest = "nix-shell -p speedtest-cli --run speedtest";
+      speedtestKarimka = "proxychains4 nix-shell -p speedtest-cli --run speedtest";
     };
 
     bashrcExtra = /*bash*/ ''

@@ -18,6 +18,10 @@ lib.${namespace}.mkIfEnabled {
     shellAliases = {
       # https://joshtronic.com/2021/05/23/unlock-user-after-too-many-failed-sudo-attempts/
       resetFailLock = "faillock --user $USER --reset";
+
+      # Things that I rarely use and don't want to store permanently as a package.
+      speedtest = "nix-shell -p speedtest-cli --run speedtest";
+      speedtestKarimka = "proxychains4 nix-shell -p speedtest-cli --run speedtest";
     };
 
     bashrcExtra = /*bash*/ ''

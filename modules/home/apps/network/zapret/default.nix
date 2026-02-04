@@ -7,7 +7,7 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "general";
+  category = "network";
   name = "zapret";
   extraPredicate = lib.ds-omega.mkIfLinux;
 }

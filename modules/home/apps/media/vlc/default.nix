@@ -7,7 +7,7 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "general";
+  category = "media";
   name = "vlc";
 }
 {

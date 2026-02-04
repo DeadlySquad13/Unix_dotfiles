@@ -7,7 +7,7 @@
 }:
 lib.${namespace}.mkIfEnabled {
   inherit config;
-  category = "general";
+  category = "network";
   name = "openvpn3";
 }
 {

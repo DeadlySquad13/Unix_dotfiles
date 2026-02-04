@@ -74,7 +74,9 @@ in {
         nix = disabled;
       };
       general = {
-        # REFACTOR: Vlc into separate profile (non-working).
+        enable = true;
+      };
+      media = {
         enable = true;
       };
       network = {

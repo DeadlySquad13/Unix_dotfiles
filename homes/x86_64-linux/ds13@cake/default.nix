@@ -102,8 +102,6 @@ in {
           stage = false;
         };
 
-        # TODO: Repair.
-        openvpn3 = disabled;
         # App works fine but it doesn't connect to server. Seems like an issue
         # with ports, systemd or something like this. Hard to investigate as logs are
         # quite lacking.
@@ -143,6 +141,8 @@ in {
         enable = false;
 
         yandex-disk = disabled;
+        # TODO: Repair.
+        openvpn3 = disabled;
       };
 
       bookmarks = {

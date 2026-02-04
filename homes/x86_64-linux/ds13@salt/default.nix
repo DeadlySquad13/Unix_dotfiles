@@ -16,11 +16,9 @@
   # All other arguments come from the home home.
   config,
   ...
-}:
-let
+}: let
   inherit (lib.${namespace}) disabled enabled;
-  in
-{
+in {
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -37,27 +35,26 @@ let
   };
 
   lib.${namespace} = {
-    paths =
-      rec {
-        # config = ~/.config;
-        kbd = ~/.bookmarks/kbn;
-        kbn = ~/.bookmarks/kbn;
-        # projects = ~/Projects;
+    paths = rec {
+      # config = ~/.config;
+      kbd = ~/.bookmarks/kbn;
+      kbn = ~/.bookmarks/kbn;
+      # projects = ~/Projects;
 
-        dotfiles = "~/.local/dotfiles-";
+      dotfiles = "~/.local/dotfiles-";
 
-        # TODO: Make like in @creamsoda.
-        # shared-dotfiles = "${dotfiles}/shared-";
-        shared-configs = "~/.bookmarks/shared-configs";
-        shared-scripts = "~/.bookmarks/shared-scripts";
+      # TODO: Make like in @creamsoda.
+      # shared-dotfiles = "${dotfiles}/shared-";
+      shared-configs = "~/.bookmarks/shared-configs";
+      shared-scripts = "~/.bookmarks/shared-scripts";
 
-        # TODO: Append home- like in @creamsoda.
-        # As far as I can tell, we would need at least change paths in Ansible
-        # Keyszer templates.
-        home-dotfiles = "${dotfiles}";
-        home-configs = "${home-dotfiles}/_configs";
-        home-scripts = "${home-dotfiles}/_scripts";
-      };
+      # TODO: Append home- like in @creamsoda.
+      # As far as I can tell, we would need at least change paths in Ansible
+      # Keyszer templates.
+      home-dotfiles = "${dotfiles}";
+      home-configs = "${home-dotfiles}/_configs";
+      home-scripts = "${home-dotfiles}/_scripts";
+    };
 
     # TODO: Add as default value.
     deploymentOptions = rec {
@@ -80,6 +77,8 @@ let
       };
       ecosystem = {
         enable = true;
+
+        ansible = disabled; # Pipx issues as ansible has it's own python interpreter.
       };
       general = {
         enable = true;
@@ -90,8 +89,6 @@ let
           stage = true;
         };
 
-        # TODO: Repair.
-        openvpn3 = disabled;
         # App works fine but it doesn't connect to server. Seems like an issue
         # with ports, systemd or something like this. Hard to investigate as logs are
         # quite lacking.
@@ -101,6 +98,13 @@ let
         karabiner-elements = disabled;
         skhd = disabled;
         yabai = disabled;
+
+        obs-studio = disabled; # Takes 3.5Gb, currently don't use.
+      };
+      media = {
+        enable = true;
+        # FIX: Has to be enabled explicitly.
+        audio = enabled;
       };
       gui-utility = {
         enable = true;
@@ -116,6 +120,11 @@ let
       };
       graphics = {
         enable = true;
+
+        blender = disabled; # Takes 3.5Gb, currently don't use.
+      };
+      virtualisation = {
+        enable = false;
       };
       system = {
         enable = true;
@@ -131,6 +140,9 @@ let
       };
       network = {
         enable = true;
+
+        # TODO: Repair.
+        openvpn3 = disabled;
       };
 
       bookmarks = {

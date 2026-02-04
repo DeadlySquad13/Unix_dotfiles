@@ -109,7 +109,6 @@ in {
 
         wireguard-tools = disabled;
         unzip = disabled;
-        vlc = disabled;
         keychain = disabled;
         numlockx = disabled;
         obs-studio = disabled;
@@ -118,8 +117,10 @@ in {
         btop = disabled;
         flatpak = disabled;
         java-fonts-fix = disabled;
-        openvpn3 = disabled;
         gpick = disabled;
+      };
+      media = {
+        enable = false;
       };
       gui-utility = {
         enable = false;
@@ -137,6 +138,9 @@ in {
         enable = false;
 
         markdown-oxide = enabled;
+      };
+      network = {
+        enable = false;
       };
 
       tools = {

@@ -92,8 +92,6 @@ let
         dev = true;
         stage = true;
       };
-
-      openvpn3 = disabled;
     };
     gui-utility = {
       enable = true;

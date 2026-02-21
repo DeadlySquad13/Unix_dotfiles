@@ -14,8 +14,8 @@ in
     imports = [
       # Overrides next modules.
       ./dev.nix
-      ./stage.nix
-      ./prod.nix
+      ./stage/default.nix
+      ./prod/default.nix
     ];
   }
   // lib.${namespace}.mkIfEnabled

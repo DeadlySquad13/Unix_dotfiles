@@ -1,6 +1,6 @@
 {
   config,
-  pkgs,
+inputs,
   lib,
   ...
 }:
@@ -13,12 +13,7 @@ lib.ds-omega.mkIfEnabled
 }
 {
   home.file = {
-    ".config/nvim".source = pkgs.fetchFromGitHub {
-      owner = "DeadlySquad13";
-      repo = "NeoVim_config";
-      rev = "6aeda4ea8215ce1fe0b50178e9ebd673e504e903";
-      hash = "sha256-TOt19WrqopFNGZsz4m/9pCaMQ5A0y34tNxOs+7WYy3Y=";
-    };
+    ".config/nvim".source = inputs.neovim-config-prod;
   };
 
   programs.bash = {

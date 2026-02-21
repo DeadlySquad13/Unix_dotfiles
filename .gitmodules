@@ -1,0 +1,8 @@
+[submodule "modules/home/apps/general/neovim/prod/NeoVim_config"]
+	path = modules/home/apps/general/neovim/prod/NeoVim_config
+	url = git@github.com:DeadlySquad13/NeoVim_config.git
+	branch = main
+[submodule "modules/home/apps/general/neovim/stage/NeoVim_config"]
+	path = modules/home/apps/general/neovim/stage/NeoVim_config
+	url = git@github.com:DeadlySquad13/NeoVim_config.git
+	branch = dev

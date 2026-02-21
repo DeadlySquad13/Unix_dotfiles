@@ -6,6 +6,7 @@
   makeWrapper,
   nim,
   git,
+  ...
 }:
 stdenv.mkDerivation (finalAttrs: rec {
   pname = "taskopen2";
@@ -28,11 +29,20 @@ stdenv.mkDerivation (finalAttrs: rec {
   '';
 
   nativeBuildInputs = [makeWrapper];
-  buildInputs = [nim git];
+  buildInputs = [
+    nim
+    git
+  ];
 
-  buildPhase = ''
-    export HOME=$(pwd)
+
+  # Set HOME to a writable directory in the build sandbox
+  preBuild = ''
+    export HOME="$TMPDIR/home"
+    mkdir -p "$HOME/.cache/crystal"
   '';
+
+  # Pass any additional Crystal compiler flags
+  CRYSTAL_CACHE_DIR = "$HOME/.cache/crystal";
 
   installPhase = ''
     make PREFIX=$out install

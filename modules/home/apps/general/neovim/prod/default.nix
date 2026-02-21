@@ -13,7 +13,10 @@ lib.ds-omega.mkIfEnabled
 }
 {
   home.file = {
-    ".config/nvim".source = inputs.neovim-config-prod;
+    ".config/nvim" = {
+      source = inputs.neovim-config-prod;
+      recursive = true; # [1]
+    };
   };
 
   programs.bash = {
@@ -24,3 +27,9 @@ lib.ds-omega.mkIfEnabled
     };
   };
 }
+
+# References:
+# [1]:
+# Otherwise we get issue with some lua modules (not even talking about
+# `lazy-lock.json` shenanigans):
+# logseq://graph/Notes?block-id=6999d40b-0a42-499e-bb39-e0040353d5bd

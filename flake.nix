@@ -9,7 +9,8 @@
     # https://discuss.logseq.com/t/nixos-logseq-has-been-removed-due-to-lack-of-maintenance-and-blocking-the-electron-27-removal/31605/3
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     nixgl = {
-      url = "github:nix-community/nixGL";
+      # url = "github:nix-community/nixGL";
+      url = "github:tom-ainc/nixgl"; # FIX: https://github.com/nix-community/nixGL/issues/217
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -39,6 +40,19 @@
       url = "github:snowfallorg/lib";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # INFO: Requires nix version >= 2.27
+    self.submodules = true;
+
+    neovim-config-prod = {
+      url = "path:modules/home/apps/general/neovim/prod/NeoVim_config";
+      flake = false;
+    };
+
+    neovim-config-stage = {
+      url = "path:modules/home/apps/general/neovim/stage/NeoVim_config";
+      flake = false;
+    };
   };
 
   outputs = inputs:
@@ -56,6 +70,10 @@
         # Now you can reference pkgs.nixgl.nixGLNvidia and other wrappers.
         nixgl.overlay
       ];
+
+      # 3rd party home modules.
+      # homes.modules = with inputs; [
+      # ];
 
       # The `specialArgs` parameter passes the
       # non-default nixpkgs instances to other nix modules

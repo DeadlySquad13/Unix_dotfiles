@@ -1,11 +1,17 @@
 {
   lib,
+  inputs,
   namespace,
   config,
   pkgs,
   ...
 }: let
   inherit (lib.ds-omega) mkIfEnabled mkIfStageEnabled;
+
+  neovim-config-stage = {
+    source = inputs.neovim-config-prod;
+    recursive = true; # [1]
+  };
 in
   mkIfEnabled
   {
@@ -22,18 +28,8 @@ in
         else {
           # Linked it here just for uniformity. Didn't find a way to point
           # NVIM_APPNAME to it.
-          ".local/dotfiles-/_configs/nvim/-stage" = lib.${namespace}.source {
-            inherit config;
-            get-path = p: "${p.shared-configs}/NeoVim_config";
-            recursive = true;
-            # out-of-store = true; # [1]
-          };
-          ".config/nvim-stage" = lib.${namespace}.source {
-            inherit config;
-            get-path = p: "${p.shared-configs}/NeoVim_config";
-            recursive = true;
-            # out-of-store = true; # [1]
-          };
+          ".local/dotfiles-/_configs/nvim/-stage" = neovim-config-stage;
+          ".config/nvim-stage" = neovim-config-stage;
         };
 
       packages = with pkgs; [

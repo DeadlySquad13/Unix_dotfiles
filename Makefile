@@ -50,6 +50,8 @@ optimise:
 	nix-store --optimise
 
 # When want to migrate to a newer version of nixpkgs and home-manager.
+# Use `nix flake lock` if you just want to recreate lock file without updating
+# any set versions.
 update:
 	nix flake update
 
@@ -63,7 +65,7 @@ fix-vault-mac:
 	nix-shell -p sops --run "sops --ignore-mac secrets/secrets.yaml"
 	# Not sure if it was needed: `nix-channel --update`
 
-# Virtual Machines
+# StratoFrame % Virtual Machines
 # # Qemu
 build-vm-qemu:
 	# Delete cached dynamic state of the virtual machine from previous build.
@@ -78,7 +80,7 @@ start-vm-qemu:
 	./result/bin/run-nixos-vm
 
 # # VirtualBox
-build-vm-qemu:
+build-vm-vb:
 	nix-build '<nixpkgs/nixos>' -A config.system.build.virtualBoxOVA -I nixpkgs=channel:nixos-24.11 -I nixos-config=./systems/x86_64-vm/vpn/default.nix
 
 # # Docker

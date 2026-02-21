@@ -5,7 +5,8 @@
   config,
   ...
 }:
-lib.${namespace}.mkIfEnabled {
+lib.${namespace}.mkIfEnabled
+{
   inherit config;
   category = "development";
   name = "lazygit";
@@ -13,13 +14,13 @@ lib.${namespace}.mkIfEnabled {
 {
   home.file = {
     ".config/lazygit".source =
-        pkgs.fetchFromGitHub {
-          owner = "DeadlySquad13";
-          repo = "Wsl2_dotfiles";
-          rev = "af728d9f05f25656ab8fcefa66d767c5b558710e";
-          hash = "sha256-3hT3Gzh7vDRap1prJFyu+av4SS0kbu+HVYPbHRYw0YE=";
-        }
-        + "/stow_home/lazygit/.config/lazygit";
+      pkgs.fetchFromGitHub {
+        owner = "DeadlySquad13";
+        repo = "Wsl2_dotfiles";
+        rev = "d12558f1542f7aec294ed651a0b97306ec6d06ff";
+        hash = "sha256-7N0ww6GnQUmlHCDSJKPb+cEUmhZXtsSWpAN8S92QwUw=";
+      }
+      + "/stow_home/lazygit/.config/lazygit";
   };
 
   home.packages = with pkgs; [

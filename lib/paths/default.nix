@@ -44,6 +44,7 @@ in {
     config,
     get-path,
     out-of-store ? false,
+    recursive ? false,
   }: let
     path = lib.${namespace}.get-path {
       inherit config;
@@ -57,6 +58,6 @@ in {
         if !out-of-store
         then path
         else config.lib.file.mkOutOfStoreSymlink path;
-      recursive = out-of-store;
+      recursive = recursive || out-of-store;
     };
 }

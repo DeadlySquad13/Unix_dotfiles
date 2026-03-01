@@ -12,15 +12,7 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    # Doesn't work with Python3.12 out of the box.
-    # https://github.com/GothenburgBitFactory/bugwarrior/issues/1050
-    # Last version 1.8.0 was released in 2020.
-    # https://github.com/GothenburgBitFactory/bugwarrior/issues/1030
-    # python311Packages.bugwarrior
-    # Doesn't work after 3.13 update where `future` package was deprecated
-    # (fully absorbed into Python).
-    # python3Packages.bugwarrior-develop
-    python312Packages.bugwarrior-develop
+    python3Packages.bugwarrior
   ];
   programs.taskwarrior = {
     extraConfig =

@@ -17,6 +17,27 @@ lib.${namespace}.mkIfEnabled {
     package = pkgs.taskwarrior2;
 
     # Files
+    # TODO:
+    # (5/5) Support for XDG Base Directory Specification
+    # 
+    #   Background
+    #   The XDG Base Directory specification provides standard locations to store
+    #   application data, configuration, state, and cached data in order to keep $HOME
+    #   clutter-free. The locations are usually set to ~/.local/share, ~/.config,
+    #   ~/.local/state and ~/.cache respectively.
+    # 
+    #   What changed in 2.6.0?
+    #   If taskrc is not found at '~/.taskrc', Taskwarrior will attempt to find it
+    #   at '$XDG_CONFIG_HOME/task/taskrc' (defaults to '~/.config/task/taskrc').
+    # 
+    #   What was the motivation behind this feature?
+    #   This allows users to fully follow XDG Base Directory Spec by moving their taskrc:
+    #       $ mkdir $XDG_CONFIG_HOME/task
+    #       $ mv ~/.taskrc $XDG_CONFIG_HOME/task/taskrc
+    # 
+    #   and further setting:
+    #       data.location=$XDG_DATA_HOME/task/
+    #       hooks.location=$XDG_CONFIG_HOME/task/hooks/
     dataLocation = "~/.task";
     # colorTheme = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/taskwarrior/deadly-solarized-light.theme;
     colorTheme =

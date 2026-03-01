@@ -1,4 +1,17 @@
 # Unix dotfiles
+## Initialization
+### Cloning
+Has submodules for some modules [Source][@/GitSubmodulesNix]|[Zotero][z@/GitSubmodulesNix]:
+- neovim
+
+Because of that certain git operations like `clone` require submodule flags. Or explicitly update
+submodules on initial clone:
+```bash
+make init
+```
+
+### Installation
+
 To install flake use: `nixos-rebuild switch --flake . --impure`.
 For non-NixOs systems, you can do the same thing by substituting `nixos-rebuilt` with `home-manager`:
 `home-manager switch --flake . --impure`.
@@ -13,3 +26,7 @@ special flags manually, specifying them inline in the command:
 ```nix
 home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes'
 ```
+
+## References
+[@/GitSubmodulesNix]: <https://nixos.asia/en/blog/git-submodule-input> 'Git Submodules as Nix Flake Inputs'
+[z@/GitSubmodulesNix]: <zotero://select/items/@/GitSubmodulesNix> 'Select in Zotero: Git Submodules as Nix Flake Inputs'

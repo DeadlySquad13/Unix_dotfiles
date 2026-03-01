@@ -5,7 +5,8 @@
   config,
   ...
 }:
-lib.${namespace}.mkIfEnabled {
+lib.${namespace}.mkIfEnabled
+{
   inherit config;
   category = "development";
   name = "git";
@@ -13,13 +14,13 @@ lib.${namespace}.mkIfEnabled {
 {
   home.file = {
     # ".gitconfig".source =
-      # pkgs.fetchFromGitHub {
-      #   owner = "DeadlySquad13";
-      #   repo = "Wsl2_dotfiles";
-      #   rev = "af728d9f05f25656ab8fcefa66d767c5b558710e";
-      #   hash = "sha256-3hT3Gzh7vDRap1prJFyu+av4SS0kbu+HVYPbHRYw0YE=";
-      # }
-      # + "/stow_home/git/.gitconfig";
+    # pkgs.fetchFromGitHub {
+    #   owner = "DeadlySquad13";
+    #   repo = "Wsl2_dotfiles";
+    #   rev = "af728d9f05f25656ab8fcefa66d767c5b558710e";
+    #   hash = "sha256-3hT3Gzh7vDRap1prJFyu+av4SS0kbu+HVYPbHRYw0YE=";
+    # }
+    # + "/stow_home/git/.gitconfig";
     ".config/git/.global_gitignore".source =
       pkgs.fetchFromGitHub {
         owner = "DeadlySquad13";
@@ -31,7 +32,7 @@ lib.${namespace}.mkIfEnabled {
   };
   programs.git = {
     enable = true;
-    extraConfig = {
+    settings = {
       core = {
         autocrlf = "input";
         excludesfile = "~/.config/git/.global_gitignore";
@@ -53,38 +54,37 @@ lib.${namespace}.mkIfEnabled {
       pull = {
         rebase = true;
       };
+      aliases = {
+        hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
+        c = "clone";
+        # - Add all.
+        aa = "add -A";
+        co = "checkout";
+        sw = "switch";
+        br = "branch";
+        br-current = "branch --show-current";
+        st = "status";
+        cm = "commit -m";
+        pl = "pull";
+        ps = "push";
+        # - Push head.
+        psh = "push -u origin HEAD";
+        unstage = "restore --staged";
+        # - Perform mixed reset.
+        unstage-all = "reset HEAD --";
+        # - Show config option scope (local, global...), origin (file) and current value.
+        show-option-origin = "config --show-origin --show-scope --get-all";
+      };
     };
 
-    aliases = {
-      hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
-      c = "clone";
-      # - Add all.
-      aa = "add -A";
-      co = "checkout";
-      sw = "switch";
-      br = "branch";
-      br-current = "branch --show-current";
-      st = "status";
-      cm = "commit -m";
-      pl = "pull";
-      ps = "push";
-      # - Push head.
-      psh = "push -u origin HEAD";
-      unstage = "restore --staged";
-      # - Perform mixed reset.
-      unstage-all = "reset HEAD --";
-      # - Show config option scope (local, global...), origin (file) and current value.
-      show-option-origin = "config --show-origin --show-scope --get-all";
-    };
-
-    includes = let 
+    includes = let
       rutube-config = {
-          user = {
-            name = "Пакало Александр";
-            email = "apakalo@rutube.ru";
-          };
+        user = {
+          name = "Пакало Александр";
+          email = "apakalo@rutube.ru";
         };
-      in [
+      };
+    in [
       {
         contents = rutube-config;
         condition = "hasconfig:remote.*.url:https://gitlab.rutube.ru/**";

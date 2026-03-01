@@ -68,6 +68,10 @@ let
     modules = {
       architecturing = {
         enable = true;
+
+        # Issue: SSL certificate OpenSSL verify result: unable to get local issuer certificate
+        # https://github.com/NixOS/nixpkgs/issues/409848
+        staruml = disabled;
       };
       cli-utility = {
         enable = true;

@@ -1,5 +1,8 @@
 run-switch: switch optimise garbage-collect-old
 
+init:
+	git submodule update --init --recursive
+
 switch:
 	home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 

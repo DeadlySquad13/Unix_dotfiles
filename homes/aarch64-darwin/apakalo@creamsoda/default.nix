@@ -41,6 +41,11 @@ in {
         kbd = ~/KnowledgeBase__Notes;
         projects = ~/Projects;
 
+        # These are used for symlinks and they need to be strings according to
+        # our `lib.ds-omega.source` interface.
+
+        shared-projects = "~/Projects/shared-";
+
         dotfiles = "~/.local/dotfiles-";
         shared-dotfiles = "${dotfiles}/shared-";
         shared-configs = "${shared-dotfiles}/_configs";

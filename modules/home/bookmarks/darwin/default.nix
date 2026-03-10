@@ -30,6 +30,9 @@
   projects-root = "${config.home.homeDirectory}/Projects";
   # TODO: Get from
   # rut-Programming_dotfiles/roles/repositories/vars/main.yml
+  # INFO: path - location of the project. If it is located in different
+  # directory, symlink should be added before running this flake. Otherwise
+  # Nix will create a new directory under specified path.
   projects = [
     {
       suite-name = "Woodpecker";
@@ -38,6 +41,10 @@
     {
       suite-name = "Premium";
       path = "${projects-root}/--professional/Rutube__/Premium";
+    }
+    {
+      suite-name = "Raichu";
+      path = "${projects-root}/--professional/Rutube__/Raichu";
     }
   ];
 
@@ -104,7 +111,7 @@ in
   }
   {
     # See `darwinConfigurations.creamsoda.config.home-manager.users.apakalo.home.file.`
-    # in nix-repl to debug.
+    # in nix repl to debug.
     home.file =
       builtins.mapAttrs
       (
@@ -122,6 +129,7 @@ in
           "kbd" = "~/KnowledgeBase__Data";
           "kbn" = "~/KnowledgeBase__Data/Notes";
           "shared-configs" = paths.shared-configs;
+          "shared-projects" = paths.shared-projects;
         }
       )
       // project-structures;

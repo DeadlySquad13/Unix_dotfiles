@@ -118,6 +118,9 @@ in {
       yandex_disk_username = {};
       yandex_disk_password = {};
 
+      # INFO: In `secrets/secrets.yaml` in "private_keys" category there's an
+      # entry "Personal__DeadlySquad13_gitHub" with an actual encrypted ssh key.
+      # During deployment it's created on a target system as a file by the `path` with `owner` set.
       # REFACTOR: Move user specific things out of system.
       # REFACTOR: Separate into specific @cake file.
       "private_keys/Personal__DeadlySquad13_gitHub" = {

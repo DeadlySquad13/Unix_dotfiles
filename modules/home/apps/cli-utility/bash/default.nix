@@ -18,6 +18,9 @@ lib.${namespace}.mkIfEnabled {
     shellAliases = {
       # https://joshtronic.com/2021/05/23/unlock-user-after-too-many-failed-sudo-attempts/
       resetFailLock = "faillock --user $USER --reset";
+
+      # REFACTOR:
+      fonts = "nix-shell -p fontconfig --command fc-list";
     };
 
     bashrcExtra = /*bash*/ ''

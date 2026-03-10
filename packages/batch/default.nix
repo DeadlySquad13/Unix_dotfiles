@@ -13,13 +13,13 @@
 }:
 stdenv.mkDerivation (finalAttrs: rec {
   pname = "batch";
-  version = "0.1.0";
+  version = "nightly";
 
   src = fetchFromGitHub {
     owner = "taupiqueur";
     repo = "batch";
     rev = "refs/tags/${version}";
-    hash = "sha256-xZ5Mu8Snl5phQCHyKZGJMCiqDOhAEpLo8Vdc5xiQyKA=";
+    hash = "sha256-/So4Oz+e1E1hfY6mprIOk3+LNSMwc9lMQBvC63K3PJg=";
   };
 
   sourceRoot = "${finalAttrs.src.name}/";

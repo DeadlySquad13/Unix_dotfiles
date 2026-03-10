@@ -1,2 +1,4 @@
 # deploy-rs logs.
 logs
+./result
+./result-main

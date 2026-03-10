@@ -27,6 +27,8 @@
     };
 
     # In order to build system images and artifacts supported by nixos-generators.
+    # INFO: It's archived in favor of nixpkgs but new version still doesn't have docker
+    # version.
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";

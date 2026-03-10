@@ -104,3 +104,7 @@ build-vm-vb:
 # # Docker
 build-NikolaiGogol-hm:
 	home-manager build --flake .#ds13@NikolaiGogol --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+build-NikolaiGogol:
+	nix build .#dockerConfigurations.NikolaiGogol  --impure --extra-experimental-features 'nix-command flakes' --show-trace
+

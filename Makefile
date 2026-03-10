@@ -105,6 +105,12 @@ build-vm-vb:
 build-NikolaiGogol-hm:
 	home-manager build --flake .#ds13@NikolaiGogol --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+switch-NikolaiGogol-system:
+	sudo nixos-rebuild switch --flake .#NikolaiGogol --impure
+
+build-NikolaiGogol-system:
+	sudo nixos-rebuild build --flake .#NikolaiGogol --impure --show-trace
+
 build-NikolaiGogol:
 	nix build .#dockerConfigurations.NikolaiGogol  --impure --extra-experimental-features 'nix-command flakes' --show-trace
 

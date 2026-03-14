@@ -5,7 +5,8 @@
   config,
   ...
 }:
-lib.${namespace}.mkIfEnabled {
+lib.${namespace}.mkIfEnabled
+{
   inherit config;
   category = "development";
   name = "docker";
@@ -15,9 +16,23 @@ lib.${namespace}.mkIfEnabled {
     docker
   ];
   programs = {
-    bash.bashrcExtra = /*bash*/ ''
-      # Docker in rootless mode.
-      export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-    '';
+    bash = {
+      shellAliases = {
+        d = "dockerWrapper";
+      };
+      bashrcExtra =
+        /*
+        bash
+        */
+        ''
+          # Docker in rootless mode.
+          export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+
+          # Custom autocompletion for alias.
+          eval "$(docker completion bash)"
+
+          complete -F _complete_alias d
+        '';
+    };
   };
 }

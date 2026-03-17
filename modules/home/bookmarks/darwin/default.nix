@@ -46,6 +46,10 @@
       suite-name = "Raichu";
       path = "${projects-root}/--professional/Rutube__/Raichu";
     }
+    {
+      suite-name = "ReleaseBuilder";
+      path = "${projects-root}/--professional/Rutube__/ReleaseBuilder";
+    }
   ];
 
   # Project local disable of automatic corepack pinning of package manager version.

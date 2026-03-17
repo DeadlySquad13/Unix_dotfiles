@@ -40,78 +40,78 @@
     "Review"
   ];
 
-  # INFO: path - location of the project. If it is located in different
+  # INFO: 
+  # @attr path - location of the project. If it is located in different
   # directory, symlink should be added before running this flake. Otherwise
   # Nix will create a new directory under specified path.
+  # @attr worktrees - list of worktrees used in a project.
   # TODO: Get from
   # rut-Programming_dotfiles/roles/repositories/vars/main.yml
   projects = [
     {
       suite-name = "Woodpecker";
       path = "${rutube-projects-root}/Woodpecker";
-      worktrees = rutube-projects-worktrees;
     }
     {
       suite-name = "Premium";
       path = "${rutube-projects-root}/Premium";
-      worktrees = rutube-projects-worktrees;
     }
     {
       suite-name = "Raichu";
       path = "${rutube-projects-root}/Raichu";
-      worktrees = rutube-projects-worktrees;
     }
     {
       suite-name = "ReleaseBuilder";
       path = "${rutube-projects-root}/ReleaseBuilder";
-      worktrees = rutube-projects-worktrees;
     }
   ];
+
+  map-project-worktrees-to-smug-configs = project:
+    lib.lists.foldl (
+      acc: worktree: let
+        # Choosing different configs.
+        smug-worktree-configs-root = "${rutube-projects-root}/_configs/Smug__";
+        project-specific-smug-worktree-configs = "${smug-worktree-configs-root}/${project.suite-name}";
+        default-smug-worktree-configs = "${smug-worktree-configs-root}/-gitWorktrees";
+
+        smug-worktree-configs =
+          if lib.filesystem.pathIsDirectory project-specific-smug-worktree-configs
+          then project-specific-smug-worktree-configs
+          else default-smug-worktree-configs;
+      in
+        acc
+        // {
+          "_configs/${worktree}.yml" = "${smug-worktree-configs}/${worktree}.yml";
+        }
+    ) {} (project.worktrees or rutube-projects-worktrees);
+
+  create-project-configs = project:
+    builtins.mapAttrs
+    (
+      name: value:
+        source {
+          inherit config;
+          get-path = _p: value;
+          out-of-store = true;
+        }
+    )
+    (
+      lib.attrsets.concatMapAttrs (name: value: {"${project.path}/${name}" = value;}) (
+        # - Nix
+        {
+          "_configs/Nix" = "${rutube-projects-root}/_configs/Nix__/${project.suite-name}";
+        }
+        # - Smug Git Worktrees.
+        // (map-project-worktrees-to-smug-configs project)
+      )
+    );
 
   # Project local disable of automatic corepack pinning of package manager version.
   project-structures =
     lib.lists.foldl (
       acc: project:
         acc
-        # Symlinks
-        // (
-          builtins.mapAttrs
-          (
-            name: value:
-              source {
-                inherit config;
-                get-path = _p: value;
-                out-of-store = true;
-              }
-          )
-          (
-            lib.attrsets.concatMapAttrs (name: value: {"${project.path}/${name}" = value;}) (
-              # - Nix
-              {
-                "_configs/Nix" = "${rutube-projects-root}/_configs/Nix__/${project.suite-name}";
-              }
-              # - Smug Git Worktrees.
-              // lib.lists.foldl (
-                acc: worktree: let
-                  # Choosing different configs.
-                  smug-worktree-configs-root = "${rutube-projects-root}/_configs/Smug__";
-                  project-specific-smug-worktree-configs = "${smug-worktree-configs-root}/${project.suite-name}";
-                  default-smug-worktree-configs = "${smug-worktree-configs-root}/-gitWorktrees";
-
-                  smug-worktree-configs =
-                    if lib.filesystem.pathIsDirectory project-specific-smug-worktree-configs
-                    then project-specific-smug-worktree-configs
-                    else default-smug-worktree-configs;
-                in
-                  acc
-                  // {
-                    "_configs/${worktree}.yml" = "${smug-worktree-configs}/${worktree}.yml";
-                  }
-              ) {}
-              (project.worktrees ? rutube-projects-worktrees)
-            )
-          )
-        )
+        // (create-project-configs project)
         // lib.attrsets.concatMapAttrs (name: value: {"${project.path}/${name}" = value;}) (
           {
             ".envrc".text =
@@ -135,7 +135,8 @@
           # Iterating over all worktrees.
           # TODO: Ideally should be based on current worktree structure, not just
           # hardcoded paths.
-          # TODO: Separate list based on project.
+          # TODO: Separate list based on project. Use `project.worktrees` like
+          # in smug config
           // lib.attrsets.concatMapAttrs (projectName: value: {"${projectName}/.envrc".text = envrc;}) {
             "CurrentTask" = "";
             "CurrentTask1" = "";

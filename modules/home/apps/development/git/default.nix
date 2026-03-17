@@ -54,7 +54,7 @@ lib.${namespace}.mkIfEnabled
       pull = {
         rebase = true;
       };
-      aliases = {
+      alias = {
         hist = "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short";
         c = "clone";
         # - Add all.

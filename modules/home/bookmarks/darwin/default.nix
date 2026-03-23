@@ -43,7 +43,7 @@
   # INFO: 
   # @attr path - location of the project. If it is located in different
   # directory, symlink should be added before running this flake. Otherwise
-  # Nix will create a new directory under specified path.
+  # Nix will create a new (empty) directory under specified path.
   # @attr worktrees - list of worktrees used in a project.
   # TODO: Get from
   # rut-Programming_dotfiles/roles/repositories/vars/main.yml
@@ -63,6 +63,10 @@
     {
       suite-name = "ReleaseBuilder";
       path = "${rutube-projects-root}/ReleaseBuilder";
+    }
+    {
+      suite-name = "AutoHub";
+      path = "${rutube-projects-root}/AutoHub";
     }
   ];
 

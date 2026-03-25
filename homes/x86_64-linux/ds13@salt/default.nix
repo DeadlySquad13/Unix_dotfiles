@@ -111,6 +111,9 @@ let
       };
       productivity = {
         enable = true;
+
+        # FIX: Has to be enabled explicitly.
+        taskwarrior = enabled;
       };
       misc = {
         qmk = enabled;

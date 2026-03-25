@@ -138,7 +138,9 @@ in {
       };
       productivity = {
         taskopen = enabled;
+        # FIX: Has to be enabled explicitly.
         taskwarrior = enabled;
+
         smug = enabled;
 
         uair = disabled;

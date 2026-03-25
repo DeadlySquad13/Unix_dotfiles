@@ -128,6 +128,7 @@ in {
       productivity = {
         enable = false;
 
+        # FIX: Has to be enabled explicitly.
         taskwarrior = enabled;
         bugwarrior = enabled;
       };

@@ -3,6 +3,7 @@
   lib,
   namespace,
   config,
+  inputs,
   ...
 }:
 {
@@ -47,15 +48,8 @@
     #       data.location=$XDG_DATA_HOME/task/
     #       hooks.location=$XDG_CONFIG_HOME/task/hooks/
     dataLocation = "~/.task";
-    # colorTheme = ~/.bookmarks/shared-configs/Wsl2_dotfiles/stow_home/taskwarrior/deadly-solarized-light.theme;
-    colorTheme =
-      pkgs.fetchFromGitHub {
-        owner = "DeadlySquad13";
-        repo = "Wsl2_dotfiles";
-        rev = "fa02f0aa6eca98b39a13448a73003083d246b37d";
-        hash = "sha256-tg1VxLIgVfWK+vChX278p/4KvSPJfxY0f9wH3MJJ7Qo=";
-      }
-      + "/stow_home/taskwarrior/deadly-solarized-light";
+    colorTheme = inputs.wsl2-config + "/stow_home/taskwarrior/deadly-solarized-light";
+     
 
     extraConfig =
       /*

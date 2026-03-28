@@ -341,7 +341,8 @@
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-stable": "nixpkgs-stable",
         "snowfall-lib": "snowfall-lib",
-        "sops-nix": "sops-nix"
+        "sops-nix": "sops-nix",
+        "wsl2-config": "wsl2-config"
       }
     },
     "snowfall-lib": {
@@ -446,6 +447,18 @@
         "repo": "flake-utils",
         "type": "github"
       }
+    },
+    "wsl2-config": {
+      "flake": false,
+      "locked": {
+        "path": "modules/home/apps/cli-utility/Wsl2_dotfiles",
+        "type": "path"
+      },
+      "original": {
+        "path": "modules/home/apps/cli-utility/Wsl2_dotfiles",
+        "type": "path"
+      },
+      "parent": []
     }
   },
   "root": "root",

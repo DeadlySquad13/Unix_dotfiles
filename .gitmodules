@@ -6,3 +6,6 @@
 	path = modules/home/apps/general/neovim/stage/NeoVim_config
 	url = git@github.com:DeadlySquad13/NeoVim_config.git
 	branch = dev
+[submodule "Wsl2_dotfiles"]
+	path = modules/home/apps/cli-utility/Wsl2_dotfiles
+	url = git@github.com:DeadlySquad13/Wsl2_dotfiles.git

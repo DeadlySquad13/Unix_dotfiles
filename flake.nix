@@ -62,6 +62,11 @@
       url = "path:modules/home/apps/general/neovim/stage/NeoVim_config";
       flake = false;
     };
+
+    wsl2-config = {
+      url = "path:modules/home/apps/cli-utility/Wsl2_dotfiles";
+      flake = false;
+    };
   };
 
   outputs = inputs:

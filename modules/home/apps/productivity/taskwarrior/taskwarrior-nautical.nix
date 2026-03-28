@@ -71,6 +71,6 @@ in
       # Sets the root dir of the taskwarrior-nautical. It's `~/.task` by default
       # but in Nix environment it's resolved to `/nix`. We override it back via
       # variable.
-      NAUTICAL_CORE_PATH = "~/.task";
+      NAUTICAL_CORE_PATH = "~/.task"; # Tilde is resolved in a script.
     };
   }

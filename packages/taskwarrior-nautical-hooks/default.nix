@@ -6,18 +6,20 @@
     python3Packages.rich
   ];
 
+  version = "v4.2.0";
+
   # Fetch the hook scripts from GitHub.
   onAddSrc = pkgs.fetchurl {
-    url = "https://github.com/catanadj/taskwarrior-nautical/raw/main/on-add-nautical.py";
-    sha256 = "sha256-8CueMd0n8g+V1UrtzkmjzPoXvD5wyu/J/JFjKgmAw2g=";
+    url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/on-add-nautical.py";
+    sha256 = "sha256-nAGPfLiekPT0dpz0iyxzoWP+B7e+o091TGdWKNdIWHA=";
   };
   onModifySrc = pkgs.fetchurl {
-    url = "https://github.com/catanadj/taskwarrior-nautical/raw/main/on-modify-nautical.py";
-    sha256 = "sha256-CD909qeJK3teYbHBIqCKKCJRkL7/EFvyQ0Z8SJGyVys=";
+    url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/on-modify-nautical.py";
+    sha256 = "sha256-PglXOWh0NYZCP9N5qGkez8i2DCOvtetOWuI5L7yzGMI=";
   };
   onExitSrc = pkgs.fetchurl {
-    url = "https://github.com/catanadj/taskwarrior-nautical/raw/main/on-exit-nautical.py";
-    sha256 = "sha256-9uc/8CcI2wN/8fcSd4+sLM2ex/ApGj6KrTI5iG+DH40=";
+    url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/on-exit-nautical.py";
+    sha256 = "sha256-bsZrl8d73gko4FVhup6Xk4zRr1oOELS1HFkyHczKNbs=";
   };
 
   # Add dependencies to the scripts. There will be two shebangs in each file:

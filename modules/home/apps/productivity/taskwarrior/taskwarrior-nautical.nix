@@ -2,17 +2,19 @@
   pkgs,
   lib,
   config,
-  namespace,
   ...
 }: let
+  version = "v4.2.0";
+
+  # TODO: Specify as inputs and update in sync with `taskwarrior-nautical-hooks`.
   customUdas = pkgs.fetchurl {
-    url = "https://github.com/catanadj/taskwarrior-nautical/raw/main/uda.conf";
+    url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/uda.conf";
     sha256 = "sha256-sjE2BmCwoGj0RkRypu+hz/7btUx++HUeF+p7MtgvV6Q=";
   };
 
   nauticalCore = pkgs.fetchzip {
-    url = "https://github.com/catanadj/taskwarrior-nautical/archive/refs/heads/main.tar.gz";
-    sha256 = "sha256-yIkI/PKJVAPpZiJwJpxZubFJ+PGHBj9AOwoU7Qu36RM=";
+    url = "https://github.com/catanadj/taskwarrior-nautical/archive/refs/tags/${version}.zip";
+    sha256 = "sha256-g1KDL4jfS6ACQNnH6mPiy/Oe9j6rQh4EW1oLlBfX57c=";
     stripRoot = true;
     # The tarball contains a single top-level directory "taskwarrior-nautical-main"
     # We only need the "nautical_core" subdirectory, so we strip the root and then
@@ -27,7 +29,7 @@
   # The nautical_core is inside the extracted directory. We'll symlink it directly.
   nauticalCorePath = "${nauticalCore}/nautical_core";
 in
-  lib.${namespace}.mkIfEnabled
+  lib.ds-omega.mkIfEnabled
   {
     inherit config;
     category = "productivity.taskwarrior";

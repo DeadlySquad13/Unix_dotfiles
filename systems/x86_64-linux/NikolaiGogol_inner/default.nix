@@ -19,20 +19,6 @@
 }: let
   inherit (lib.${namespace}) disabled enabled;
 in {
-
-  /*
-     snowfallorg.user = {
-    enable = true;
-    name = "ds-omega";
-  };
-  */
-
-  /*
-     home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-  };
-  */
   system = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -44,25 +30,46 @@ in {
     stateVersion = "24.11";
   };
 
-  networking.hostName = "NikolaiGogol";
+  environment.systemPackages = with pkgs; [
+    # Testing.
+    cowsay
+    lolcat
+
+    # For virt-install.
+    virt-manager
+
+    # For lsusb.
+    usbutils
+  ];
+
+  # Take priority over generated value (NikolaiGogol_inner).
+  networking.hostName = lib.mkDefault "NikolaiGogol";
 
   # programs.ssh.startAgent = true;
   users.users.ds13 = {
-    isNormalUser  = true;
-    home  = "/home/ds13";
-    extraGroups  = [ "wheel" "networkmanager" ];
+    isNormalUser = true;
+    home = "/home/ds13";
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      # Access to libvirtd.
+      "libvirtd"
+    ];
     #initialPassword = "test";
     password = "test";
     description = "Main admin user";
     # openssh.authorizedKeys.keyFiles = [
-      # authorizedkeys file.
+    # authorizedkeys file.
     # ];
   };
 
-  # boot.loader.systemd-boot.enable = true; # (for UEFI systems only)
+  boot.isContainer = true;
   services.sshd.enable = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   lib.ds-omega = {
     modules = {
@@ -76,4 +83,26 @@ in {
       };
     };
   };
+
+  virtualisation = {
+    libvirtd = {
+      enable = true;
+      # Used for UEFI boot of Home Assistant OS guest image
+      # qemuOvmf = true;
+    };
+  };
+
+  # networking = {
+  #   defaultGateway = "10.0.0.1";
+  #   bridges.br0.interfaces = ["wlan0"];
+  #   interfaces.br0 = {
+  #     useDHCP = false;
+  #     ipv4.addresses = [
+  #       {
+  #         "address" = "10.0.0.5";
+  #         "prefixLength" = 24;
+  #       }
+  #     ];
+  #   };
+  # };
 }

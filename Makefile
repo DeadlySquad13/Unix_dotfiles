@@ -112,5 +112,5 @@ build-NikolaiGogol-system:
 	sudo nixos-rebuild build --flake .#NikolaiGogol_inner --impure --show-trace
 
 build-NikolaiGogol:
-	nix build .#dockerConfigurations.NikolaiGogol  --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix build --out-link result-NikolaiGogol .#dockerConfigurations.NikolaiGogol  --impure --extra-experimental-features 'nix-command flakes' --show-trace
 

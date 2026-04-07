@@ -63,6 +63,9 @@ in {
     };
 
     modules = {
+      ai-assistance = {
+        enable = true;
+      };
       architecturing = {
         enable = true;
 

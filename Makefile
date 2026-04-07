@@ -46,6 +46,12 @@ hm-rollback:
 	# When home-manager is not working try: `nix-shell -p home-manager`).
 	bash $$(nix-shell -p home-manager generations | fzf | awk -F '-> ' '{print $2 "/activate"}')
 
+system-rollback:
+	sudo nixos-rebuild switch --rollback
+
+system-rollback-no-internet:
+	sudo nixos-rebuild switch --rollback --no-net --offline --fast
+
 garbage-collect-old:
 	# Unlinks older profiles and then deletes unreachable store objects.
 	nix-collect-garbage --delete-older-than 10d

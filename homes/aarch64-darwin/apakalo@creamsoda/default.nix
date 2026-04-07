@@ -112,6 +112,7 @@ in {
           stage = false;
         };
 
+        element-desktop = disabled;
         keepassxc = disabled;
         ferdium = disabled;
         telegram-desktop = disabled;

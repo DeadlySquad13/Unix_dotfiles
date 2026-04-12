@@ -1,0 +1,8 @@
+dark-mode: false
+code-theme: solarized-light
+
+# I rarely use llm for code and when I do it's a small portion so I don't want
+# to include it in messages. If it's a big portion, I will add it explicitly to
+# the merge request description.
+no-attribute-author: true
+no-attribute-committer: true

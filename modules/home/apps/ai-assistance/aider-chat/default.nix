@@ -14,4 +14,6 @@ lib.${namespace}.mkIfEnabled {
   home.packages = with pkgs; [
     ds-omega-aider-chat
   ];
+
+  home.file.".aider.conf.yml".source = ./aider.conf.yml;
 }

@@ -101,9 +101,12 @@
     )
     (
       lib.attrsets.concatMapAttrs (name: value: {"${project.path}/${name}" = value;}) (
-        # - Nix
         {
+          # - Nix.
           "_configs/Nix" = "${rutube-projects-root}/_configs/Nix__/${project.suite-name}";
+          # - Scripts.
+          # Currently they're generic enough so no need to create a map `project:scripts`.
+          "_scripts" = "${rutube-projects-root}/_scripts";
         }
         # - Smug Git Worktrees.
         // (map-project-worktrees-to-smug-configs project)

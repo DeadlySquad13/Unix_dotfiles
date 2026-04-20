@@ -5,6 +5,10 @@
   config,
   ...
 }:
+let
+  inherit (lib.ds-omega) mkIfLinux;
+  inherit (lib) mkIf;
+in
 lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "productivity";
@@ -19,7 +23,7 @@ lib.${namespace}.mkIfEnabled {
   # Needed for web clipper on Linux.
   # There's very similar entry in [source code](https://github.com/NixOS/nixpkgs/blob/20075955deac2583bb12f07151c2df830ef346b4/pkgs/by-name/lo/logseq/package.nix#L267C3-L267C15)
   # but it doesn't work. Maybe my gl overlay ruins it...
-  xdg.desktopEntries.Logseq = {
+  xdg.desktopEntries.Logseq = mkIf (mkIfLinux {}) {
       name = "Logseq";
       # To fix logseq "Open with default app" on Linux without desktop manager.
       # see: https://github.com/logseq/logseq/issues/11462

@@ -29,6 +29,7 @@ lib.${namespace}.mkIfEnabled {
 
           # QUESTION: Should be in Shared too?
           "ChronoIndex" = "ChronoIndex";
+          "cic" = "ChronoIndex/Current";
           "Taxonomy" = "Taxonomy";
           "Taxonomy_hub" = "Taxonomy_hub";
           "Taxonomy_hub{current}" = "Taxonomy_hub{current}";

@@ -20,7 +20,7 @@ lib.${namespace}.mkIfEnabled
   # TODO: Add mkIfDevEnabled.
   programs.bash = {
     sessionVariables = {
-      VISUAL = "gvi-stage";
+      GUI_EDITOR = "gvi-stage";
     };
   };
 

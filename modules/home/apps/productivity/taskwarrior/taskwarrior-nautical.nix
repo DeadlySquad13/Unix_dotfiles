@@ -4,17 +4,17 @@
   config,
   ...
 }: let
-  version = "v4.2.0";
+  version = "v4.5.3";
 
   # TODO: Specify as inputs and update in sync with `taskwarrior-nautical-hooks`.
   customUdas = pkgs.fetchurl {
     url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/uda.conf";
-    sha256 = "sha256-sjE2BmCwoGj0RkRypu+hz/7btUx++HUeF+p7MtgvV6Q=";
+    sha256 = "sha256-KvvvmrNoN4gqn2KK26EYtuAjeJCvyskcBRef6MCnJes=";
   };
 
   nauticalCore = pkgs.fetchzip {
     url = "https://github.com/catanadj/taskwarrior-nautical/archive/refs/tags/${version}.zip";
-    sha256 = "sha256-g1KDL4jfS6ACQNnH6mPiy/Oe9j6rQh4EW1oLlBfX57c=";
+    sha256 = "sha256-oqAQ8huj/NzZ4fLEBA73Ukg/zLJIXr+K5XYzJ7JWIDE=";
     stripRoot = true;
     # The tarball contains a single top-level directory "taskwarrior-nautical-main"
     # We only need the "nautical_core" subdirectory, so we strip the root and then
@@ -73,6 +73,6 @@ in
       # Sets the root dir of the taskwarrior-nautical. It's `~/.task` by default
       # but in Nix environment it's resolved to `/nix`. We override it back via
       # variable.
-      NAUTICAL_CORE_PATH = "~/.task"; # Tilde is resolved in a script.
+      NAUTICAL_CORE_PATH = "~/.task"; # INFO: Tilde is resolved in a script.
     };
   }

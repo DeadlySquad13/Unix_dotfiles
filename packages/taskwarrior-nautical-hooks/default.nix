@@ -6,20 +6,20 @@
     python3Packages.rich
   ];
 
-  version = "v4.2.0";
+  version = "v4.5.3";
 
   # Fetch the hook scripts from GitHub.
   onAddSrc = pkgs.fetchurl {
     url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/on-add-nautical.py";
-    sha256 = "sha256-nAGPfLiekPT0dpz0iyxzoWP+B7e+o091TGdWKNdIWHA=";
+    sha256 = "sha256-Oc+mT4GY29tkA3ouojWShMemLFQDvlsE1lCUgUCa/zU=";
   };
   onModifySrc = pkgs.fetchurl {
     url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/on-modify-nautical.py";
-    sha256 = "sha256-PglXOWh0NYZCP9N5qGkez8i2DCOvtetOWuI5L7yzGMI=";
+    sha256 = "sha256-aiZNbjC3Ky9e1JFM+EiaSE3Kr/CS82z8GS1+mVdWdDo=";
   };
   onExitSrc = pkgs.fetchurl {
     url = "https://github.com/catanadj/taskwarrior-nautical/raw/${version}/on-exit-nautical.py";
-    sha256 = "sha256-bsZrl8d73gko4FVhup6Xk4zRr1oOELS1HFkyHczKNbs=";
+    sha256 = "sha256-1s+Wn8z8iKHt1NY8ABDu/o/9BtOaoHGeWp7uDGm4qQ8=";
   };
 
   # Add dependencies to the scripts. There will be two shebangs in each file:

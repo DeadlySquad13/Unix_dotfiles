@@ -120,3 +120,5 @@ build-NikolaiGogol-system:
 build-NikolaiGogol:
 	nix build --out-link result-NikolaiGogol .#dockerConfigurations.NikolaiGogol  --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+trampoline:
+	nix run github:hraban/mac-app-util -- mktrampoline "$(which dbeaver)" ~/Applications/DBeaver.app

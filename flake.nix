@@ -137,8 +137,22 @@
       ];
 
       system.modules.darwin = with inputs; [
+        # Enable system modules.
+        mac-app-util.darwinModules.default
+
         # Enable home-manager modules.
-        mac-app-util.homeManagerModules.default
+        home-manager.darwinModules.home-manager
+        (
+          {
+            pkgs,
+            config,
+            inputs,
+          }: {
+            home-manager.sharedModules = [
+              mac-app-util.homeManagerModules.default
+            ];
+          }
+        )
       ];
 
       inherit (inputs.snowfall-lib.snowfall.internal-lib.system) is-darwin;
@@ -182,6 +196,11 @@
       checks = let
         inherit (inputs.nixkpgs.lib) mkIf;
       in
-        mkIf (deploySystemsMatch systemToDeploy) (builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib);
+        mkIf (deploySystemsMatch systemToDeploy) (
+          builtins.mapAttrs (
+            system: deployLib: deployLib.deployChecks inputs.self.deploy
+          )
+          inputs.deploy-rs.lib
+        );
     };
 }

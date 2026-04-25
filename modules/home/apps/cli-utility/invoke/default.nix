@@ -12,7 +12,9 @@ lib.${namespace}.mkIfEnabled {
 }
 {
   home.packages = with pkgs; [
-    python311Packages.invoke
+    # At the moment unstable has 2.2.1 which is missing c.remainder feature
+    # python311Packages.invoke
+    python3Packages.invoke-v3
   ];
 
   home.file = {

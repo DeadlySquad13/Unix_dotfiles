@@ -5,13 +5,14 @@
   config,
   ...
 }:
-lib.${namespace}.mkIfEnabled {
+lib.${namespace}.mkIfEnabled
+{
   inherit config;
   category = "ai-assistance";
   name = "llm-cli";
 }
 {
   home.packages = with pkgs; [
-    llm
+    ds-omega-llm-cli
   ];
 }

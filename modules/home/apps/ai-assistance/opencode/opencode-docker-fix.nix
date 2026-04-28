@@ -22,7 +22,7 @@ in
           # Only act if the file exists (module may have created a symlink)
           if [ -f "$target" ]; then
             # cp follows symlinks by default; it replaces the symlink with a regular file
-            $DRY_RUN_CMD cp "$target" "$target.tmp" && $DRY_RUN_CMD mv "$target.tmp" "$target"
+            $DRY_RUN_CMD cp "$target" "$target.tmp" && $DRY_RUN_CMD mv --force "$target.tmp" "$target"
           fi
         '')
         filesToMaterialise

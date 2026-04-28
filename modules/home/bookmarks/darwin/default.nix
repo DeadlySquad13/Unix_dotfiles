@@ -174,7 +174,7 @@ in
     inherit config;
     category = "bookmarks";
     name = "darwin";
-    extraPredicate = lib.${namespace}.mkIfDarwin;
+    extraPredicate = lib.${namespace}.isDarwin;
   }
   {
     # See `darwinConfigurations.creamsoda.config.home-manager.users.apakalo.home.file.`

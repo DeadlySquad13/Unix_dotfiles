@@ -15,7 +15,7 @@ lib.${namespace}.mkIfEnabled
   # errors on 1 test:
   # Support/./SupportTests/ProgramEnvTest/TestExecuteEmptyEnvironment
   # TODO: Check after next update of flake inputs.
-  extraPredicate = lib.${namespace}.mkIfLinux;
+  extraPredicate = lib.${namespace}.isLinux;
 }
 {
   # home.packages = with inputs; [

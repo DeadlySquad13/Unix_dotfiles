@@ -102,6 +102,6 @@ in {
   mkIfProdEnabled = { module-cfg, ... }: if module-cfg ? prod then module-cfg.prod else true;
 
   # Platform specific modules.
-  mkIfDarwin = _: lib.snowfall.system.is-darwin builtins.currentSystem;
-  mkIfLinux = _: lib.snowfall.system.is-linux builtins.currentSystem;
+  isDarwin = _: lib.snowfall.system.is-darwin builtins.currentSystem;
+  isLinux = _: lib.snowfall.system.is-linux builtins.currentSystem;
 }

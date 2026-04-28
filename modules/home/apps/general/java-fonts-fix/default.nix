@@ -8,7 +8,7 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
   name = "java-fonts-fix";
-  extraPredicate = lib.${namespace}.mkIfLinux;
+  extraPredicate = lib.${namespace}.isLinux;
 }
 # TODO: Move it to a layer.
 {

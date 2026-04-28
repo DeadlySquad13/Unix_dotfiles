@@ -9,7 +9,7 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "general";
   name = "skhd";
-  extraPredicate = lib.${namespace}.mkIfDarwin;
+  extraPredicate = lib.${namespace}.isDarwin;
 }
 (
   let

@@ -7,7 +7,7 @@
   config,
   ...
 }: let
-  inherit (lib.ds-omega) mkIfLinux;
+  inherit (lib.ds-omega) isLinux;
   inherit (lib) mkIf mkMerge;
 in
   {
@@ -33,14 +33,14 @@ in
           zig
         ];
       }
-      (mkIf (mkIfLinux {}) {
+      (mkIf (isLinux {}) {
         packages = with pkgs; [
           xclip
         ];
       })
     ];
     # (
-    #     mkIf (mkIfLinux {}) [
+    #     mkIf (isLinux {}) [
     #       xclip
     #       zig
     #     ]

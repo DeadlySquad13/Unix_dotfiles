@@ -5,7 +5,7 @@
   config,
   ...
 }: let
-  inherit (lib.ds-omega) mkIfLinux;
+  inherit (lib.ds-omega) isLinux;
   inherit (lib) mkIf;
   neovide-package = lib.${namespace}.packageGLify {
     inherit config;
@@ -32,7 +32,7 @@ in
     };
 
     # https://github.com/neovide/neovide/blob/084db1b1412d4975d74a781051c0122e53bb0332/assets/neovide.desktop
-    xdg.desktopEntries.neovide = mkIf (mkIfLinux {}) {
+    xdg.desktopEntries.neovide = mkIf (isLinux {}) {
       name = "Neovide";
       type = "Application";
       exec = "neovide %F";
@@ -67,7 +67,7 @@ in
       # startupWMClass = "neovide";
     };
 
-    xdg.mimeApps = mkIf (mkIfLinux {}) {
+    xdg.mimeApps = mkIf (isLinux {}) {
       enable = true;
 
       # Default applications (what opens when no association exists or user chooses default)

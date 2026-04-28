@@ -9,7 +9,7 @@ lib.${namespace}.mkIfEnabled {
   inherit config;
   category = "gui-utility";
   name = "xdg-autostart";
-  extraPredicate = lib.${namespace}.mkIfLinux;
+  extraPredicate = lib.${namespace}.isLinux;
 }
 {
   home.packages = with pkgs; [

@@ -9,10 +9,10 @@
 #   inherit config;
 #   category = "gui-utility";
 #   name = "rofi";
-  # extraPredicate = lib.ds-omega.mkIfLinux;
+  # extraPredicate = lib.ds-omega.isLinux;
 # }
 {lib, ...}:
-lib.mkIf (lib.ds-omega.mkIfLinux {}) {
+lib.mkIf (lib.ds-omega.isLinux {}) {
   programs.rofi = {
     enable = true;
 

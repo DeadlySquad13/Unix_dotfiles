@@ -5,7 +5,7 @@
   lib,
 }: let
   inherit (lib.ds-omega) mkIfLinux;
-  inherit (lib) mkIf;
+  inherit (lib) optionalAttrs;
 
   nixGLNvidia = pkgs.nixgl.auto.nixGLNvidia;
   pkgs-stable = import inputs.nixpkgs-stable {
@@ -21,7 +21,7 @@ in
       logseq
       nixGLNvidia
     ];
-    runtimeEnv = mkIf (mkIfLinux {}) {
+    runtimeEnv = optionalAttrs (mkIfLinux {}) {
       # To fix logseq "Open with default app" on Linux without desktop manager.
       # see: https://github.com/logseq/logseq/issues/11462
       XDG_CURRENT_DESKTOP = "GNOME";

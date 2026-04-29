@@ -39,7 +39,10 @@ build-darwin:
 	nix run nix-darwin -- build --flake . --impure --show-trace
 
 check:
-	nix flake check
+	nix flake check --keep-going
+
+check-impure:
+	nix flake check --impure --keep-going
 
 # TODO: Doesn't work when using Makefile, only manually.
 hm-rollback:

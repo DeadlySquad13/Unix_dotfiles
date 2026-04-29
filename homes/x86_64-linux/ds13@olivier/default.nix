@@ -58,6 +58,13 @@ in {
         "ephemeral-projects" = "ephemeral-";
         "interim-projects" = "interim-";
       };
+
+    # TODO: Add as default value.
+    deploymentOptions = rec {
+      isDeployedFromDarwin = false;
+      isNixGlNotWorking = isDeployedFromDarwin;
+    };
+
     modules = {
       architecturing = {
         enable = false;

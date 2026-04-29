@@ -33,6 +33,10 @@
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    typenix = {
+      url = "github:ryanrasti/typenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     nixos-wsl = {
       url = "github:nix-community/nixos-wsl";
@@ -188,19 +192,27 @@
         };
       };
 
-      # This is highly advised, and will prevent many possible mistakes.
-      # Checks are always local even if build is remote. This eliminates any
-      # purpose so disable it for such systems.
-      # TODO: Disable for specific systemms: currently it won't work if at
-      # least one doesn't match.
-      checks = let
-        inherit (inputs.nixkpgs.lib) mkIf;
-      in
-        mkIf (deploySystemsMatch systemToDeploy) (
-          builtins.mapAttrs (
-            system: deployLib: deployLib.deployChecks inputs.self.deploy
-          )
-          inputs.deploy-rs.lib
-        );
+      outputs-builder = _channel: {
+        #   Deploy-rs checks are highly advised as they will prevent many possible mistakes.
+        # Checks are always local even if build is remote.This eliminates any
+        # purpose so disable it for such systems.
+        #   We've defined them in outputs-builder because otherwise we get
+        # errors related to missing `nixpkgs`. I guess the fact that
+        # outputs-builder is a function itself, ensures lazy-loading and forces
+        # to evaluate checks expression later, when nixpkgs are finally
+        # available on `inputs`. See: https://github.com/snowfallorg/lib/issues/112
+        # We didn't even need to use `channel.nixpkgs`.
+        # TODO: Disable for specific systems: currently it won't work if at
+        # least one doesn't match.
+        checks = let
+          inherit (inputs.nixpkgs.lib) mkIf;
+        in
+          mkIf (deploySystemsMatch systemToDeploy) (
+            builtins.mapAttrs (
+              system: deployLib: deployLib.deployChecks inputs.self.deploy
+            )
+            inputs.deploy-rs.lib
+          );
+      };
     };
 }

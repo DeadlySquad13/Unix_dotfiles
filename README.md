@@ -137,16 +137,27 @@ Part of the output is a deployment using `deploy-rs` (defined as input).
         };
       };
 
-      # ... deploy automatic checks. ...
-      # Prevent common misconfigurations and simple mistakes before actually
-      # applying config. 
-      checks = let
-        inherit (inputs.nixkpgs.lib) mkIf;
-      in
-        mkIf (deploySystemsMatch systemToDeploy) (builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib);
+      outputs-builder = _channel: {
+          # ... deploy automatic checks. ...
+          # Prevent common misconfigurations and simple mistakes before actually
+          # applying config. 
+          checks = let
+            inherit (inputs.nixkpgs.lib) mkIf;
+          in
+          mkIf (deploySystemsMatch systemToDeploy) (
+            builtins.mapAttrs (
+              system: deployLib: deployLib.deployChecks inputs.self.deploy
+            )
+            inputs.deploy-rs.lib
+          );
     };
 }
 ```
+
+
+You can also pass through external packages or dynamically create new ones
+in addition to the ones that `lib` will create from your `packages/` directory
+using `outupts-builder`. But we use [7. Overlays](<README#7. Overlays>) for that.
 
 ### 5. Flake structure
 
@@ -315,8 +326,6 @@ pkgs.mkShell {
 
 Apart from basic checks provided by `deploy-rs` it's beneficial to add checks (sometimes system-specific) under `checks/`:
 
-> It's not yet explored field.
-
 ```bash
 mkdir -p checks/my-check
 ```
@@ -329,6 +338,8 @@ Create `checks/my-check/default.nix`:
 pkgs.runCommand "my-check" { } ''
   echo "Running checks..."
   # Implement your checks
+
+  # Should have an output to register as a valid derivation.
   touch $out
 ''
 ```

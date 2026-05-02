@@ -4,6 +4,8 @@
     ./tools/pizza.nix
     ./tools/taskwarrior.nix
     ./tools/zotero.nix
+    ./skills/logseq-db-queries.nix
+    ./skills/file-organizer.nix
   ];
 
   programs.opencode = {
@@ -32,9 +34,11 @@
       };
     };
 
-    skills = {
-      logseq-db-queries = /shared/archive-resources-/Resources/KnowledgeBase__Data/-skills/logseq-db-queries;
-      file-organizer = /home/ds13/Projects/--personal/AiAssistance__/_skills/file-organizer;
+    skills = lib.mkDefault {};
+
+    enabledSkills = {
+      logseq-db-queries = true;
+      file-organizer = true;
     };
 
     customTools = {

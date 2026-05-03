@@ -1,0 +1,13 @@
+{
+  "name": "unix_dotfiles",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "hygen": "^6.2.11"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

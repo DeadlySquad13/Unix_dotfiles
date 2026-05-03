@@ -125,3 +125,14 @@ build-NikolaiGogol:
 
 trampoline:
 	nix run github:hraban/mac-app-util -- mktrampoline "$(which dbeaver)" ~/Applications/DBeaver.app
+
+
+# StratoFrame__ConvPlatProv (Templates)
+# TODO: Refactor into invoke.
+%:
+	@:
+
+args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
+
+add-opencode-skill:
+	invoke --search-root=./tasks add-opencode-skill $(call args,default)

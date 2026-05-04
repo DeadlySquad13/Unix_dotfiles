@@ -14,9 +14,9 @@ def invoke_cmd(c, *cmd, **kwargs):
 
 def _nix_shell(c, packages):
     """
-    Pre‑task: if nix-shell works, create a temporary file that captures
-    the environment of `nix-shell -p <packages>`. Store the file path
-    in c.config. If Nix is not available, leave it empty (fallback).
+    Create a temporary file that exports environment variables from
+    `nix-shell -p <packages>`. Store the file path in c.config["nix_env_file"].
+    If Nix is not available or packages is empty, leave it unset.
     """
     if not packages:
         return
@@ -46,13 +46,21 @@ def _nix_shell(c, packages):
 
 
 @contextmanager
-def nix_shell(c: Context, packages):
+def nix_shell(c: Context, packages: list[str]):
+    """
+    Wrap commands with nix-shell that has `packages` initialized in it.
+    :param packages: nix packgaes to import into shell
+    """
     _nix_shell(c, packages)
 
     env_file = c.config.get("nix_env_file")
+    if not env_file:
+        yield
+        return
 
-    with c.prefix(f"source {env_file}" if env_file else ""):
-        try:
+    try:
+        with c.prefix(f"source {env_file}"):
             yield
-        finally:
-            pass
+    finally:
+        import os
+        os.unlink(env_file)

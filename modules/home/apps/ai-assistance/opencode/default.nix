@@ -6,6 +6,10 @@
     ./tools/zotero.nix
     ./skills/logseq-db-queries.nix
     ./skills/file-organizer.nix
+    ./skills/mcp-builder.nix
+    ./skills/skill-creator.nix
+    ./skills/add-opencode-skill-to-unix-dotfiles.nix
+    ./skills/changelog-generator.nix
   ];
 
   programs.opencode = {
@@ -39,6 +43,10 @@
     enabledSkills = {
       logseq-db-queries = true;
       file-organizer = true;
+      mcp-builder = true;
+      skill-creator = true;
+      add-opencode-skill-to-unix-dotfiles = true;
+      changelog-generator = true;
     };
 
     customTools = {

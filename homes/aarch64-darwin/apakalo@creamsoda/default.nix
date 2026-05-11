@@ -47,9 +47,20 @@ in {
         shared-projects = "~/Projects/shared-";
 
         dotfiles = "~/.local/dotfiles-";
-        shared-dotfiles = "${dotfiles}/shared-";
-        shared-configs = "${shared-dotfiles}/_configs";
-        shared-scripts = "${shared-dotfiles}/_scripts";
+        # "System" in a sense of inheritance by other homes. It's still limited
+        # to home-manager.
+        system-dotfiles = "${dotfiles}/shared-";
+        system-configs = "${system-dotfiles}/_configs";
+        system-scripts = "${system-dotfiles}/_scripts";
+
+        # Left for compatibility reasons. On @salt and @olivier, it points to
+        # locations, shared between dual-boot systems.
+        # @deprecated.
+        shared-dotfiles = system-dotfiles;
+        # @deprecated.
+        shared-configs = system-configs;
+        # @deprecated.
+        shared-scripts = system-scripts;
 
         home-dotfiles = "${dotfiles}/home-";
         home-configs = "${home-dotfiles}/_configs";

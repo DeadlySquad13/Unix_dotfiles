@@ -23,6 +23,8 @@ lib.${namespace}.mkIfEnabled {
           "shared-configs" = "Shared/_configs";
           "shared-scripts" = "Shared/_scripts";
 
+          "Unix_dotfiles" = "Shared/_configs/Unix_dotfiles";
+
           # QUESTION: Should be in Shared too?
           "kbd" = "Resources/KnowledgeBase__Data";
           "kbn" = "Resources/KnowledgeBase__Data/Notes";
@@ -63,7 +65,7 @@ lib.${namespace}.mkIfEnabled {
         # Projects
         builtins.mapAttrs (name: value: "/home/ds13/Projects/${value}") {
           # Namespaces.
-          "ephemeral-projects" = "emphemeral-";
+          "ephemeral-projects" = "ephemeral-";
           "interim-projects" = "interim-";
 
           # Specific projects.

@@ -17,27 +17,30 @@ build:
 
 NODE ?= cake
 
-
 # Usage:
 # - make deploy-dry # default NODE
 # - make deploy-dry NODE=MelisStoke
-deploy-dry:
+deploy-dry: decrypt-build-time-secrets
 	nix run github:serokell/deploy-rs -- .#$(NODE) --dry-activate -- --keep-going --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	rm -rf ./secrets/tmp
 
-deploy-with-activate:
+deploy-with-activate: decrypt-build-time-secrets
 	mkdir -p ./logs
 	nix run github:serokell/deploy-rs -- .#$(NODE) --log-dir ./logs -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	rm -rf ./secrets/tmp
 
 # Just skips checks. It's impossible to pass them because architecture is not
 # amtching.
-deploy-dry-non-matching:
+deploy-dry-non-matching: decrypt-build-time-secrets
 	nix run github:serokell/deploy-rs -- .#$(NODE) --skip-checks --dry-activate -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	rm -rf ./secrets/tmp
 
 # Just skips checks. It's impossible to pass them because architecture is not
 # amtching.
-deploy-with-activate-non-matching:
+deploy-with-activate-non-matching: decrypt-build-time-secrets
 	mkdir -p ./logs
 	nix run github:serokell/deploy-rs -- .#$(NODE) --skip-checks --log-dir ./logs -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	rm -rf ./secrets/tmp
 
 deploy: deploy-dry deploy-activate
 
@@ -99,6 +102,22 @@ update:
 
 edit-vault:
 	nix-shell -p sops --run "sops secrets/secrets.yaml"
+
+encrypt-melis-stoke-xray-config:
+	# Copying config to temporary location in ./secrets to fit .sops.yml
+	# creation rules.
+	mkdir -p ./secrets/tmp \
+		&& cp ~/.bookmarks/shared-projects/--personal/StratoFrame__/PlatConvProv__/ConvPlatProv__NixOsAnywhereXray/config.json \
+			./secrets/tmp/xray-config.json \
+		&& nix-shell -p sops --run \
+			"sops -e ./secrets/tmp/xray-config.json" \
+			> ./secrets/MelisStoke/xray-config.json \
+		&& rm ./secrets/tmp/xray-config.json
+
+.PHONY: decrypt-build-time-secrets
+
+decrypt-build-time-secrets:
+	invoke --search-root=./tasks secrets.decrypt --node=$(NODE) || echo "Node doesn't has any build-time secrets to decrypt..."
 
 # Edit in vault, change some content, save -> mac is updated.
 # Use with care, only when you're sure you've just mistaken while

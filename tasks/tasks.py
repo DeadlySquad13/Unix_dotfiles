@@ -1,10 +1,12 @@
 from pathlib import Path
 
 from invoke.runners import Result
-from invoke.tasks import task
-from invoke.context import Context
+from invoke import task, Collection, Context
 from nix.nix_shell import nix_shell
 
+import secrets
+
+namespace = Collection(secrets)
 
 # REFACTOR:
 def invoke_cmd(c: Context, *cmd, **kwargs):

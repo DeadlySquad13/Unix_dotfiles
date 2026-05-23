@@ -49,19 +49,10 @@ in {
   #   stateVersion = "24.11";
   # };
 
-  sops = {
-    # age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!
-    # Because we use sops on a system level for users, it should be persisted.
-    # Read on deployed system itself.
-    age.keyFile = "/var/lib/sops/age/keys.txt"; # must have no password!
-    # # REFACTOR: Targeting root of Unix_dotfiles.
-    # Read while deploying (on a system we deploy from).
-    defaultSopsFile = ../../../secrets/secrets.yaml;
-    secrets = {};
-  };
-
   xray = {
-    configFile = ~/.bookmarks/Unix_dotfiles/secrets/melis-stoke-xray-config.json;
+    # It's actually at secrets/MelisStoke/buildTime-/xray-config.json, just encrypted.
+    # See `decrypt-build-time-secrets` target at `Makefile`.
+    configFile = ~/.bookmarks/Unix_dotfiles/secrets/tmp/MelisStoke/xray-config.json;
     rootAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
     userAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
   };

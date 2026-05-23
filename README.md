@@ -1,3 +1,31 @@
+<!-- mtoc-start -->
+
+* [Unix dotfiles](#unix-dotfiles)
+  * [Initialization](#initialization)
+    * [Cloning](#cloning)
+    * [Installation](#installation)
+  * [Repository Structure](#repository-structure)
+    * [2. Snowfall Lib and other notable Flake Inputs](#2-snowfall-lib-and-other-notable-flake-inputs)
+    * [3. Use `mkFlake` to Define Flake Outputs](#3-use-mkflake-to-define-flake-outputs)
+    * [4. Deployment](#4-deployment)
+    * [5. Flake structure](#5-flake-structure)
+    * [6. Packages](#6-packages)
+    * [7. Overlays](#7-overlays)
+    * [8. Modules](#8-modules)
+    * [9. Systems](#9-systems)
+    * [10. Homes](#10-homes)
+    * [11. Templates](#11-templates)
+    * [12. Shells](#12-shells)
+    * [13. Checks](#13-checks)
+    * [14. Automatic Importing and Exporting](#14-automatic-importing-and-exporting)
+    * [15. Accessing Inputs and Libs](#15-accessing-inputs-and-libs)
+    * [16. Merging Custom Outputs](#16-merging-custom-outputs)
+  * [Working with Secrets](#working-with-secrets)
+    * [Runtime Secrets](#runtime-secrets)
+    * [Build-time Secrets](#build-time-secrets)
+  * [References](#references)
+
+<!-- mtoc-end -->
 # Unix dotfiles
 
 ## Initialization
@@ -6,8 +34,8 @@
 
 Has submodules for some modules [Source][@/GitSubmodulesNix]|[Zotero][z@/GitSubmodulesNix]:
 
-- neovim
-- wsl2-config
+* neovim
+* wsl2-config
 
 Because of that certain git operations like `clone` require submodule flags. Or explicitly update
 submodules on initial clone:
@@ -162,15 +190,15 @@ using `outupts-builder`. But we use [7. Overlays](<README#7. Overlays>) for that
 
 Snowfall Lib expects a specific directory structure under your `root` directory (default is `.` or `./nix` if configured):
 
-- `packages/`   : Define Nix packages
-- `overlays/`   : Define Nixpkgs overlays
-- `modules/`    : Define NixOS, Darwin, or Home Manager modules
-- `systems/`    : Define system configurations
-- `homes/`      : Define Home Manager configurations
-- `templates/`  : Define flake templates
-- `shells/`     : Define development shells
-- `checks/`     : Define flake checks
-- `lib/`        : Define shared library functions
+* `packages/`   : Define Nix packages
+* `overlays/`   : Define Nixpkgs overlays
+* `modules/`    : Define NixOS, Darwin, or Home Manager modules
+* `systems/`    : Define system configurations
+* `homes/`      : Define Home Manager configurations
+* `templates/`  : Define flake templates
+* `shells/`     : Define development shells
+* `checks/`     : Define flake checks
+* `lib/`        : Define shared library functions
 
 ### 6. Packages
 
@@ -347,24 +375,24 @@ pkgs.runCommand "my-check" { } ''
 
 Snowfall Lib automatically:
 
-- **Imports** all files in the structured directories.
-- **Exports** them under appropriate flake outputs:
-  - Packages: `packages`
-  - Overlays: `overlays`
-  - Modules: `nixosModules`, `darwinModules`, `homeModules`
-  - Systems: `nixosConfigurations`, `darwinConfigurations`, etc.
-  - Homes: `homeConfigurations`
-  - Shells: `devShells`
-  - Checks: `checks`
-  - Templates: `templates`
-  - Library functions: `lib`
+* **Imports** all files in the structured directories.
+* **Exports** them under appropriate flake outputs:
+  * Packages: `packages`
+  * Overlays: `overlays`
+  * Modules: `nixosModules`, `darwinModules`, `homeModules`
+  * Systems: `nixosConfigurations`, `darwinConfigurations`, etc.
+  * Homes: `homeConfigurations`
+  * Shells: `devShells`
+  * Checks: `checks`
+  * Templates: `templates`
+  * Library functions: `lib`
 
 ### 15. Accessing Inputs and Libs
 
 Within your Nix files, you have access to:
 
-- `inputs`: Your flake's inputs, allowing you to use other flakes.
-- `lib`: A merged library that includes your own functions and those from inputs.
+* `inputs`: Your flake's inputs, allowing you to use other flakes.
+* `lib`: A merged library that includes your own functions and those from inputs.
 
 Example usage:
 
@@ -398,9 +426,48 @@ If you need to add custom outputs not managed by Snowfall Lib:
 
 For more detailed information, refer to the [Snowfall Lib documentation](https://github.com/snowfallorg/lib).
 
+## Working with Secrets
+
+All secrets are stored in a [secrets](./secrets) directory in encrypted
+format.
+
+### Runtime Secrets
+
+Use [sops-nix](https://github.com/Mic92/sops-nix?tab=readme-ov-file).
+
+### Build-time Secrets
+
+For build-time secrets we use custom solution that decrypts necessary files
+before deployment using sops-nix. Secrets are stored in
+a [`buildTime-`](./secrets/buildTime-) namespace as a secrets subdirectory. For
+each node there's a corresponding folder. All secrets from a node of a specified node will be
+decrypted and stored in a parallel structure inside `./secrets/tmp/<node>` directory.
+
+For instance:
+
+```nix
+
+# It's actually at secrets/MelisStoke/buildTime-/xray-config.json, just encrypted.
+# After unencrypting with `make decrypt-build-time-secrets NODE=MelisStoke` it
+# will be at specified path in a tmp subdirectory.
+configFile = ~/.bookmarks/Unix_dotfiles/secrets/tmp/MelisStoke/xray-config.json;
+```
+
+For more detail see:
+
+* `decrypt-build-time-secrets` at [Makefile](./Makefile).
+* [secrets tasks collection](./tasks/secrets.py)
+
+> [!warning] Secrets at evaluation time is not secure enough. 
+> Use only for secrets you don't care that much (by someone that has access to
+> your file system, any user has access to store) but still don't want to show
+> in a public repository [Source][@/ComparisonSecretManaging]|[Zotero][z@/ComparisonSecretManaging].
+
 ## References
 
 [@/GitSubmodulesNix]: <https://nixos.asia/en/blog/git-submodule-input> 'Git Submodules as Nix Flake Inputs'
 [z@/GitSubmodulesNix]: <zotero://select/items/@/GitSubmodulesNix> 'Select in Zotero: Git Submodules as Nix Flake Inputs'
 [@/262588213843476/Snowfalllibguidecondensedmd]: <https://gist.github.com/bibijeebi/4ecf11cd8f214da6e738777485001e9b> 'Snowfall-Lib-Guide-Condensed.Md'
 [z@/262588213843476/Snowfalllibguidecondensedmd]: <zotero://select/items/@/262588213843476/Snowfalllibguidecondensedmd> 'Select in Zotero: Snowfall-Lib-Guide-Condensed.Md'
+[@/ComparisonSecretManaging]: <https://nixos.wiki/wiki/Comparison_of_secret_managing_schemes> 'Comparison of Secret Managing Schemes - NixOS Wiki'
+[z@/ComparisonSecretManaging]: <zotero://select/items/@/ComparisonSecretManaging> 'Select in Zotero: Comparison of Secret Managing Schemes - NixOS Wiki'

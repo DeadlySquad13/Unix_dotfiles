@@ -1,3 +1,9 @@
+# TODO: Refactor into invoke.
+%:
+	@:
+
+args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
+
 run-switch: switch optimise garbage-collect-old
 
 init:
@@ -9,20 +15,29 @@ switch:
 build:
 	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+NODE ?= cake
+
+
+# Usage:
+# - make deploy-dry # default NODE
+# - make deploy-dry NODE=MelisStoke
 deploy-dry:
-	nix run github:serokell/deploy-rs -- --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run github:serokell/deploy-rs -- .#$(NODE) --dry-activate -- --keep-going --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 deploy-with-activate:
 	mkdir -p ./logs
-	nix run github:serokell/deploy-rs -- --log-dir ./logs -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run github:serokell/deploy-rs -- .#$(NODE) --log-dir ./logs -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+# Just skips checks. It's impossible to pass them because architecture is not
+# amtching.
 deploy-dry-non-matching:
-	nix run github:serokell/deploy-rs -- --skip-checks --dry-activate -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run github:serokell/deploy-rs -- .#$(NODE) --skip-checks --dry-activate -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+# Just skips checks. It's impossible to pass them because architecture is not
+# amtching.
 deploy-with-activate-non-matching:
 	mkdir -p ./logs
-	nix run github:serokell/deploy-rs -- --skip-checks --log-dir ./logs -- .#cake --impure --extra-experimental-features 'nix-command flakes' --show-trace
-
+	nix run github:serokell/deploy-rs -- .#$(NODE) --skip-checks --log-dir ./logs -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 deploy: deploy-dry deploy-activate
 
@@ -126,13 +141,6 @@ build-NikolaiGogol:
 trampoline:
 	nix run github:hraban/mac-app-util -- mktrampoline "$(which dbeaver)" ~/Applications/DBeaver.app
 
-
 # StratoFrame__ConvPlatProv (Templates)
-# TODO: Refactor into invoke.
-%:
-	@:
-
-args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
-
 add-opencode-skill:
 	invoke --search-root=./tasks add-opencode-skill $(call args,default)

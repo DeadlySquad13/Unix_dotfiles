@@ -154,7 +154,6 @@ Part of the output is a deployment using `deploy-rs` (defined as input).
 }
 ```
 
-
 You can also pass through external packages or dynamically create new ones
 in addition to the ones that `lib` will create from your `packages/` directory
 using `outupts-builder`. But we use [7. Overlays](<README#7. Overlays>) for that.

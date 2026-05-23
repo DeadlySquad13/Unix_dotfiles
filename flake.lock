@@ -42,6 +42,27 @@
         "type": "github"
       }
     },
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "xray-config",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1778958912,
+        "narHash": "sha256-6pvS9rIF9mZRj1ENwu9fDLHeG1JFDTCpRyy6vJhXkTA=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "6e8dc7aa0e65fce67c76e18227a13a7d529f2cdf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -343,7 +364,8 @@
         "snowfall-lib": "snowfall-lib",
         "sops-nix": "sops-nix",
         "typenix": "typenix",
-        "wsl2-config": "wsl2-config"
+        "wsl2-config": "wsl2-config",
+        "xray-config": "xray-config"
       }
     },
     "snowfall-lib": {
@@ -497,6 +519,27 @@
         "type": "path"
       },
       "parent": []
+    },
+    "xray-config": {
+      "inputs": {
+        "disko": "disko",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1779032074,
+        "narHash": "sha256-UptLF7/tuWYSPf1EydaJ13Jjojfpdon68pqd2BoIsyg=",
+        "owner": "dsOmega-StratoFrame",
+        "repo": "ConvPlatProv__NixOsAnywhereXray",
+        "rev": "4438ff385f2626f3f0dbd85e6c78aa1272944be0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dsOmega-StratoFrame",
+        "repo": "ConvPlatProv__NixOsAnywhereXray",
+        "type": "github"
+      }
     }
   },
   "root": "root",

@@ -54,6 +54,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Personal flakes.
+    xray-config = {
+      url = "github:dsOmega-StratoFrame/ConvPlatProv__NixOsAnywhereXray";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # INFO: Requires nix version >= 2.27
     self.submodules = true;
 
@@ -73,7 +79,8 @@
     };
   };
 
-  outputs = inputs:
+  outputs =
+    inputs:
     inputs.snowfall-lib.mkFlake rec {
       # You must provide our flake inputs to Snowfall Lib.
       inherit inputs;
@@ -133,6 +140,30 @@
         # ];
       };
 
+      nixosConfigurations.melis-stoke-nixos-xray = inputs.nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          "${toString <nixpkgs>}/nixos/modules/profiles/qemu-guest.nix"
+          "${toString <nixpkgs>}/nixos/modules/installer/scan/not-detected.nix"
+          {
+            xray = {
+              configFile = ~/.bookmarks/Unix_dotfiles/secrets/melis-stoke-xray-config.json;
+              rootAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
+              userAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
+            };
+            services.dbus.implementation = inputs.nixpkgs.lib.mkForce "broker";
+            environment.systemPackages = with
+              inputs.nixpkgs.legacyPackages.x86_64-linux; [
+              cowsay
+            ];
+          }
+          "${builtins.fetchTarball "https://github.com/nix-community/disko/archive/master.tar.gz"}/module.nix"
+          inputs.xray-config.nixosModules.xray-disko
+          inputs.xray-config.nixosModules.system-module
+          inputs.xray-config.nixosModules.xray-module
+        ];
+      };
+
       systems.modules.nixos = with inputs; [
         nixos-wsl.nixosModules.wsl
         sops-nix.nixosModules.sops
@@ -151,7 +182,8 @@
             pkgs,
             config,
             inputs,
-          }: {
+          }:
+          {
             home-manager.sharedModules = [
               mac-app-util.homeManagerModules.default
             ];
@@ -161,6 +193,10 @@
 
       inherit (inputs.snowfall-lib.snowfall.internal-lib.system) is-darwin;
       isCurrentSystemDarwin = is-darwin builtins.currentSystem;
+      # TODO: Rewrite. It assumes that current system is Darwin.
+      # In other words: deploySystemsMatch = true, when darwin deploying to
+      # darwin, otherwise false.
+      #
       # Instead of direct matching, we make a louse matching via snowfall
       # builtins. Because otherwise we wouldn't get match in a lot of cases
       # while we actually just need to check that we're not deploying from
@@ -189,6 +225,37 @@
               path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.cake;
             };
           };
+
+          MelisStoke = {
+            # Storage is limited
+            remoteBuild = false;
+
+            hostname = "MelisStoke";
+            profiles = {
+              system = {
+                # TODO: Deploy as non-root via sudo
+                # sshUser = "ds13";
+                # TODO: Change to Lent__MelisStoke
+                sshOpts = [
+                  "-i"
+                  "~/.ssh/Lent__MelisStoke_bootstrap"
+                ];
+                sshUser = "root";
+                # The owner of the profile. For system it's always root.
+                user = "root";
+                interactiveSudo = false;
+                path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.melis-stoke-nixos-xray;
+              };
+              # melis-stoke-system = {
+              #   # sshUser = "ds13";
+              #   sshUser = "root";
+              #   # The owner of the profile. For system it's always root.
+              #   user = "root";
+              #   interactiveSudo = true;
+              #   path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.MelisStoke;
+              # };
+            };
+          };
         };
       };
 
@@ -204,14 +271,14 @@
         # We didn't even need to use `channel.nixpkgs`.
         # TODO: Disable for specific systems: currently it won't work if at
         # least one doesn't match.
-        checks = let
-          inherit (inputs.nixpkgs.lib) mkIf;
-        in
+        checks =
+          let
+            inherit (inputs.nixpkgs.lib) mkIf;
+          in
           mkIf (deploySystemsMatch systemToDeploy) (
             builtins.mapAttrs (
               system: deployLib: deployLib.deployChecks inputs.self.deploy
-            )
-            inputs.deploy-rs.lib
+            ) inputs.deploy-rs.lib
           );
       };
     };

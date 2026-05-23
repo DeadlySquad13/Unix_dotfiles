@@ -140,30 +140,6 @@
         # ];
       };
 
-      nixosConfigurations.melis-stoke-nixos-xray = inputs.nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          "${toString <nixpkgs>}/nixos/modules/profiles/qemu-guest.nix"
-          "${toString <nixpkgs>}/nixos/modules/installer/scan/not-detected.nix"
-          {
-            xray = {
-              configFile = ~/.bookmarks/Unix_dotfiles/secrets/melis-stoke-xray-config.json;
-              rootAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
-              userAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
-            };
-            services.dbus.implementation = inputs.nixpkgs.lib.mkForce "broker";
-            environment.systemPackages = with
-              inputs.nixpkgs.legacyPackages.x86_64-linux; [
-              cowsay
-            ];
-          }
-          "${builtins.fetchTarball "https://github.com/nix-community/disko/archive/master.tar.gz"}/module.nix"
-          inputs.xray-config.nixosModules.xray-disko
-          inputs.xray-config.nixosModules.system-module
-          inputs.xray-config.nixosModules.xray-module
-        ];
-      };
-
       systems.modules.nixos = with inputs; [
         nixos-wsl.nixosModules.wsl
         sops-nix.nixosModules.sops
@@ -244,7 +220,7 @@
                 # The owner of the profile. For system it's always root.
                 user = "root";
                 interactiveSudo = false;
-                path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.melis-stoke-nixos-xray;
+                path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.MelisStoke;
               };
               # melis-stoke-system = {
               #   # sshUser = "ds13";

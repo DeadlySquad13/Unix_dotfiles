@@ -81,7 +81,7 @@ in {
 
     # zfs.package = pkgs.zfs.latestCompatibleLinuxPackages;
     # TODO: linux 6.16 was removed because it has reached its end of life upstream. Not sure it will error when deploying on @cake, though.
-    kernelPackages = pkgs.linuxPackages_6_16;
+    kernelPackages = pkgs.linuxPackages_6_18;
     # Ensure ZFS is properly configured
     zfs = {
       # Allow force importing if pools don't import cleanly

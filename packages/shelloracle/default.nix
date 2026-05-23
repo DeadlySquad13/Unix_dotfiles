@@ -1,3 +1,4 @@
+# @ts: { lib: Lib, stdenv: Stdenv, [key: string]: any }
 {
   lib,
   fetchPypi,

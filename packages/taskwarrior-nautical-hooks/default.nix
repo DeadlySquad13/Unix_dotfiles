@@ -1,3 +1,4 @@
+# @ts: { lib: Lib, stdenv: Stdenv, pkgs: Nixpkgs, [key: string]: any }
 {
   pkgs,
   buildEnv,

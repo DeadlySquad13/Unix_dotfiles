@@ -28,6 +28,8 @@ in {
     inputs.xray-config.nixosModules.xray-module
   ];
 
+  networking.hostName = lib.mkForce "MelisStoke";
+
   /*
      snowfallorg.user = {
     enable = true;
@@ -35,7 +37,8 @@ in {
   };
   */
 
-  system = {
+  # Already set in base module
+  # system = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
     # introduces backwards incompatible changes.
@@ -43,8 +46,8 @@ in {
     # You should not change this value, even if you update Home Manager. If you do
     # want to update the value, then make sure to first check the Home Manager
     # release notes.
-    stateVersion = "24.11";
-  };
+  #   stateVersion = "24.11";
+  # };
 
   sops = {
     # age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!

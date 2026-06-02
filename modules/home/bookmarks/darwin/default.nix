@@ -127,6 +127,9 @@
                 dotenv ./.env.dev
                 # TODO: Remove temporary workaround when it's properly fixed https://github.com/NixOS/nixpkgs/issues/376958
                 unset DEVELOPER_DIR
+                # Conflicts with AutoHub .env variable GITLAB_TOKEN. See glab
+                # module. This token is personal either way, so unsetting in all work projects.
+                unset GITLAB_TOKEN
 
                 # vi:ft=bash
               '';

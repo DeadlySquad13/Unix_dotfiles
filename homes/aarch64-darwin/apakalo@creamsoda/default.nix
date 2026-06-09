@@ -108,7 +108,7 @@ in {
         # FIX: Has to be enabled explicitly.
         nix = enabled;
 
-        docker = disabled;
+        docker = enabled;
 
         deno = disabled;
         browser-sync = disabled;
@@ -182,5 +182,13 @@ in {
         enable = false;
       };
     };
+  };
+
+  # FIX: For some reason on Darwin can't use `${namespace}`: infinite
+  # recursion.
+  ds-omega.development.docker = {
+    installDockerPackage = false; # Already installed by provider.
+    rootless = false;
+    enableAlias = true;
   };
 }

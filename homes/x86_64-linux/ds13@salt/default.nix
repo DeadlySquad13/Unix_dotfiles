@@ -180,6 +180,6 @@ in {
   };
 
   ${namespace}.development.docker = {
-    aliasEnabled = true;
+    enableAlias = true;
   };
 }

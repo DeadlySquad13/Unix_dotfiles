@@ -178,4 +178,8 @@ in {
       enable = true;
     };
   };
+
+  ${namespace}.development.docker = {
+    aliasEnabled = true;
+  };
 }

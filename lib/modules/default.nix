@@ -85,8 +85,10 @@ in {
     # Now we have: `options."development.nix".<name>`
     # but want: `options.development.nix.<name>`
     # For inspiration see https://github.com/NixOS/nixpkgs/blob/05405724efa137a0b899cce5ab4dde463b4fd30b/lib/attrsets.nix#L65
-    options.${namespace}.${category}.${name} = with lib.types; {
-      enable = mkBoolOpt false "Whether or not to enable ${name}.";
+    options.${namespace}.${category}.${name}.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Whether or not to enable ${name}.";
     };
 
     config = mkIf (module-enabled && extraPredicate { inherit modules-cfg; inherit module-cfg; }) module;

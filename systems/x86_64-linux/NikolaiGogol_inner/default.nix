@@ -125,6 +125,9 @@ in {
     libvirtd = {
       enable = true;
       # Used for UEFI boot of Home Assistant OS guest image
+      qemu = {
+        runAsRoot = true;
+      };
       # qemuOvmf = true;
     };
   };

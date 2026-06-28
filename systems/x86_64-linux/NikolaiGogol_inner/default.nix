@@ -5,19 +5,19 @@
   # An instance of `pkgs` with your overlays and packages applied is also available.
   pkgs,
   # You also have access to your flake's inputs.
-  inputs,
+  # inputs,
   # Additional metadata is provided by Snowfall Lib.
   namespace, # The namespace used for your flake, defaulting to "internal" if not set.
-  home, # The home architecture for this host (eg. `x86_64-linux`).
-  target, # The Snowfall Lib target for this home (eg. `x86_64-home`).
-  format, # A normalized name for the home target (eg. `home`).
-  virtual, # A boolean to determine whether this home is a virtual target using nixos-generators.
-  host, # The host name for this home.
+  # home, # The home architecture for this host (eg. `x86_64-linux`).
+  # target, # The Snowfall Lib target for this home (eg. `x86_64-home`).
+  # format, # A normalized name for the home target (eg. `home`).
+  # virtual, # A boolean to determine whether this home is a virtual target using nixos-generators.
+  # host, # The host name for this home.
   # All other arguments come from the home home.
-  config,
+  # config,
   ...
 }: let
-  inherit (lib.${namespace}) disabled enabled;
+  inherit (lib.${namespace}) disabled;
 in {
   system = {
     # This value determines the Home Manager release that your configuration is
@@ -43,7 +43,33 @@ in {
   ];
 
   # Take priority over generated value (NikolaiGogol_inner).
-  networking.hostName = lib.mkDefault "NikolaiGogol";
+  networking = {
+    hostName = lib.mkDefault "NikolaiGogol";
+
+    # TAP device for VM networking (created declaratively by NixOS)
+    interfaces.tap0 = {
+      virtual = true;
+      virtualType = "tap";
+      ipv4.routes = [
+        { address = "192.168.31.200"; prefixLength = 32; }
+      ];
+      # Respond to ARP from VM for gateway 192.168.31.1
+      proxyARP = true;
+    };
+
+    # Proxy ARP on Wi-Fi interface — pseudo-bridge for WLAN
+    interfaces.wlan0.proxyARP = true;
+
+    # Firewall: allow forwarding between TAP and Wi-Fi (no NAT needed)
+    firewall = {
+      enable = true;
+      extraCommands = ''
+        iptables -A FORWARD -i tap0 -o wlan0 -j ACCEPT
+        iptables -A FORWARD -i wlan0 -o tap0 -j ACCEPT
+        iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+      '';
+    };
+  };
 
   # programs.ssh.startAgent = true;
   users.users.ds13 = {
@@ -63,7 +89,18 @@ in {
     # ];
   };
 
-  boot.isContainer = true;
+  boot = {
+    isContainer = true;
+
+    # Load TUN/TAP kernel module for virtual networking
+    kernelModules = ["tun"];
+
+    # Enable IP forwarding (required for routing between interfaces)
+    kernel.sysctl = {
+      "net.ipv4.ip_forward" = 1;
+    };
+  };
+
   services.sshd.enable = true;
 
   nix.settings.experimental-features = [
@@ -91,18 +128,4 @@ in {
       # qemuOvmf = true;
     };
   };
-
-  # networking = {
-  #   defaultGateway = "10.0.0.1";
-  #   bridges.br0.interfaces = ["wlan0"];
-  #   interfaces.br0 = {
-  #     useDHCP = false;
-  #     ipv4.addresses = [
-  #       {
-  #         "address" = "10.0.0.5";
-  #         "prefixLength" = 24;
-  #       }
-  #     ];
-  #   };
-  # };
 }

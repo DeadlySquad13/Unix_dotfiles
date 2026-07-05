@@ -57,6 +57,12 @@ lib.${namespace}.mkIfEnabled
         id = "arfqd-gwsgl";
         devices = ["POCO X6 Pro 5G"];
       };
+
+      "rut-Projects" = {
+        path = "/zsalt/shared-/@creamsoda/Projects";
+        id = "xtnmf-9ntus";
+        devices = ["@creamsoda"];
+      };
     };
   };
 }

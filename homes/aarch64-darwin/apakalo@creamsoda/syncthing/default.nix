@@ -61,9 +61,14 @@ in
           devices = ["@sugar"];
         };
 
-        "Projects" = {
+        "rut-Projects" = {
           path = "${homeDirectory}/Projects";
-          id = shared.folderIds.Projects;
+          id = shared.folderIds.rutProjects;
+          devices = ["@salt"];
+        };
+        "rut-Documents" = {
+          path = "${homeDirectory}/Documents";
+          id = shared.folderIds.rutDocuments;
           devices = ["@salt"];
         };
       };

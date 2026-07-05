@@ -19,6 +19,10 @@
 }: let
   inherit (lib.${namespace}) disabled enabled;
 in {
+  imports = [
+    ./syncthing/default.nix
+  ];
+
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -124,6 +128,7 @@ in {
       };
       misc = {
         qmk = enabled;
+        cook-cli = enabled;
       };
       writing = {
         enable = true;

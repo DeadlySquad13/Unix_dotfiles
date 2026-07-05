@@ -1,13 +1,13 @@
 {
   lib,
-  namespace,
   config,
   ...
 }: let
   inherit (config.home) homeDirectory;
   shared = import ../../../../modules/home/services/syncthing/shared.nix {inherit lib;};
 in
-  lib.${namespace}.mkIfEnabled
+  # FIX: Infinite recursion caused by namespace.
+  lib.ds-omega.mkIfEnabled
   {
     inherit config;
     category = "services";
@@ -17,7 +17,8 @@ in
     services.syncthing.settings = {
       devices = shared.selectDevices [
         "POCO X6 Pro 5G"
-        "@creamsoda"
+        "@salt"
+        "@sugar"
       ];
       folders = {
         # TODO: Change path and device.

@@ -19,6 +19,10 @@
 }: let
   inherit (lib.ds-omega) disabled enabled;
 in {
+  imports = [
+    ./syncthing/default.nix
+  ];
+
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -180,6 +184,8 @@ in {
 
       services = {
         enable = false;
+
+        syncthing = enabled;
       };
     };
   };

@@ -1,7 +1,8 @@
 # Used for sharing settings between home syncthing configurations. Must be
 # explicitly imported.
-{lib}: let
-  devices = {
+{ lib }:
+let
+  availableDevices = {
     "POCO X6 Pro 5G" = {
       id = "HC3AI3I-M5MX4QG-XK2GLZZ-XK3ATLW-3VRXKPR-VATN3Q3-UKUCPYJ-B77VEQK";
     };
@@ -15,8 +16,21 @@
       id = "EU6MIGT-GWHH4FB-AWEOFS3-F7QS552-JDDBNTM-YOXMAQC-CGMPR5F-NDTZAQK";
     };
   };
-in {
-  selectDevices = deviceNames: lib.genAttrs deviceNames (k: devices.${k});
+in
+{
+  # Usage:
+  # `selectDevices ["@salt" "@creamsoda"]` produces:
+  # ```nix
+  # {
+  #   "@sugar" = {
+  #     id = "GAY7RJA-JYHSVSZ-5IGMIAM-QJOBMWM-MN25PE4-K3MSF7Q-QPTGDAK-I42DIAS";
+  #   };
+  #   "@creamsoda" = {
+  #     id = "EU6MIGT-GWHH4FB-AWEOFS3-F7QS552-JDDBNTM-YOXMAQC-CGMPR5F-NDTZAQK";
+  #   };
+  # }
+  # ```
+  selectDevices = deviceNames: lib.genAttrs deviceNames (k: availableDevices.${k});
 
   folderIds = {
     KnowledgeBase = "tqoqm-gyfov";

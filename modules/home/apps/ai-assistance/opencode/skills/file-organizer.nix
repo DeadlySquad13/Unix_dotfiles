@@ -3,6 +3,10 @@
   config,
   ...
 }: {
+  imports = [
+    ./shared.nix
+  ];
+
   options.programs.opencode.enabledSkills.file-organizer = lib.mkOption {
     type = lib.types.bool;
     default = false;
@@ -10,8 +14,8 @@
   };
 
   config = lib.mkIf config.programs.opencode.enabledSkills.file-organizer {
-    programs.opencode.skills = {
-      file-organizer = /home/ds13/Projects/--personal/AiAssistance__/_skills/file-organizer;
-    };
+    programs.opencode.skillPaths = [
+      /home/ds13/Projects/--personal/AiAssistance__/_skills/file-organizer
+    ];
   };
 }

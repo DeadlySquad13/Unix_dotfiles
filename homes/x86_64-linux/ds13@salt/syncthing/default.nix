@@ -16,6 +16,7 @@ in
     services.syncthing.settings = {
       devices = shared.selectDevices [
         "POCO X6 Pro 5G"
+        # ../../../aarch64-darwin/apakalo@creamsoda/syncthing/default.nix
         "@creamsoda"
       ];
       folders = {

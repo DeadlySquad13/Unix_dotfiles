@@ -17,6 +17,7 @@ in
     services.syncthing.settings = {
       devices = shared.selectDevices [
         "POCO X6 Pro 5G"
+        # ../../../x86_64-linux/ds13@salt/syncthing/default.nix
         "@salt"
         "@sugar"
       ];

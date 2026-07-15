@@ -21,12 +21,11 @@ in
         "@sugar"
       ];
       folders = {
-        # TODO: Change path and device.
-        # "-secrets" = {
-        #   path = "/shared/archive-resources-/Archive/YandexDisk/-secrets";
-        #   id = "vgg7f-vdut5";
-        #   devices = ["POCO X6 Pro 5G"];
-        # };
+        "-secrets" = {
+          path = "${homeDirectory}/Yandex.Disk.localized/-secrets";
+          id = "vgg7f-vdut5";
+          devices = ["@salt"];
+        };
         "KnowledgeBase" = {
           path = "${homeDirectory}/.bookmarks/kbd";
           id = shared.folderIds.KnowledgeBase;

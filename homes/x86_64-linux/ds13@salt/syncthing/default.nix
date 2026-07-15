@@ -22,7 +22,10 @@ in
         "-secrets" = {
           path = "/shared/archive-resources-/Archive/YandexDisk/-secrets";
           id = "vgg7f-vdut5";
-          devices = ["POCO X6 Pro 5G"];
+          devices = [
+            "POCO X6 Pro 5G"
+            "@creamsoda"
+          ];
         };
         "KnowledgeBase" = {
           path = "/home/ds13/.bookmarks/kbd";

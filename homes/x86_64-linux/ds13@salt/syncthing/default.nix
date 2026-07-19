@@ -62,12 +62,18 @@ in
 
         "rut-Projects" = {
           path = "/zsalt/shared-/@creamsoda/Projects";
-          id = shared.folderIds.rutProjects;
+          id = shared.folderIds.rut-Projects;
           devices = ["@creamsoda"];
           ignorePatterns = [
             # Scratchpad, relevant only on @salt for now so no need to sync.
             "/ai-"
           ];
+        };
+        "rut-Projects_artifacts" = {
+          path = "/zsalt/shared-/@creamsoda/Projects/.artifact";
+          id = shared.folderIds.rut-Projects_artifacts;
+          devices = ["@creamsoda"];
+          type = "receiveonly";
         };
         "rut-Documents" = {
           path = "/zsalt/shared-/@creamsoda/Documents";

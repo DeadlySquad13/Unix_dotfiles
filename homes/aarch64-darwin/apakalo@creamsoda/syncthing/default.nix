@@ -64,8 +64,14 @@ in
 
         "rut-Projects" = {
           path = "${homeDirectory}/Projects";
-          id = shared.folderIds.rutProjects;
+          id = shared.folderIds.rut-Projects;
           devices = ["@salt"];
+        };
+        "rut-Projects_artifacts" = {
+          path = "${homeDirectory}/Projects/.artifact";
+          id = shared.folderIds.rut-Projects_artifacts;
+          devices = ["@salt"];
+          type = "sendonly";
         };
         "rut-Documents" = {
           path = "${homeDirectory}/Documents";

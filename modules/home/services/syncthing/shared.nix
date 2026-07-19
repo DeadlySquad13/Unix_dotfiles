@@ -37,7 +37,8 @@ in
     CurrentTerm = "3jzjd-srmar";
     denis-CurrentTerm = "3cp9p-5c7kw";
     taskd = "4r7wr-n7ei5";
-    rutProjects = "xtnmf-9ntus";
+    rut-Projects = "xtnmf-9ntus";
+    rut-Projects_artifacts = "rut-Projects_artifacts";
     rutDocuments = "rut-Documents";
   };
 }

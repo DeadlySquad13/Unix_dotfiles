@@ -56,6 +56,8 @@
     };
 
     agents = {
+      prompt-designer = ./agents/prompt-designer.md;
+      coding = ./agents/coding.md;
       kbn =
         /*
         md

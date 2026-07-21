@@ -145,6 +145,7 @@ build-vm-vb:
 	nix-build '<nixpkgs/nixos>' -A config.system.build.virtualBoxOVA -I nixpkgs=channel:nixos-24.11 -I nixos-config=./systems/x86_64-vm/vpn/default.nix
 
 # # Docker
+# ## NikolaiGogol
 build-NikolaiGogol-hm:
 	home-manager build --flake .#ds13@NikolaiGogol --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
@@ -156,6 +157,10 @@ build-NikolaiGogol-system:
 
 build-NikolaiGogol:
 	nix build --out-link result-NikolaiGogol .#dockerConfigurations.NikolaiGogol  --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+# ## OpenCode
+build-OpenCode:
+	nix build --out-link result-OpenCode .#dockerConfigurations.OpenCode  --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 trampoline:
 	nix run github:hraban/mac-app-util -- mktrampoline "$(which dbeaver)" ~/Applications/DBeaver.app

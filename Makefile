@@ -12,6 +12,9 @@ init:
 switch:
 	home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+switch-offline:
+	home-manager switch --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace --option flake-registry $(PWD)/flake-registry.json --no-substitute
+
 build:
 	home-manager build --flake . --impure --extra-experimental-features 'nix-command flakes' --show-trace
 

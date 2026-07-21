@@ -60,6 +60,16 @@ in
           devices = ["POCO X6 Pro 5G"];
         };
 
+        "shared-Documents" = {
+          path = "/shared/archive-resources-/Archive/YandexDisk/Documents";
+          id = shared.folderIds.shared-Documents;
+          devices = ["POCO X6 Pro 5G"];
+        };
+        "Interim" = {
+          path = "/shared/archive-resources-/Archive/YandexDisk/Interim";
+          devices = ["POCO X6 Pro 5G"];
+        };
+
         "rut-Projects" = {
           path = "/zsalt/shared-/@creamsoda/Projects";
           id = shared.folderIds.rut-Projects;

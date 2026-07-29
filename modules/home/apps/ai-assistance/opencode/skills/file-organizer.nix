@@ -15,7 +15,7 @@
 
   config = lib.mkIf config.programs.opencode.enabledSkills.file-organizer {
     programs.opencode.skillPaths = [
-      /home/ds13/Projects/--personal/AiAssistance__/_skills/file-organizer
+      /${config.programs.opencode.skillsDir}/file-organizer
     ];
   };
 }

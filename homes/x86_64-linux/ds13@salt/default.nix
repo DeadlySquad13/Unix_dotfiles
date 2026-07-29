@@ -45,7 +45,7 @@ in {
       # config = ~/.config;
       kbd = ~/.bookmarks/kbn;
       kbn = ~/.bookmarks/kbn;
-      # projects = ~/Projects;
+      projects = "~/Projects";
 
       dotfiles = "~/.local/dotfiles-";
 

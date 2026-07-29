@@ -12,13 +12,14 @@
     suffixKeys
     ;
   opencodeToolsPath = ".config/opencode/tool";
-  toolsPath = "/home/ds13/Projects/--personal/AiAssistance__/_tools";
-  bindingsPath = /home/ds13/Projects/--personal/AiAssistance__/AiAssistance_agents__TypeScript_bindings;
+  toolsPath = "${config.programs.opencode.aiAssistanceDir}/_tools";
+  bindingsPath = "${config.programs.opencode.aiAssistanceDir}/AiAssistance_agents__TypeScript_bindings";
   # TODO: We may eventually move from flat structure to nested. We would need
   # to process folders too.
   typeScriptSourceFiles = lib.pipe config.programs.opencode.toolWrappers [
     (toolWrappers: lib.genAttrs toolWrappers (t: "${t}.ts"))
-    (suffixKeys ".ts")
+    # FIX: Currently ruins our docker strategy
+    # (suffixKeys ".ts")
   ];
   sourceFiles =
     typeScriptSourceFiles

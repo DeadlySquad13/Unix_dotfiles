@@ -15,7 +15,7 @@
 
   config = lib.mkIf config.programs.opencode.enabledSkills.add-opencode-skill-to-unix-dotfiles {
     programs.opencode.skillPaths = [
-      /home/ds13/Projects/--personal/AiAssistance__/_skills/add-opencode-skill-to-unix-dotfiles
+      /${config.programs.opencode.skillsDir}/add-opencode-skill-to-unix-dotfiles
     ];
   };
 }

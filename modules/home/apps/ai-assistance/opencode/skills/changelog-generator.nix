@@ -15,7 +15,7 @@
 
   config = lib.mkIf config.programs.opencode.enabledSkills.changelog-generator {
     programs.opencode.skillPaths = [
-      /home/ds13/Projects/--personal/AiAssistance__/_skills/changelog-generator
+      /${config.programs.opencode.skillsDir}/changelog-generator
     ];
   };
 }

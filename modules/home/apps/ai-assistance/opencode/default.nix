@@ -1,4 +1,10 @@
-{lib, ...}: {
+{
+  lib,
+  config,
+  namespace,
+  ...
+}:
+{
   imports = [
     ./opencode-docker-fix.nix
     ./tools/pizza.nix
@@ -11,7 +17,14 @@
     ./skills/add-opencode-skill-to-unix-dotfiles.nix
     ./skills/changelog-generator.nix
   ];
-
+}
+// lib.${namespace}.mkIfEnabled
+{
+  inherit config;
+  category = "ai-assistance";
+  name = "opencode";
+}
+{
   programs.opencode = {
     enable = true;
 
@@ -118,6 +131,40 @@
         - Dependency vulnerabilities
         - Configuration security issues
       '';
+    };
+  };
+}
+// {
+  options.programs.opencode = {
+    aiAssistanceDir = lib.mkOption {
+      type = lib.types.path;
+      default =
+        let
+          projectsPath =
+            if config.lib ? ${namespace} && config.lib.${namespace}.paths ? projects
+            then lib.${namespace}.get-path {
+              inherit config;
+              as-string = true;
+              cb = p: p.projects;
+            }
+            else null;
+        in
+          if projectsPath != null
+          then "${projectsPath}/--personal/AiAssistance__"
+          else "${config.home.homeDirectory}/Projects/--personal/AiAssistance__";
+      defaultText = lib.literalExpression ''
+        if config.lib.''${namespace}.paths ? projects
+        then config.lib.''${namespace}.paths.projects + "/--personal/AiAssistance__"
+        else config.home.homeDirectory + "/Projects/--personal/AiAssistance__"
+      '';
+      description = "Path to the AiAssistance repository root directory";
+    };
+
+    skillsDir = lib.mkOption {
+      type = lib.types.path;
+      default = "${config.programs.opencode.aiAssistanceDir}/_skills";
+      defaultText = lib.literalExpression ''"''${config.programs.opencode.aiAssistanceDir}/_skills"'';
+      description = "Directory containing opencode skills";
     };
   };
 }

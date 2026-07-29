@@ -15,7 +15,7 @@
 
   config = lib.mkIf config.programs.opencode.enabledSkills.skill-creator {
     programs.opencode.skillPaths = [
-      /home/ds13/Projects/--personal/AiAssistance__/_skills/skill-creator
+      /${config.programs.opencode.skillsDir}/skill-creator
     ];
   };
 }

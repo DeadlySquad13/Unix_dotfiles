@@ -15,7 +15,7 @@
 
   config = lib.mkIf config.programs.opencode.enabledSkills.mcp-builder {
     programs.opencode.skillPaths = [
-      /home/ds13/Projects/--personal/AiAssistance__/_skills/mcp-builder
+      /${config.programs.opencode.skillsDir}/mcp-builder
     ];
   };
 }

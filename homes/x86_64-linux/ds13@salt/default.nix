@@ -19,8 +19,10 @@
 }: let
   inherit (lib.${namespace}) disabled enabled;
 in {
+  # REFACTOR: Implement auto-import via Snowfall-lib utils.
   imports = [
     ./syncthing/default.nix
+    ./apps/network/sshfs/default.nix
   ];
 
   home = {

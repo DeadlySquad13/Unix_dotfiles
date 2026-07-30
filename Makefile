@@ -147,7 +147,7 @@ start-vm-qemu:
 build-vm-vb:
 	nix-build '<nixpkgs/nixos>' -A config.system.build.virtualBoxOVA -I nixpkgs=channel:nixos-24.11 -I nixos-config=./systems/x86_64-vm/vpn/default.nix
 
-# # Docker
+# # Docker, StratoFrame__ConvPlatProv
 # ## NikolaiGogol
 build-NikolaiGogol-hm:
 	home-manager build --flake .#ds13@NikolaiGogol --impure --extra-experimental-features 'nix-command flakes' --show-trace
@@ -161,9 +161,18 @@ build-NikolaiGogol-system:
 build-NikolaiGogol:
 	nix build --out-link result-NikolaiGogol .#dockerConfigurations.NikolaiGogol  --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
-# ## OpenCode
-build-OpenCode:
-	nix build --out-link result-OpenCode .#dockerConfigurations.OpenCode  --impure --extra-experimental-features 'nix-command flakes' --show-trace
+# ## tangerineDream
+build-darkGreen-tangerineDream-hm:
+	home-manager build --flake .#tangerineDream@darkGreen-tangerineDream --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+switch-darkGreen-tangerineDream-system:
+	sudo nixos-rebuild switch --flake .#darkGreen-tangerineDream_inner --impure
+
+build-darkGreen-tangerineDream-system:
+	sudo nixos-rebuild build --flake .#darkGreen-tangerineDream_inner --impure --show-trace
+
+build-darkGreen-tangerineDream:
+	nix build --out-link result-darkGreen-tangerineDream .#dockerConfigurations.darkGreen-tangerineDream  --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 trampoline:
 	nix run github:hraban/mac-app-util -- mktrampoline "$(which dbeaver)" ~/Applications/DBeaver.app

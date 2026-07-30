@@ -18,8 +18,7 @@
   # to process folders too.
   typeScriptSourceFiles = lib.pipe config.programs.opencode.toolWrappers [
     (toolWrappers: lib.genAttrs toolWrappers (t: "${t}.ts"))
-    # FIX: Currently ruins our docker strategy
-    # (suffixKeys ".ts")
+    (suffixKeys ".ts")
   ];
   sourceFiles =
     typeScriptSourceFiles

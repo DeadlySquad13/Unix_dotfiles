@@ -18,7 +18,11 @@ to: modules/home/apps/ai-assistance/opencode/skills/<%= name %>.nix
 
   config = lib.mkIf config.programs.opencode.enabledSkills.<%= name %> {
     programs.opencode.skillPaths = [
+      <% if (path) { -%>
       <%= path %>/<%= name %>
+      <% } else { -%>
+      /${config.programs.opencode.skillsDir}/<%= name %>
+      <% } -%>
     ];
   };
 }

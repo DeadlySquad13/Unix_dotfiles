@@ -53,20 +53,9 @@
 
     skills = lib.mkDefault {};
 
-    enabledSkills = {
-      logseq-db-queries = true;
-      file-organizer = true;
-      mcp-builder = true;
-      skill-creator = true;
-      add-opencode-skill-to-unix-dotfiles = true;
-      changelog-generator = true;
-    };
+    inherit (config.${namespace}.ai-assistance.opencode) enabledSkills;
 
-    customTools = {
-      pizza = true;
-      taskwarrior = true;
-      zotero = true;
-    };
+    inherit (config.${namespace}.ai-assistance.opencode) customTools;
 
     agents = {
       prompt-designer = ./agents/prompt-designer.md;
@@ -165,6 +154,31 @@
       default = "${config.programs.opencode.aiAssistanceDir}/_skills";
       defaultText = lib.literalExpression ''"''${config.programs.opencode.aiAssistanceDir}/_skills"'';
       description = "Directory containing opencode skills";
+    };
+  };
+
+  options.${namespace}.ai-assistance.opencode = {
+    enabledSkills = lib.mkOption {
+      type = lib.types.attrsOf lib.types.bool;
+      default = {
+        logseq-db-queries = true;
+        file-organizer = true;
+        mcp-builder = true;
+        skill-creator = true;
+        add-opencode-skill-to-unix-dotfiles = true;
+        changelog-generator = true;
+      };
+      description = "Enable or disable specific opencode skills";
+    };
+
+    customTools = lib.mkOption {
+      type = lib.types.attrsOf lib.types.bool;
+      default = {
+        pizza = true;
+        taskwarrior = true;
+        zotero = true;
+      };
+      description = "Enable or disable custom opencode tools";
     };
   };
 }

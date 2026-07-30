@@ -1,0 +1,3 @@
+interface IOpenCodeToolOptions {
+    zotero?: boolean;
+}

@@ -8,7 +8,7 @@ module.exports = [
   {
     type: 'input',
     name: 'path',
-    message: 'Skill directory base path:',
-    initial: '/home/ds13/Projects/--personal/AiAssistance__/_skills'
+    message: 'Skill directory base path (empty for default from skillsDir):',
+    initial: ''
   },
 ];

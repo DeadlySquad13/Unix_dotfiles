@@ -3,8 +3,9 @@
   config,
   namespace,
   ...
-}:
-{
+}: let
+  cfg = config.${namespace}.ai-assistance.opencode;
+in {
   imports = [
     ./opencode-docker-fix.nix
     ./tools/pizza.nix
@@ -53,9 +54,7 @@
 
     skills = lib.mkDefault {};
 
-    inherit (config.${namespace}.ai-assistance.opencode) enabledSkills;
-
-    inherit (config.${namespace}.ai-assistance.opencode) customTools;
+    inherit (cfg) enabledSkills customTools;
 
     agents = {
       prompt-designer = ./agents/prompt-designer.md;
@@ -158,27 +157,28 @@
   };
 
   options.${namespace}.ai-assistance.opencode = {
-    enabledSkills = lib.mkOption {
-      type = lib.types.attrsOf lib.types.bool;
-      default = {
-        logseq-db-queries = true;
-        file-organizer = true;
-        mcp-builder = true;
-        skill-creator = true;
-        add-opencode-skill-to-unix-dotfiles = true;
-        changelog-generator = true;
-      };
-      description = "Enable or disable specific opencode skills";
-    };
+    enabledSkills = lib.genAttrs [
+      "logseq-db-queries"
+      "file-organizer"
+      "mcp-builder"
+      "skill-creator"
+      "add-opencode-skill-to-unix-dotfiles"
+      "changelog-generator"
+    ] (name: lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable ${name} opencode skill";
+    });
 
-    customTools = lib.mkOption {
-      type = lib.types.attrsOf lib.types.bool;
-      default = {
-        pizza = true;
-        taskwarrior = true;
-        zotero = true;
-      };
-      description = "Enable or disable custom opencode tools";
-    };
+    customTools = lib.genAttrs [
+      "pizza"
+      "taskwarrior"
+      "zotero"
+    ] (name: lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable ${name} opencode tool";
+    });
   };
+
 }

@@ -8,6 +8,9 @@
     "allowArbitraryExtensions": true,
     "typeRoots": []
   },
-  "include": ["**/*.nix"],
+  "include": [
+    "**/*.nix",
+    "**/*.nix.d.ts"
+  ],
   "exclude": ["result", "result-*"]
 }

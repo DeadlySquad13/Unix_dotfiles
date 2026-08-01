@@ -168,11 +168,30 @@ build-darkGreen-tangerineDream-hm:
 switch-darkGreen-tangerineDream-system:
 	sudo nixos-rebuild switch --flake .#darkGreen-tangerineDream_inner --impure
 
+switch-remote-darkGreen-tangerineDream-system:
+	nixos-rebuild switch --flake .#darkGreen-tangerineDream_inner --impure
+
 build-darkGreen-tangerineDream-system:
 	sudo nixos-rebuild build --flake .#darkGreen-tangerineDream_inner --impure --show-trace
 
 build-darkGreen-tangerineDream:
-	nix build --out-link result-darkGreen-tangerineDream .#dockerConfigurations.darkGreen-tangerineDream  --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix build --out-link result-darkGreen-tangerineDream .#dockerConfigurations.darkGreen-tangerineDream --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+# ### tangerineDream-green
+build-darkGreen-tangerineDream-green-hm:
+	home-manager build --flake .#tangerineDream-green@darkGreen-tangerineDream-green --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+switch-darkGreen-tangerineDream-green-system:
+	sudo nixos-rebuild switch --flake .#darkGreen-tangerineDream-green_inner --impure
+
+switch-remote-darkGreen-tangerineDream-green-system:
+	nixos-rebuild switch --flake .#darkGreen-tangerineDream-green_inner --impure
+
+build-darkGreen-tangerineDream-green-system:
+	sudo nixos-rebuild build --flake .#darkGreen-tangerineDream-green_inner --impure --show-trace
+
+build-darkGreen-tangerineDream-green:
+	nix build --out-link result-darkGreen-tangerineDream-green .#dockerConfigurations.darkGreen-tangerineDream-green --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
 trampoline:
 	nix run github:hraban/mac-app-util -- mktrampoline "$(which dbeaver)" ~/Applications/DBeaver.app

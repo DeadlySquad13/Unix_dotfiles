@@ -52,20 +52,20 @@ in
 
     serviceConfig = {
       Type = "oneshot";
-      User = "tangerineDream";
-      ExecStart = "${pkgs.bash}/bin/bash -c 'cd /home/tangerineDream/.bookmarks/shared-configs/Unix_dotfiles/ && echo \"test\" | make switch-$${SYSTEM_NAME}-system'";
+      User = "tangerineDream-green";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'cd /home/tangerineDream-green/.bookmarks/shared-configs/Unix_dotfiles/ && echo \"test\" | make switch-$${SYSTEM_NAME}-system'";
       Environment = [
-        "SYSTEM_NAME=darkGreen-tangerineDream"
+        "SYSTEM_NAME=darkGreen-tangerineDream-green"
       ];
       RemainAfterExit = true;
     };
   }; */
-  networking.hostName = "darkGreen-tangerineDream";
+  networking.hostName = "darkGreen-tangerineDream-green";
 
   # programs.ssh.startAgent = true;
-  users.users.tangerineDream = {
+  users.users.tangerineDream-green = {
     isNormalUser = true;
-    home = "/home/tangerineDream";
+    home = "/home/tangerineDream-green";
     extraGroups = [
       "wheel"
       "networkmanager"

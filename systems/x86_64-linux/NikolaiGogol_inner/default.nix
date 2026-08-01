@@ -37,6 +37,8 @@ in {
 
     # For virt-install.
     virt-manager
+    # FileSystem shared volume between host and vm (@NikolaiGogol_inner).
+    virtiofsd
 
     # For lsusb.
     usbutils

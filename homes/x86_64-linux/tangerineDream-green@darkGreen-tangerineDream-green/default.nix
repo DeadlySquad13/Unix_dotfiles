@@ -18,6 +18,9 @@
   ...
 }: let
   inherit (lib.${namespace}) disabled enabled;
+  # The system of this home config is deployed from a host different than
+  # a system it will be deployed to. This home is used when deploying docker container.
+  deploymentHostHome = "/home/ds13";
 in {
   home = {
     # This value determines the Home Manager release that your configuration is
@@ -30,23 +33,23 @@ in {
     stateVersion = "24.11";
     # Home Manager needs a bit of information about you and the paths it should
     # manage.
-    username = "tangerineDream";
-    homeDirectory = "/home/tangerineDream";
+    username = "tangerineDream-green";
+    homeDirectory = "/home/tangerineDream-green";
   };
 
   lib.${namespace} = {
     paths = rec {
-      # config = ~/.config;
-      kbd = ~/.bookmarks/kbn;
-      kbn = ~/.bookmarks/kbn;
-      # projects = ~/Projects;
+      # config = /home/ds13/.config;
+      kbd = /home/ds13/.bookmarks/kbn;
+      kbn = /home/ds13/.bookmarks/kbn;
+      projects = "${deploymentHostHome}/Projects";
 
-      dotfiles = "~/.local/dotfiles-";
+      dotfiles = "${deploymentHostHome}/.local/dotfiles-";
 
       # TODO: Make like in @creamsoda.
       # shared-dotfiles = "${dotfiles}/shared-";
-      shared-configs = "~/.bookmarks/shared-configs";
-      shared-scripts = "~/.bookmarks/shared-scripts";
+      shared-configs = "${deploymentHostHome}/.bookmarks/shared-configs";
+      shared-scripts = "${deploymentHostHome}/.bookmarks/shared-scripts";
 
       # TODO: Append home- like in @creamsoda.
       # As far as I can tell, we would need at least change paths in Ansible
@@ -143,8 +146,7 @@ in {
     };
     # @ts: IOpenCodeSkillOptions
     enabledSkills = {
-      # TODO: Requires workaround like an extra volume to kbn.
-      logseq-db-queries = false;
+      logseq-db-queries = true;
     };
   };
 }

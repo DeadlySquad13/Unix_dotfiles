@@ -30,8 +30,8 @@ in {
     stateVersion = "24.11";
     # Home Manager needs a bit of information about you and the paths it should
     # manage.
-    username = "tangerineDream";
-    homeDirectory = "/home/tangerineDream";
+    username = "ds13";
+    homeDirectory = "/home/ds13";
   };
 
   lib.${namespace} = {
@@ -94,13 +94,30 @@ in {
         enable = false;
       };
       general = {
-        enable = false;
+        enable = true;
 
         neovim = {
-          enabled = true;
+          enabled = true; # TODO: Remove.
           dev = true;
           stage = false;
         };
+
+        keepassxc = disabled;
+        ferdium = disabled;
+        telegram-desktop = disabled;
+        zathura = disabled;
+
+        wireguard-tools = disabled;
+        unzip = disabled;
+        keychain = disabled;
+        numlockx = disabled;
+        obs-studio = disabled;
+        qbittorrent = disabled;
+        syncthing = enabled;
+        btop = disabled;
+        flatpak = disabled;
+        java-fonts-fix = disabled;
+        gpick = disabled;
       };
       media = {
         enable = false;
@@ -130,21 +147,6 @@ in {
           stage = false;
         };
       };
-    };
-  };
-
-  # FIX:Infinite recursion.
-  ds-omega.ai-assistance.opencode = {
-    # @ts: IOpenCodeToolOptions
-    customTools = {
-      pizza = false;
-      zotero = false;
-      taskwarrior = false;
-    };
-    # @ts: IOpenCodeSkillOptions
-    enabledSkills = {
-      # TODO: Requires workaround like an extra volume to kbn.
-      logseq-db-queries = false;
     };
   };
 }

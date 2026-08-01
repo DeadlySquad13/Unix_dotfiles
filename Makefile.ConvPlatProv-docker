@@ -1,0 +1,28 @@
+# # Docker, StratoFrame__ConvPlatProv
+# Machines: (machine, home-manager user)
+#   NikolaiGogol                    ds13
+#   darkGreen-tangerineDream        tangerineDream
+#   darkGreen-tangerineDream-green  tangerineDream-green
+NIX_FLAGS = --impure --extra-experimental-features 'nix-command flakes' --show-trace
+
+# Generates the docker machine targets below.
+#   $(1) machine name (also the dockerConfiguration name)
+#   $(2) home-manager user
+define docker-targets
+.PHONY: build-$(1)-hm switch-$(1)-system build-$(1)-system build-$(1)
+build-$(1)-hm:
+	home-manager build --flake .#$(2)@$(1) $(NIX_FLAGS)
+
+switch-$(1)-system:
+	sudo nixos-rebuild switch --flake .#$(1)_inner --impure
+
+build-$(1)-system:
+	sudo nixos-rebuild build --flake .#$(1)_inner --impure --show-trace
+
+build-$(1):
+	nix build --out-link result-$(1) .#dockerConfigurations.$(1) $(NIX_FLAGS)
+endef
+
+$(eval $(call docker-targets,NikolaiGogol,ds13))
+$(eval $(call docker-targets,darkGreen-tangerineDream,tangerineDream))
+$(eval $(call docker-targets,darkGreen-tangerineDream-green,tangerineDream-green))

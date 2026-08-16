@@ -18,6 +18,7 @@
   ...
 }: let
   inherit (lib.${namespace}) disabled enabled;
+
   # The system of this home config is deployed from a host different than
   # a system it will be deployed to. This home is used when deploying docker container.
   deploymentHostHome = "/home/ds13";
@@ -104,6 +105,9 @@ in {
           dev = true;
           stage = false;
         };
+
+        unzip = enabled;
+        proxychains-ng = enabled;
       };
       media = {
         enable = false;

@@ -16,23 +16,26 @@
   # All other arguments come from the home home.
   config,
   ...
-}:
-let
+}: let
   inherit (lib.${namespace}) disabled enabled;
-in
-{
+in {
+  # REFACTOR: Implement auto-import via Snowfall-lib utils.
+  imports = [
+    ./apps/ecosystem/sops-opencode/default.nix
+  ];
+
   /*
-       snowfallorg.user = {
-      enable = true;
-      name = "ds-omega";
-    };
+     snowfallorg.user = {
+    enable = true;
+    name = "ds-omega";
+  };
   */
 
   /*
-       home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-    };
+     home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+  };
   */
   system = {
     # This value determines the Home Manager release that your configuration is
@@ -45,7 +48,8 @@ in
     stateVersion = "24.11";
   };
 
-  /* systemd.services.docker-setup = {
+  /*
+  systemd.services.docker-setup = {
     description = "Docker container setup commands";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
@@ -59,7 +63,8 @@ in
       ];
       RemainAfterExit = true;
     };
-  }; */
+  };
+  */
   networking.hostName = "darkGreen-tangerineDream-green";
 
   # programs.ssh.startAgent = true;
@@ -87,11 +92,27 @@ in
   ];
 
   lib.ds-omega = {
+    common = {
+      # For resolving docker mounts -> inner filesystem.
+      spiceNamespace = "darkGreen";
+      systemBaseName = "tangerineDream-green";
+    };
+
+    paths = {
+      # STYLE: Name our paths properly.
+      system = "/usr/local/";
+    };
+
     modules = {
+      ai-assistance = {
+        enable = true;
+      };
       ecosystem = {
         enable = false;
 
         nix = disabled;
+        sops = enabled;
+        sops-opencode = enabled;
       };
       development = {
         enable = true;

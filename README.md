@@ -433,7 +433,8 @@ format.
 
 ### Runtime Secrets
 
-Use [sops-nix](https://github.com/Mic92/sops-nix?tab=readme-ov-file).
+Use [sops-nix](https://github.com/Mic92/sops-nix?tab=readme-ov-file). Some
+pitfalls are described in [CONTRIBUTING, "Secrets Management" section](<CONTRIBUTING#Secrets Management>)
 
 ### Build-time Secrets
 
@@ -458,7 +459,7 @@ For more detail see:
 * `decrypt-build-time-secrets` at [Makefile](./Makefile).
 * [secrets tasks collection](./tasks/secrets.py)
 
-> [!warning] Secrets at evaluation time is not secure enough. 
+> [!warning] Secrets at evaluation time is not secure enough.
 > Use only for secrets you don't care that much (by someone that has access to
 > your file system, any user has access to store) but still don't want to show
 > in a public repository [Source][@/ComparisonSecretManaging]|[Zotero][z@/ComparisonSecretManaging].

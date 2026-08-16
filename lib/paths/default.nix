@@ -7,6 +7,11 @@
   inherit (inputs.nixpkgs.lib) strings;
   inherit (lib.${namespace}) disabled enabled;
 in {
+  # TODO: We have a bit strange hard-dependency on
+  # `config.lib.${namespace}.paths` in this function. If it's missing, it will
+  # be `{}` => path will be `null` => nix will throw error. We should either
+  # make it more friendly error "set config...paths" or further abstract this
+  # function from our config.
   get-path = {
     config,
     cb,

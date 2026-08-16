@@ -11,7 +11,8 @@
     inputs.sops-nix.homeManagerModules.sops
   ];
 }
-// lib.${namespace}.mkIfEnabled {
+// lib.${namespace}.mkIfEnabled
+{
   inherit config;
   category = "ecosystem";
   name = "sops";
@@ -23,7 +24,8 @@
   ];
 
   sops = {
-    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!
+    # This is using an age key that is expected to already be in the filesystem
+    age.keyFile = lib.mkDefault "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!
     # REFACTOR: Targeting root of Unix_dotfiles.
     defaultSopsFile = ../../../../../secrets/secrets.yaml;
     secrets = {
@@ -37,6 +39,21 @@
       };
       yandex_disk_username = {};
       yandex_disk_password = {};
+      codexapi_api_key = {};
+    };
+    templates."opencode-auth.json" = {
+      content =
+        /*
+        json
+        */
+        ''
+          {
+            "openai": {
+              "type": "api",
+              "key": "${config.sops.placeholder.codexapi_api_key}"
+            }
+          }
+        '';
     };
   };
 }

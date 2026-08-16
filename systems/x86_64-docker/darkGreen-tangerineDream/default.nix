@@ -21,6 +21,11 @@ let
   inherit (lib.${namespace}) disabled enabled;
 in
 {
+  # REFACTOR: Implement auto-import via Snowfall-lib utils.
+  imports = [
+    ./apps/ecosystem/sops-opencode/default.nix
+  ];
+
   /*
        snowfallorg.user = {
       enable = true;
@@ -87,11 +92,27 @@ in
   ];
 
   lib.ds-omega = {
+    common = {
+      # For resolving docker mounts -> inner filesystem.
+      spiceNamespace = "darkGreen";
+      systemBaseName = "tangerineDream";
+    };
+
+    paths = {
+      # STYLE: Name our paths properly.
+      system = "/usr/local/";
+    };
+
     modules = {
+      ai-assistance = {
+        enable = true;
+      };
       ecosystem = {
         enable = false;
 
         nix = disabled;
+        sops = enabled;
+        sops-opencode = enabled;
       };
       development = {
         enable = true;

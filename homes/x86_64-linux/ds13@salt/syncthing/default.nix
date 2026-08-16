@@ -60,6 +60,18 @@ in
           devices = ["POCO X6 Pro 5G"];
         };
 
+        "Camera@PocoX6Pro5G" = {
+          path = "/shared/archive-resources-/Archive/Backup/_media/PocoX6Pro5G";
+          id = "2311drk48g_5v75-photos";
+          devices = ["POCO X6 Pro 5G"];
+        };
+        
+        "Dictionaries" = {
+          path = "/shared/archive-resources-/Archive/Installers/Dictionaries";
+          id = "tva41-8zxxx";
+          devices = ["POCO X6 Pro 5G"];
+        };
+
         "shared-Documents" = {
           path = "/shared/archive-resources-/Archive/YandexDisk/Documents";
           id = shared.folderIds.shared-Documents;

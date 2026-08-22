@@ -15,6 +15,7 @@ in
   {
     sops = {
       secrets = {
+        cheap_vibe_code_api_key = {};
         codexapi_api_key = {};
       };
       templates."opencode-auth.json" = {
@@ -27,12 +28,20 @@ in
           */
           ''
             {
-                "openai": {
+                "cheapvibecode": {
                     "type": "api",
-                    "key": "${config.sops.placeholder.codexapi_api_key}"
+                    "key": "${config.sops.placeholder.cheap_vibe_code_api_key}"
                 }
             }
           '';
+          # ''
+          #   {
+          #       "openai": {
+          #           "type": "api",
+          #           "key": "${config.sops.placeholder.codexapi_api_key}"
+          #       }
+          #   }
+          # '';
       };
     };
   }

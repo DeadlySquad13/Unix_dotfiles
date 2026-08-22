@@ -11,6 +11,8 @@ in
   {
     imports = [
       ./opencode-docker-fix.nix
+      ./mcp.nix
+      ./providers/opencode-cheapvibecode.provider.nix
       ./tools/pizza.nix
       ./tools/taskwarrior.nix
       ./tools/zotero.nix
@@ -67,11 +69,11 @@ in
               };
             };
           };
-          openai = {
-            options = {
-              baseURL = "https://alt.codexapi.work/v1";
-            };
-          };
+          # openai = {
+          #   options = {
+          #     baseURL = "https://alt.codexapi.work/v1";
+          #   };
+          # };
         };
       };
 

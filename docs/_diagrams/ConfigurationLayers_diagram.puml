@@ -1,0 +1,27 @@
+@startuml
+title Layered configuration: inputs, modules, and generated output
+left to right direction
+component "Reusable modules\n(options and behavior)\n\nExample:\noptions.foo.bar.path\nconfig.services.foo" as modules
+component "Repository namespace\n(user-facing inputs)\n\nExample:\nconfig.ds-omega.foo.bar.path\nconfig.ds-omega.hosts.<name>" as inputs
+component "Per-host / per-user glue\n(local wiring)\n\nExample:\nfoo.path = config.sops.templates.\"foo.env\".path" as glue
+component "Processed program\nconfiguration\n\nExample:\nprograms.foo.settings\nprograms.foo.services" as processed
+component "Generated files / runtime\n\nExample:\nfoo.conf\nuser systemd unit\ncontainer / service" as output
+
+modules --> inputs : declare / consume contracts
+glue --> inputs : supply local values
+modules --> processed : evaluate
+inputs --> processed : consume
+processed --> output : generate / apply
+
+note bottom of inputs
+Repository namespace means the flake's own namespaced option tree,
+usually config.<namespace> (for example config.ds-omega).
+It is distinct from standard module namespaces such as
+programs, services, and home.
+end note
+
+note bottom of modules
+Concrete SOPS/OpenCode example:
+docs/adr/sops-opencode.md
+end note
+@enduml

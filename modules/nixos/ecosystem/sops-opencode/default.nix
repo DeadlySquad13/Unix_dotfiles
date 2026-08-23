@@ -17,23 +17,31 @@ in
       secrets = {
         cheap_vibe_code_api_key = {};
         codexapi_api_key = {};
+        logseq_api_token = {};
       };
-      templates."opencode-auth.json" = {
-        owner = cfg.username;
-        group = "users";
-        mode = "0600";
-        content =
-          /*
-          json
-          */
-          ''
-            {
-                "cheapvibecode": {
-                    "type": "api",
-                    "key": "${config.sops.placeholder.cheap_vibe_code_api_key}"
-                }
-            }
-          '';
+      templates = {
+        "logseq-mcp.env" = {
+          owner = cfg.username;
+          group = "users";
+          mode = "0600";
+          content = "LOGSEQ_API_TOKEN=${config.sops.placeholder.logseq_api_token}";
+        };
+        "opencode-auth.json" = {
+          owner = cfg.username;
+          group = "users";
+          mode = "0600";
+          content =
+            /*
+            json
+            */
+            ''
+              {
+                  "cheapvibecode": {
+                      "type": "api",
+                      "key": "${config.sops.placeholder.cheap_vibe_code_api_key}"
+                  }
+              }
+            '';
           # ''
           #   {
           #       "openai": {
@@ -42,6 +50,7 @@ in
           #       }
           #   }
           # '';
+        };
       };
     };
   }

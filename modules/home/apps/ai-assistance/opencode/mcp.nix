@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  namespace,
   ...
 }: let
   inherit
@@ -16,6 +17,12 @@
   mcpoUrl = serverName: mcpoBaseUrl + "/" + serverName;
 
   mcpoServers = {
+    filesystem-mcpo = {
+      url = mcpoUrl "filesystem";
+    };
+    memory-mcpo = {
+      url = mcpoUrl "memory";
+    };
     time-mcpo = {
       url = mcpoUrl "time";
     };
@@ -34,12 +41,13 @@
   };
 
   # # Container approach.
-  cfg = config.programs.opencode.mcpContainers;
+  cfg = config.${namespace}.ai-assistance.opencode.mcp;
+  mcpContainersCfg = config.programs.opencode.mcpContainers;
   containerPort = 8000;
   endpointFor = name: server: {
     type = "remote";
     url =
-      if cfg.accessMode == "docker-network"
+      if mcpContainersCfg.accessMode == "docker-network"
       then "http://mcp-${name}:${toString containerPort}${server.endpointPath}"
       else "http://127.0.0.1:${toString server.hostPort}${server.clientEndpointPath}";
   };
@@ -64,12 +72,6 @@ in {
       ];
       default = "host";
       description = "Whether OpenCode reaches MCP servers through host loopback ports or the shared Docker network.";
-    };
-
-    logseqEnvironmentFile = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      description = "Runtime environment file containing LOGSEQ_API_TOKEN for the Logseq MCP server.";
     };
 
     servers = mkOption {
@@ -130,6 +132,20 @@ in {
             "mcp-server-fetch"
           ];
         };
+        filesystem = {
+          image = "supercorp/supergateway:uvx";
+          hostPort = 18106;
+          endpointPath = "/mcp";
+          clientEndpointPath = "/sse";
+          stdioCommand = [ "npx" "-y" "@modelcontextprotocol/server-filesystem" "/kbn" ];
+        };
+        memory = {
+          image = "supercorp/supergateway:latest";
+          hostPort = 18107;
+          endpointPath = "/mcp";
+          clientEndpointPath = "/sse";
+          stdioCommand = [ "npx" "-y" "@modelcontextprotocol/server-memory" ];
+        };
         logseq = {
           image = "supercorp/supergateway:uvx";
           hostPort = 18103;
@@ -169,11 +185,23 @@ in {
     };
   };
 
+  options.${namespace}.ai-assistance.opencode.mcp.logseqEnvironmentFile = mkOption {
+    type = types.nullOr types.str;
+    default = null;
+    description = "Runtime SOPS environment file for the Logseq MCP server.";
+  };
+
   # QUESTION: Levae as mcp.nix in opencode and move rest to a seperate generic module mcp?
-  config = mkIf (config.programs.opencode.enable && cfg.enable) {
+  config = mkIf (config.programs.opencode.enable && mcpContainersCfg.enable) {
     programs = {
       opencode.enableMcpIntegration = true;
       opencode.settings.mcp = {
+        filesystem-mcpo = {
+          enabled = false;
+        };
+        memory-mcpo = {
+          enabled = false;
+        };
         time-mcpo = {
           enabled = false;
         };
@@ -192,7 +220,7 @@ in {
       };
       mcp = {
         enable = true;
-        servers = mapAttrs endpointFor cfg.servers // mcpoServers;
+        servers = mapAttrs endpointFor mcpContainersCfg.servers // mcpoServers;
       };
     };
   };

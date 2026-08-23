@@ -23,6 +23,7 @@ in {
   imports = [
     ./syncthing/default.nix
     ./apps/network/sshfs/default.nix
+    ./apps/ecosystem/sops-opencode/default.nix
   ];
 
   home = {
@@ -186,7 +187,9 @@ in {
     };
   };
 
-  ${namespace}.development.docker = {
-    enableAlias = true;
+  ${namespace} = {
+    development.docker = {
+      enableAlias = true;
+    };
   };
 }

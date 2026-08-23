@@ -11,7 +11,8 @@
         container_name = "mcp-${name}";
         ports = ["127.0.0.1:${toString server.hostPort}:${toString containerPort}"];
         networks.mcp.aliases = ["mcp-${name}"];
-        restart = "unless-stopped";
+          restart = "unless-stopped";
+          volumes = lib.optionals (name == "filesystem") [ "/home/ds13/.bookmarks/kbn:/kbn:ro" ];
       }
       // optionalAttrs (server.environment != {}) {inherit (server) environment;}
       // optionalAttrs (server.extraHosts != []) {extra_hosts = server.extraHosts;}

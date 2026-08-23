@@ -392,8 +392,7 @@ Snowfall Lib automatically:
 Within your Nix files, you have access to:
 
 * `inputs`: Your flake's inputs, allowing you to use other flakes.
-* `lib`: A merged library that includes your own functions and those from inputs.
-
+* `lib`: A merged library that includes your own functions and those from inputs. Just create a new module at `./lib/<moduleName>`
 Example usage:
 
 ```nix

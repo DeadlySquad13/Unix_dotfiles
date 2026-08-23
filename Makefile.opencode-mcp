@@ -1,0 +1,24 @@
+# OpenCode MCP containers
+MCP_SERVICE := opencode-mcp.service
+
+# Run after `make switch` to start the generated Compose stack at login.
+.PHONY: mcp-bootstrap mcp-start mcp-stop mcp-restart mcp-status mcp-logs
+
+mcp-bootstrap:
+	systemctl --user daemon-reload
+	systemctl --user enable --now $(MCP_SERVICE)
+
+mcp-start:
+	systemctl --user start $(MCP_SERVICE)
+
+mcp-stop:
+	systemctl --user stop $(MCP_SERVICE)
+
+mcp-restart:
+	systemctl --user restart $(MCP_SERVICE)
+
+mcp-status:
+	systemctl --user status $(MCP_SERVICE)
+
+mcp-logs:
+	journalctl --user --unit $(MCP_SERVICE) --follow

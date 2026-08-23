@@ -12,6 +12,7 @@ in
     imports = [
       ./opencode-docker-fix.nix
       ./mcp.nix
+      ./mcp-compose.nix
       ./providers/opencode-cheapvibecode.provider.nix
       ./tools/pizza.nix
       ./tools/taskwarrior.nix

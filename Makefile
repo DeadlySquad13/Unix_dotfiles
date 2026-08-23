@@ -156,3 +156,5 @@ trampoline:
 # StratoFrame__ConvPlatProv (Templates)
 add-opencode-skill:
 	invoke --search-root=./tasks add-opencode-skill $(call args,default)
+
+include Makefile.opencode-mcp

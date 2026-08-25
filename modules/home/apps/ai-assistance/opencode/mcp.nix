@@ -239,11 +239,63 @@ in {
             enabled = false;
           };
         };
-        ddg-search-mcpo = {
-          enabled = false;
+        # Globs are required as we actually disable tools (that are part of
+        # mcps)
+        # Reference: https://github.com/anomalyco/opencode/pull/6306
+        tools = {
+          "filesystem*" = false;
+          "memory*" = false;
+          "time*" = false;
+          "fetch*" = false;
+          "logseq*" = false;
+          "ddg-search*" = false;
+          "nixos*" = false;
         };
-        nixos-mcpo = {
-          enabled = false;
+        agent = rec {
+          build = {
+            tools = {
+              "time*" = true;
+              "memory*" = true;
+            };
+          };
+          plan = {
+            tools =
+              build.tools
+              // {
+                "fetch*" = true;
+                "ddg-search*" = true;
+              };
+          };
+          docs-writer = {
+            tools =
+              plan.tools
+              // {
+                "filesystem*" = true;
+              };
+          };
+          kbn = {
+            tools =
+              docs-writer.tools
+              // {
+                "logseq*" = true;
+              };
+          };
+
+          # These agents are currently defined in Unix_dotfiles.
+          nix-build = {
+            tools =
+              build.tools
+              // {
+                "nixos*" = true;
+              };
+          };
+          nix-plan = {
+            tools =
+              plan.tools
+              // {
+                "nixos*" = true;
+              };
+          };
         };
       };
       mcp = {

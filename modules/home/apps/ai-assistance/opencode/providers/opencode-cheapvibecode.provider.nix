@@ -12,7 +12,7 @@ lib.ds-omega.mkIfEnabled
 }
 {
   programs.opencode.settings = {
-    small_model = "cheapvibecode/claude-haiku-4-5";
+    small_model = "cheapvibecode/deepseek-v4-flash";
     provider.cheapvibecode = {
       npm = "@ai-sdk/openai-compatible";
       name = "CheapVibeCode";

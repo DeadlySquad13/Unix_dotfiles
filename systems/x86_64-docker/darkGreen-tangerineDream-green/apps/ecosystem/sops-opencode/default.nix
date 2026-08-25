@@ -18,6 +18,5 @@ in
       # The username of the main user that runs opencode.
       # Used for permissions.
       username = systemBaseName;
-      mcp.logseqEnvironmentFile = config.sops.templates."logseq-mcp.env".path;
     };
   }

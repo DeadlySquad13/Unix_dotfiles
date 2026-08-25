@@ -23,6 +23,10 @@
   # a system it will be deployed to. This home is used when deploying docker container.
   deploymentHostHome = "/home/ds13";
 in {
+  imports = [
+    ./apps/ecosystem/sops-opencode/default.nix
+  ];
+
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release

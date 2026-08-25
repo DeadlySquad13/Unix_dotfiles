@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  namespace,
   ...
 }: let
   inherit
@@ -41,7 +40,7 @@
   };
 
   # # Container approach.
-  cfg = config.${namespace}.ai-assistance.opencode.mcp;
+  cfg = config.ds-omega.ai-assistance.opencode.mcp;
   mcpContainersCfg = config.programs.opencode.mcpContainers;
   containerPort = 8000;
   endpointFor = name: server: {
@@ -65,6 +64,8 @@ in {
       description = "Rootless Docker socket used by the MCP user service.";
     };
 
+    # TODO: Add a namespace option once needed and set in system. Similarly to
+    # logseqEnvironmentFile
     accessMode = mkOption {
       type = types.enum [
         "host"
@@ -116,6 +117,11 @@ in {
           hostPort = 18101;
           endpointPath = "/mcp";
           clientEndpointPath = "/sse";
+          # Workaround: mcp-logseq 1.8.0 uses the MCP 1.x Server API, while
+          # uvx otherwise resolves mcp 2.x, which removed Server.list_tools.
+          # Remove `--with mcp<2` after a mcp-logseq release supports MCP 2.x.
+          # Check its declared dependency with:
+          # `uvx --from mcp-logseq python -c 'import importlib.metadata as m; print(m.metadata("mcp-logseq").get_all("Requires-Dist"))'`
           stdioCommand = [
             "uvx"
             "mcp-server-time"
@@ -137,14 +143,23 @@ in {
           hostPort = 18106;
           endpointPath = "/mcp";
           clientEndpointPath = "/sse";
-          stdioCommand = [ "npx" "-y" "@modelcontextprotocol/server-filesystem" "/kbn" ];
+          stdioCommand = [
+            "npx"
+            "-y"
+            "@modelcontextprotocol/server-filesystem"
+            "/kbn"
+          ];
         };
         memory = {
           image = "supercorp/supergateway:latest";
           hostPort = 18107;
           endpointPath = "/mcp";
           clientEndpointPath = "/sse";
-          stdioCommand = [ "npx" "-y" "@modelcontextprotocol/server-memory" ];
+          stdioCommand = [
+            "npx"
+            "-y"
+            "@modelcontextprotocol/server-memory"
+          ];
         };
         logseq = {
           image = "supercorp/supergateway:uvx";
@@ -153,6 +168,11 @@ in {
           clientEndpointPath = "/sse";
           stdioCommand = [
             "uvx"
+            "--refresh"
+            "--from"
+            "mcp-logseq==1.8.0"
+            "--with"
+            "mcp<2"
             "mcp-logseq"
           ];
           environment.LOGSEQ_API_URL = "http://host.docker.internal:12315";
@@ -185,7 +205,7 @@ in {
     };
   };
 
-  options.${namespace}.ai-assistance.opencode.mcp.logseqEnvironmentFile = mkOption {
+  options.ds-omega.ai-assistance.opencode.mcp.logseqEnvironmentFile = mkOption {
     type = types.nullOr types.str;
     default = null;
     description = "Runtime SOPS environment file for the Logseq MCP server.";
@@ -195,21 +215,29 @@ in {
   config = mkIf (config.programs.opencode.enable && mcpContainersCfg.enable) {
     programs = {
       opencode.enableMcpIntegration = true;
-      opencode.settings.mcp = {
-        filesystem-mcpo = {
-          enabled = false;
-        };
-        memory-mcpo = {
-          enabled = false;
-        };
-        time-mcpo = {
-          enabled = false;
-        };
-        fetch-mcpo = {
-          enabled = false;
-        };
-        logseq-mcpo = {
-          enabled = false;
+      opencode.settings = {
+        mcp = {
+          filesystem-mcpo = {
+            enabled = false;
+          };
+          memory-mcpo = {
+            enabled = false;
+          };
+          time-mcpo = {
+            enabled = false;
+          };
+          fetch-mcpo = {
+            enabled = false;
+          };
+          logseq-mcpo = {
+            enabled = false;
+          };
+          ddg-search-mcpo = {
+            enabled = false;
+          };
+          nixos-mcpo = {
+            enabled = false;
+          };
         };
         ddg-search-mcpo = {
           enabled = false;
@@ -220,7 +248,7 @@ in {
       };
       mcp = {
         enable = true;
-        servers = mapAttrs endpointFor mcpContainersCfg.servers // mcpoServers;
+        servers = (mapAttrs endpointFor mcpContainersCfg.servers) // mcpoServers;
       };
     };
   };

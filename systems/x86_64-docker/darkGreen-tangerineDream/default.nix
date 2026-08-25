@@ -67,6 +67,28 @@ in
   }; */
   networking.hostName = "darkGreen-tangerineDream";
 
+  services.runtime-home-bridge = {
+    enable = true;
+    user = "tangerineDream";
+    homeDirectory = "/home/tangerineDream";
+    namespaceRoot = "/usr/local/darkGreen-/tangerineDream";
+    required = true;
+    variants = {
+      orchestrator = [
+        { source = "_configs/Unix_dotfiles"; target = ".bookmarks/shared-configs/Unix_dotfiles"; }
+        { source = "Projects/--personal/AiAssistance__"; target = "Projects/--personal/AiAssistance__"; }
+      ];
+      convPlatProv = [
+        { source = "_configs"; target = ".bookmarks/shared-configs"; }
+        { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
+      ];
+      full = [
+        { source = "_configs"; target = ".bookmarks/shared-configs"; }
+        { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
+      ];
+    };
+  };
+
   # programs.ssh.startAgent = true;
   users.users.tangerineDream = {
     isNormalUser = true;

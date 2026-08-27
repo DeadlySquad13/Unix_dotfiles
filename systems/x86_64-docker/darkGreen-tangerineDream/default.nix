@@ -73,19 +73,26 @@ in
     homeDirectory = "/home/tangerineDream";
     namespaceRoot = "/usr/local/darkGreen-/tangerineDream";
     required = true;
-    variants = {
+    variants = rec {
+      base = [
+        { source = "_cache/opencode"; target = ".cache/opencode"; }
+        { source = "_cache/opencode__node_modules"; target = ".config/opencode/node_modules"; }
+        { source = "_state/opencode"; target = ".local/state/opencode"; }
+        { source = "_share/opencode"; target = ".local/share/opencode"; }
+      ];
       orchestrator = [
         { source = "_configs/Unix_dotfiles"; target = ".bookmarks/shared-configs/Unix_dotfiles"; }
-        { source = "Projects/--personal/AiAssistance__"; target = "Projects/--personal/AiAssistance__"; }
-      ];
+        { source = "Projects/--personal/AiAssistance__"; target = ".bookmarks/projects/--personal/AiAssistance__"; }
+      ] ++ base;
       convPlatProv = [
         { source = "_configs"; target = ".bookmarks/shared-configs"; }
         { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
-      ];
+      ] ++ base;
       full = [
         { source = "_configs"; target = ".bookmarks/shared-configs"; }
         { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
-      ];
+        { source = "Projects"; target = ".bookmarks/shared-projects"; }
+      ] ++ base;
     };
   };
 

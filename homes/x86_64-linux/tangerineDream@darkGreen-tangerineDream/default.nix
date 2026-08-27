@@ -23,6 +23,15 @@
   # a system it will be deployed to. This home is used when deploying docker container.
   deploymentHostHome = "/home/ds13";
 in {
+  # REFACTOR: Implement auto-import via Snowfall-lib utils.
+  # imports = [
+  #   ../../../modules/home/bookmarks/darkGreen-/tangerineDream/default.nix
+  # ];
+  # REFACTOR: Implement auto-import via Snowfall-lib utils.
+  imports = [
+    ./apps/ecosystem/sops-opencode/default.nix
+  ];
+
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release

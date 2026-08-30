@@ -80,6 +80,8 @@ in {
     modules = {
       ai-assistance = {
         enable = true;
+        codex = disabled;
+        claude-code = disabled;
       };
       architecturing = {
         enable = false;

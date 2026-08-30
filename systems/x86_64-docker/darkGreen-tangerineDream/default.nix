@@ -16,28 +16,28 @@
   # All other arguments come from the home home.
   config,
   ...
-}:
-let
+}: let
   inherit (lib.${namespace}) disabled enabled;
-in
-{
+  systemBaseName = "tangerineDream";
+in {
   # REFACTOR: Implement auto-import via Snowfall-lib utils.
   imports = [
     ./apps/ecosystem/sops-opencode/default.nix
+    ./services/runtime-home-bridge/default.nix
   ];
 
   /*
-       snowfallorg.user = {
-      enable = true;
-      name = "ds-omega";
-    };
+     snowfallorg.user = {
+    enable = true;
+    name = "ds-omega";
+  };
   */
 
   /*
-       home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-    };
+     home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+  };
   */
   system = {
     # This value determines the Home Manager release that your configuration is
@@ -50,7 +50,8 @@ in
     stateVersion = "24.11";
   };
 
-  /* systemd.services.docker-setup = {
+  /*
+  systemd.services.docker-setup = {
     description = "Docker container setup commands";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
@@ -64,42 +65,14 @@ in
       ];
       RemainAfterExit = true;
     };
-  }; */
+  };
+  */
   networking.hostName = "darkGreen-tangerineDream";
 
-  services.runtime-home-bridge = {
-    enable = true;
-    user = "tangerineDream";
-    homeDirectory = "/home/tangerineDream";
-    namespaceRoot = "/usr/local/darkGreen-/tangerineDream";
-    required = true;
-    variants = rec {
-      base = [
-        { source = "_cache/opencode"; target = ".cache/opencode"; }
-        { source = "_cache/opencode__node_modules"; target = ".config/opencode/node_modules"; }
-        { source = "_state/opencode"; target = ".local/state/opencode"; }
-        { source = "_share/opencode"; target = ".local/share/opencode"; }
-      ];
-      orchestrator = [
-        { source = "_configs/Unix_dotfiles"; target = ".bookmarks/shared-configs/Unix_dotfiles"; }
-        { source = "Projects/--personal/AiAssistance__"; target = ".bookmarks/projects/--personal/AiAssistance__"; }
-      ] ++ base;
-      convPlatProv = [
-        { source = "_configs"; target = ".bookmarks/shared-configs"; }
-        { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
-      ] ++ base;
-      full = [
-        { source = "_configs"; target = ".bookmarks/shared-configs"; }
-        { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
-        { source = "Projects"; target = ".bookmarks/shared-projects"; }
-      ] ++ base;
-    };
-  };
-
   # programs.ssh.startAgent = true;
-  users.users.tangerineDream = {
+  users.users.${systemBaseName} = {
     isNormalUser = true;
-    home = "/home/tangerineDream";
+    home = "/home/${systemBaseName}";
     extraGroups = [
       "wheel"
       "networkmanager"
@@ -124,7 +97,7 @@ in
     common = {
       # For resolving docker mounts -> inner filesystem.
       spiceNamespace = "darkGreen";
-      systemBaseName = "tangerineDream";
+      inherit systemBaseName;
     };
 
     paths = {
@@ -145,6 +118,11 @@ in
       };
       development = {
         enable = true;
+      };
+
+      services = {
+        enable = false;
+        runtime-home-bridge = enabled;
       };
     };
   };

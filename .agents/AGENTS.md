@@ -54,6 +54,16 @@ See .[Configuration Layers diagram](./docs/_diagrams/ConfigurationLayers_diagram
 - Review the final diff for unintended source, generated, secret, or unrelated
   changes. Do not commit unless explicitly asked.
 
+## Snowfall module-arg `lib` is flat-merged
+
+Each `lib/<name>/default.nix` exports an attrset, and Snowfall merges every
+lib file **flat** into a single namespace attrset (`lib.<namespace>`). The
+filesystem directory does not become a nested namespace. For example, a
+function defined in `lib/runtime-home-bridge/default.nix` is reached as
+`lib.ds-omega.resolveRuntimePaths`, **not** `lib.ds-omega.runtime-home-bridge.resolveRuntimePaths`.
+Use the flat path. This applies to the module-arg `lib` (`{ lib, ... }:`) in
+modules and checks; it is distinct from `config.lib.<namespace>.*` options.
+
 ## Documentation synchronization
 
 - Update the governing ADR or guide when an implementation lesson, boundary,

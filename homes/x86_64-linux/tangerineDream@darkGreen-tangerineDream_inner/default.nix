@@ -35,11 +35,21 @@ in {
   };
 
   lib.${namespace} = {
-    paths = rec {
+    # Resolve runtime-home-bridge-created `.bookmarks` links to their symlink-free
+    # real paths, so they can be handed to Nix as paths. Only keys present in the
+    # host's bridge catalog are rewritten; other `.bookmarks` keys pass through.
+    # See lib/runtime-home-bridge/default.nix.
+    paths = lib.${namespace}.resolveRuntimePaths {
+      inherit (config.home) homeDirectory;
+      resolutions = lib.${namespace}.mkResolutions {
+        inherit (config.home) homeDirectory;
+        catalog = lib.${namespace}.catalogs.darkGreen-tangerineDream;
+      };
+    } rec {
       # config = ~/.config;
       kbd = ~/.bookmarks/kbn;
       kbn = ~/.bookmarks/kbn;
-      # projects = ~/Projects;
+      projects = "~/.bookmarks/projects";
 
       dotfiles = "~/.local/dotfiles-";
 

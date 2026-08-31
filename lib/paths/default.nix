@@ -35,6 +35,28 @@ in {
   }.result;
 
   /*
+  Resolve `~/.bookmarks/<x>` keys to their symlink-free real paths **only when
+  they are present in the host's runtime-home-bridge attrset** (`resolutions`).
+  Keys the runtime bridge does not manage, and any other value (plain strings or
+  Nix path literals with store-copy semantics), pass through unchanged.
+
+  This is narrow on purpose: only links the runtime-home-bridge actually creates
+  are necessarily symlinks that a Nix path context cannot traverse. Home Manager
+  bookmarks (`mkOutOfStoreSymlink`) and plain build-host paths are fine as-is and
+  must not be rewritten. If a host does not enable the bridge, pass `{}` and
+  nothing is resolved.
+  */
+  resolveRuntimePaths = { homeDirectory, resolutions }: paths:
+    builtins.mapAttrs (_name: value: let
+      s = builtins.toString value;
+      key =
+        if strings.hasPrefix "~/" s
+        then "${homeDirectory}/${strings.removePrefix "~/" s}"
+        else s;
+    in
+      if builtins.hasAttr key resolutions then resolutions.${key} else value) paths;
+
+  /*
   @usage
     Assign result of this function to a `home.file."somepath"`.
   @example

@@ -5,6 +5,20 @@
   ...
 }: let
   inherit (inputs.nixpkgs.lib) concatMapAttrs listToAttrs nameValuePair toJSON;
+  opencodeBase = [
+    { source = "_cache/opencode"; target = ".cache/opencode"; }
+    { source = "_cache/opencode__node_modules"; target = ".config/opencode/node_modules"; }
+    { source = "_state/opencode"; target = ".local/state/opencode"; }
+    { source = "_share/opencode"; target = ".local/share/opencode"; }
+  ];
+
+  sharedConfigs = { source = "_configs"; target = ".bookmarks/shared-configs"; };
+  sharedScripts = { source = "_scripts"; target = ".bookmarks/shared-scripts"; };
+  sharedProjects = {
+    zSource = "shared-/@salt/shared-/Projects";
+    source = "shared-Projects";
+    target = ".bookmarks/shared-projects";
+  };
 in {
   # Host-specific runtime-home-bridge catalogs. Pure data; the system side
   # feeds them into the bridge service and the home side derives bookmark
@@ -15,12 +29,7 @@ in {
     namespaceRoot = "/usr/local/darkGreen-/tangerineDream";
     zNamespaceRoot = "/ztangerineDream";
     variants = rec {
-      base = [
-        { source = "_cache/opencode"; target = ".cache/opencode"; }
-        { source = "_cache/opencode__node_modules"; target = ".config/opencode/node_modules"; }
-        { source = "_state/opencode"; target = ".local/state/opencode"; }
-        { source = "_share/opencode"; target = ".local/share/opencode"; }
-      ];
+      base = opencodeBase;
       baseForSwitch = [
         # darkGreen-tangerineDream is intended to be deployed and then
         # switched. We need these mounts specifically during switching (on
@@ -36,17 +45,13 @@ in {
         { source = "_configs/Unix_dotfiles"; target = ".bookmarks/shared-configs/Unix_dotfiles"; }
       ] ++ baseForSwitch;
       convPlatProv = [
-        { source = "_configs"; target = ".bookmarks/shared-configs"; }
-        { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
+        sharedConfigs
+        sharedScripts
       ] ++ baseForSwitch;
       full = [
-        { source = "_configs"; target = ".bookmarks/shared-configs"; }
-        { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
-        {
-          zSource = "shared-/@salt/shared-/Projects";
-          source = "shared-Projects";
-          target = ".bookmarks/shared-projects";
-        }
+        sharedConfigs
+        sharedScripts
+        sharedProjects
       ] ++ baseForSwitch;
     };
   };
@@ -55,19 +60,18 @@ in {
     namespaceRoot = "/usr/local/darkGreen-/tangerineDream-green";
     zNamespaceRoot = "/ztangerineDream-green";
     variants = rec {
-      base = [
-        { source = "_cache/opencode"; target = ".cache/opencode"; }
-        { source = "_cache/opencode__node_modules"; target = ".config/opencode/node_modules"; }
-        { source = "_state/opencode"; target = ".local/state/opencode"; }
-        { source = "_share/opencode"; target = ".local/share/opencode"; }
-      ];
+      base = opencodeBase;
       green = [
-        { source = "_configs"; target = ".bookmarks/shared-configs"; }
-        { source = "_scripts"; target = ".bookmarks/shared-scripts"; }
+        sharedConfigs
+        sharedScripts
+        sharedProjects
+        # darkGreen-tangerineDream-green doesn't need to switch like darkGreen-tangerineDream.
+        # And it already has AiAssistance embedded into it from host.
+        # But still it may need access to the AiAssistance for subagents in subnodes.
         {
-          zSource = "shared-/@salt/Projects";
-          source = "Projects";
-          target = ".bookmarks/projects";
+          zSource = "shared-/@salt/Projects/--personal/AiAssistance__";
+          source = "Projects/--personal/AiAssistance__";
+          target = ".bookmarks/projects/--personal/AiAssistance__";
         }
       ] ++ base;
     };

@@ -120,7 +120,7 @@ in {
       };
 
       services = {
-        enable = true;
+        enable = false;
         runtime-home-bridge = enabled;
       };
     };

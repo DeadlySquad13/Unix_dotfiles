@@ -65,6 +65,39 @@ check:
 check-impure:
 	nix flake check --impure --keep-going
 
+# --- Bookmarks / paths debugging -------------------------------------------------
+#
+# These targets use the same `resolveBookmarks` pipeline as the docker hosts and
+# let you inspect which real path a `.bookmarks` entry resolves to for a given
+# system. Pass the flake home host as the trailing argument, e.g.:
+#
+#   make bookmarks-system darkGreen-tangerineDream_inner
+#   make bookmarks-skills darkGreen-tangerineDream_inner
+
+# The flake home host to debug; the arg after the recipe name (macOS shell: $${#1}).
+HOST ?= darkGreen-tangerineDream_inner
+
+# Build the unit + integration checks that cover `get-path`, `resolveBookmarks`
+# and the bookmark pipeline.
+bookmarks-check:
+	nix build --impure --print-out-paths .#checks.x86_64-linux.paths
+	nix build --impure --print-out-paths .#checks.x86_64-linux.bookmarks
+
+# Print the resolved `lib.ds-omega.paths` (after `resolveBookmarks`) for a host.
+bookmarks-paths:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#homeConfigurations."tangerineDream@$(HOST)"'.config.lib.ds-omega.paths
+
+# Print the opencode skill paths a host resolves to (the original failure).
+bookmarks-skills:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#nixosConfigurations."$(HOST)"'.config.home-manager.users.tangerineDream.programs.opencode.skillPaths
+
+# Print the runtime-home-bridge variant catalog a system serializes at build time.
+bookmarks-catalog:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#nixosConfigurations."$(HOST)"'.config.services.runtime-home-bridge.variants
+
 # TODO: Doesn't work when using Makefile, only manually.
 hm-rollback:
 	# When home-manager is not working try: `nix-shell -p home-manager`).

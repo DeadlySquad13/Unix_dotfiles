@@ -404,7 +404,63 @@ in
 # Use myFunction in your derivation or module
 ```
 
-### 16. Merging Custom Outputs
+> **Note:** functions in `lib/<name>/default.nix` are merged **flat** into the
+> single `lib.<namespace>` attrset. The directory name is not a namespace: a
+> function defined in `lib/runtime-home-bridge/default.nix` is reached as
+> `lib.ds-omega.resolveRuntimePaths`, not
+> `lib.ds-omega.runtime-home-bridge.resolveRuntimePaths`.
+
+### 16. `.bookmarks` and Nix paths
+
+`~/.bookmarks/<name>` is the repo's centralized, human-friendly namespace for
+project files, knowledge bases and shared configs. It is a set of symlinks
+produced by several sources:
+
+* the Home Manager `bookmarks` modules (`modules/home/bookmarks/…`); and
+* the runtime-home-bridge systemd oneshot
+  (`modules/nixos/services/runtime-home-bridge`), which creates the links
+  inside containers at boot (see [ADR 0001](docs/adr/0001-runtime-home-bridge.md)).
+
+At the Nix level, `lib.${namespace}.paths` is the central point that connects
+this filesystem namespace to every module. Modules derive high-level options
+from it (for example `config.programs.opencode.aiAssistanceDir`) and read the
+resolved locations through the `get-path` helper in `lib/paths/default.nix`.
+
+### Symlinks made by Nix vs. runtime symlinks
+
+The difference that matters is *how* a symlink is created:
+
+* **`mkOutOfStoreSymlink` (Nix-made)** symlinks are fine. They point at a
+  `/nix/store/…` derivation output the builder created with `ln -s "<real>"`.
+  Nix only ever consumes the output *string*; the target is baked into the
+  build script as text, so no symlink-traversing path is statted or copied.
+  The `.bookmarks` link materializes only at activation, as a runtime output.
+* **Runtime symlinks** — plain `ln -s` in scripts or the `runtime-home-bridge`
+  oneshot — are fine only when their value is used as a **string**. They break
+  only in a Nix **path context**: a consumer module stat/copies the path
+  (`pathIsDirectory`, `builtins.path`), or the value is materialized into the
+  store. Symptom:
+
+  ```
+  error: path '…/AiAssistance__' is a symlink
+  ```
+
+So `paths.<x>` may hold a `.bookmarks` string as long as it is resolved to a
+real, build-available path before it reaches a path context. `resolveRuntimePaths`
+does exactly this — and only for keys actually managed by the host's runtime
+bridge (`lib/runtime-home-bridge`), so you can keep writing `.bookmarks` strings
+in `paths` while satisfying Nix. Home-manager `mkOutOfStoreSymlink` bookmarks
+pass through unchanged. See
+[ADR 0002](docs/adr/0002-path-resolution.md).
+
+Docker hosts such as `darkGreen-tangerineDream` must take the runtime bridge
+into account: their `projects`, `shared-configs` and `shared-scripts` are
+created by the bridge, so their `paths` must be resolved from the source that is
+valid at build time (the build-host real path), not the container-runtime
+`/ztangerineDream/…` target. Otherwise you get `… does not exist` during the
+image build.
+
+### 17. Merging Custom Outputs
 
 If you need to add custom outputs not managed by Snowfall Lib:
 

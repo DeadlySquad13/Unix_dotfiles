@@ -47,7 +47,7 @@ in {
       };
     } rec {
       # config = ~/.config;
-      kbd = ~/.bookmarks/kbn;
+      kbd = ~/.bookmarks/kbd;
       kbn = ~/.bookmarks/kbn;
       projects = "~/.bookmarks/projects";
 

@@ -33,6 +33,39 @@ Run all discovered checks with:
 nix flake check
 ```
 
+## Paths and bookmarks checks
+
+Coverage for the `paths`/`resolveRuntimePaths` machinery and the bookmark pipeline:
+
+| Check | Layer | Purpose |
+| --- | --- | --- |
+| `checks/paths` | Unit | `get-path` and `resolveRuntimePaths`: bridge-managed `.bookmarks` keys resolve to real paths; multiple keys resolve independently; non-bridge `.bookmarks` keys (e.g. `kbd`, `shared-configs`) and Nix path literals pass through unchanged; an empty resolutions table resolves nothing; `get-path` returns a path or a `~`-expanded string. |
+| `checks/bookmarks` | Integration | The full pipeline mirroring a docker host: `resolveRuntimePaths` against the runtime-home-bridge catalog resolves `projects`, `shared-configs` and `shared-scripts` to symlink-free real paths while leaving non-bridge keys intact. |
+
+Run just these:
+
+```sh
+nix build .#checks.x86_64-linux.paths
+nix build .#checks.x86_64-linux.bookmarks
+```
+
+Per the repo convention the checks import `lib/paths` and `lib/runtime-home-bridge`
+directly with a minimal mock namespace, because the repo lib is not exposed
+through a standalone check's injected `lib` merge.
+
+Shortcuts via the Makefile (pass the flake host as the target argument):
+
+```sh
+make bookmarks-check                             # build both checks
+make bookmarks-paths darkGreen-tangerineDream_inner   # resolved .paths for a host
+make bookmarks-skills darkGreen-tangerineDream_inner  # opencode skillPaths for a host
+make bookmarks-catalog darkGreen-tangerineDream       # system bridge variant catalog
+```
+
+The `paths` checks are what guard against the `path '…' is a symlink` error:
+they assert the resolved value is a real path before it reaches any Nix path
+context. See `docs/adr/0002-path-resolution.md`.
+
 ## Namespaced `lib` in checks
 
 Reusable modules under `modules/` often call `lib.ds-omega.mkIfEnabled`, which

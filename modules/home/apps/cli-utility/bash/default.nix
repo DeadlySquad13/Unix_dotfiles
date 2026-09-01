@@ -27,6 +27,16 @@ lib.${namespace}.mkIfEnabled {
     };
 
     bashrcExtra = /*bash*/ ''
+      # Non-login interactive shells (e.g. `docker exec … bash`) do not source
+      # /etc/profile, so the NixOS system binary dir is absent from PATH and the
+      # personal profile below needs coreutils (mkdir/dirname/stty/sed) and USER
+      # to be set. Restore the login environment here so the personal profile
+      # works in both login and non-login contexts. /etc/profile is idempotent
+      # (has the __ETC_PROFILE_DONE guard).
+      if [ -f /etc/profile ]; then
+        . /etc/profile
+      fi
+
       # Personal profile.
       [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc
     '';

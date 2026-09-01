@@ -54,8 +54,30 @@ See .[Configuration Layers diagram](./docs/_diagrams/ConfigurationLayers_diagram
 - Review the final diff for unintended source, generated, secret, or unrelated
   changes. Do not commit unless explicitly asked.
 
-## Snowfall module-arg `lib` is flat-merged
+## Module kinds: home / nixos / darwin
 
+Three distinct module trees feed three separate module graphs. Never assume they
+share options or `config`:
+
+| Kind | Location | Configured from | Evaluated via |
+| --- | --- | --- | --- |
+| NixOS | `modules/nixos/...` | `systems/...` | `nixosConfigurations.<host>` |
+| Home Manager | `modules/home/...` | `homes/...` | `homeConfigurations.<user>@<host>` |
+| Darwin | `modules/darwin/...` | Darwin configs | `darwinConfigurations.<host>` |
+
+- A module may be used by more than one target, but only within its own graph.
+- Do not set a Home Manager-only option from a NixOS system module, or a
+  NixOS-only option from a standalone Home Manager config. They intersect only
+  when NixOS embeds Home Manager via `home-manager.users`.
+- To see which modules are enabled for a target, inspect the
+  `config.lib.<namespace>.modules.<category>.<name>.enable` tree with the
+  `modules-*` Makefile targets (see `Makefile.modules-debug`).
+- The enable tree is populated by `mkIfEnabled` in `lib/modules/default.nix`;
+  a child module with an explicit `enable` overrides a disabled category
+  (e.g. `cli-utility.enable = false` but `bash.enable = true` still enables
+  bash). See `checks/mkIfEnabled` for the unit tests.
+
+## Snowfall module-arg `lib` is flat-merged
 Each `lib/<name>/default.nix` exports an attrset, and Snowfall merges every
 lib file **flat** into a single namespace attrset (`lib.<namespace>`). The
 filesystem directory does not become a nested namespace. For example, a

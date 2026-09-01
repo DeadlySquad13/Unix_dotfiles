@@ -36,6 +36,23 @@ Libs", before editing.
   Manager, pass its known runtime path through a repository namespace option in
   per-home glue rather than trying to read system `config` from Home Manager.
 
+### Module graph by kind
+
+| Kind | Module tree | Target that configures it | Flake output |
+| --- | --- | --- | --- |
+| NixOS | `modules/nixos/...` | `systems/...` | `nixosConfigurations.<host>` |
+| Home Manager | `modules/home/...` | `homes/...` | `homeConfigurations.<user>@<host>` |
+| Darwin | `modules/darwin/...` | Darwin configs | `darwinConfigurations.<host>` |
+
+Keep the three trees separate: a change in one tree does not affect the other
+graphs, and an option declared in one is not visible in another unless NixOS
+embeds Home Manager through `home-manager.users`.
+
+To see which modules a target enables, inspect
+`config.lib.<namespace>.modules.<category>.<name>.enable` — the tree that
+`mkIfEnabled` populates. Use the `modules-home` / `modules-system` /
+`modules-darwin` Makefile targets (from `Makefile.modules-debug`).
+
 ## Enable discovered modules deliberately
 
 Snowfall makes discovered modules available by default; it does not mean every

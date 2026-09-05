@@ -175,8 +175,11 @@ in {
             "mcp<2"
             "mcp-logseq"
           ];
-          environment.LOGSEQ_API_URL = "http://host.docker.internal:12315";
-          extraHosts = ["host.docker.internal:host-gateway"];
+          # In rootless Docker, host.docker.internal resolves to docker0
+          # (172.17.0.1) which may be DOWN/NO-CARRIER.  Use the machine's
+          # hostname instead – Docker's embedded DNS resolves it to the current
+          # LAN IP via systemd-resolved.  Override logseqHost if needed.
+          environment.LOGSEQ_API_URL = "http://${cfg.logseqHost}:12315";
           environmentFile = cfg.logseqEnvironmentFile;
         };
         ddg-search = {
@@ -205,10 +208,24 @@ in {
     };
   };
 
-  options.ds-omega.ai-assistance.opencode.mcp.logseqEnvironmentFile = mkOption {
-    type = types.nullOr types.str;
-    default = null;
-    description = "Runtime SOPS environment file for the Logseq MCP server.";
+  options.ds-omega.ai-assistance.opencode.mcp = {
+    logseqEnvironmentFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Runtime SOPS environment file for the Logseq MCP server.";
+    };
+
+    logseqHost = mkOption {
+      type = types.str;
+      default = "localhost";
+      description = ''
+        Hostname or IP address where Logseq's HTTP API is reachable from inside
+        the MCP container.  In rootless Docker the special name
+        `host.docker.internal` resolves to the docker0 bridge which may be down,
+        so the default is `localhost`.  Set this to the machine's LAN hostname
+        (e.g. `salt`) so Docker's embedded DNS resolves it to the current LAN IP.
+      '';
+    };
   };
 
   # QUESTION: Levae as mcp.nix in opencode and move rest to a seperate generic module mcp?

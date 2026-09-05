@@ -11,6 +11,8 @@ lib.${namespace}.mkIfEnabled
   name = "sops-opencode";
 }
 {
-  ${namespace}.ai-assistance.opencode.mcp.logseqEnvironmentFile =
-    config.sops.templates."logseq-mcp.env".path;
+  ${namespace}.ai-assistance.opencode.mcp = {
+    logseqEnvironmentFile = config.sops.templates."logseq-mcp.env".path;
+    logseqHost = "salt";
+  };
 }

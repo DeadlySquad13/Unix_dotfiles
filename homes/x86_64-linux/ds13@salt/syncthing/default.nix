@@ -60,9 +60,17 @@ in
           devices = ["POCO X6 Pro 5G"];
         };
 
+        # Doesn't include gallery albums, see Pictures.
         "Camera@PocoX6Pro5G" = {
           path = "/shared/archive-resources-/Archive/Backup/_media/PocoX6Pro5G";
           id = "2311drk48g_5v75-photos";
+          devices = ["POCO X6 Pro 5G"];
+        };
+
+        # Stores pictures and photos by app. Including gallery albums too.
+        "Pictures@PocoX6Pro5G" = {
+          path = "/shared/archive-resources-/Archive/Backup/_media/PocoX6Pro5G__Pictures";
+          id = "hr3ti-vl4qo";
           devices = ["POCO X6 Pro 5G"];
         };
         

@@ -2,7 +2,7 @@
 MCP_SERVICE := opencode-mcp.service
 
 # Run after `make switch` to start the generated Compose stack at login.
-.PHONY: mcp-bootstrap mcp-start mcp-stop mcp-restart mcp-status mcp-logs
+.PHONY: mcp-bootstrap mcp-start mcp-stop mcp-restart mcp-status mcp-logs mcp-logseq-debug mcp-logseq-check
 
 mcp-bootstrap:
 	systemctl --user daemon-reload
@@ -22,3 +22,39 @@ mcp-status:
 
 mcp-logs:
 	journalctl --user --unit $(MCP_SERVICE) --follow
+
+# Logseq agent-namespace ACL check + debugging dump.
+#
+#   checks/mcp-logseq/default.nix  — canonical Snowfall-discovered check
+#       (checks.<system>.mcp-logseq). It imports the REAL mcp.nix module and
+#       sources the global namespace values from
+#       modules/home/apps/ai-assistance/opencode/logseq-profiles.nix, then
+#       asserts every ACL invariant (7-server oracle, isolation, counterpart
+#       delegation/personas) — any mismatch aborts loudly so the build fails.
+#       Note: the flake only sees git-tracked files, so these check files must
+#       be tracked (a bare `git add` / `git add -N` suffices) for Snowfall to
+#       expose the check.
+#   checks/mcp-logseq/debug.nix     — debugging dump (evaluates the real
+#       mcp-logseq ACL contract per agent; namespace values from
+#       logseq-profiles.nix, host glue logseqEnvironmentFile/logseqHost
+#       mirroring the salt sops-opencode module).
+#
+# Usage:
+#   make mcp-logseq-check    # nix build .#checks.<system>.mcp-logseq
+#   make mcp-logseq-debug    # pretty-print per-agent ACL contract as JSON
+CHECKS_DIR := checks/mcp-logseq
+MCP_LOGSEQ_DEBUG := $(CHECKS_DIR)/debug.nix
+
+.PHONY: mcp-logseq-debug mcp-logseq-check
+
+mcp-logseq-debug:
+	nix-instantiate --eval $(MCP_LOGSEQ_DEBUG) \
+		| python3 -c "import sys,json; print(json.dumps(json.loads(json.load(sys.stdin)), indent=2))"
+
+# Canonical: build the Snowfall check derivation (forces the asserted Nix
+# values and fails loudly on mismatch). `nix build` is the canonical entry; the
+# check itself is a `{ pkgs, lib, namespace, ... }` function, so evaluate it
+# only through the flake (`.#checks.<system>.mcp-logseq`).
+mcp-logseq-check:
+	nix build --impure --extra-experimental-features 'nix-command flakes' \
+		--print-out-paths .#checks.x86_64-linux.mcp-logseq

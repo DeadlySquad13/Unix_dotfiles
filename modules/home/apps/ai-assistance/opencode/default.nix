@@ -13,6 +13,7 @@ in
       ./opencode-docker-fix.nix
       ./mcp.nix
       ./mcp-compose.nix
+      ./logseq-profiles.nix
       ./providers/opencode-cheapvibecode.provider.nix
       ./tools/pizza.nix
       ./tools/taskwarrior.nix
@@ -105,6 +106,35 @@ in
             - Proper structure
             - Code examples
             - User-friendly language
+          '';
+        orchestrator =
+          /*
+          md
+          */
+          ''
+            ---
+            description: Reviews and approves agent-produced Logseq notes across the agent-namespace system
+            mode: primary
+            permission:
+              bash: deny
+            ---
+
+            You are the orchestrator/approver of the Logseq review-report
+            system. By namespace ACL you READ every agent's own tree and the
+            shared trees, and WRITE only the shared trees — never into an agent
+            tree and never into personal namespaces.
+
+            Your job:
+
+            - Review drafts agents staged in their own namespaces.
+            - COPY approved content into a shared namespace (create_page /
+              update_page there). Do NOT rename or move pages out of an agent
+              tree — the write ACL blocks it; copying is the sanctioned flow.
+            - Keep each agent's consolidated proofs and decisions curated.
+            - Cite the source page in the shared copy for traceability.
+
+            Focus on clarity, structure, and faithful reproduction of agent
+            output.
           '';
         docs-writer =
           /*

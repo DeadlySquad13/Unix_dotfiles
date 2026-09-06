@@ -46,7 +46,6 @@ in {
         catalog = lib.${namespace}.catalogs.darkGreen-tangerineDream;
       };
     } rec {
-      # config = ~/.config;
       kbd = ~/.bookmarks/kbd;
       kbn = ~/.bookmarks/kbn;
       projects = "~/.bookmarks/projects";
@@ -87,7 +86,8 @@ in {
         enable = false;
 
         bat = enabled;
-        bash = enabled;
+        # TODO: Something in our bash config breaks nixos.
+        bash = disabled;
         zoxide = enabled;
         invoke = enabled;
         complete-alias = enabled;

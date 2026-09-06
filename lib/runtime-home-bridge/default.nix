@@ -62,9 +62,10 @@ in {
     variants = rec {
       base = opencodeBase;
       green = [
+        # NOTE: In this context it's actually an `ai-` variant.
         sharedConfigs
+        # NOTE: In this context it's actually an `ai-` variant.
         sharedScripts
-        sharedProjects
         # darkGreen-tangerineDream-green doesn't need to switch like darkGreen-tangerineDream.
         # And it already has AiAssistance embedded into it from host.
         # But still it may need access to the AiAssistance for subagents in subnodes.

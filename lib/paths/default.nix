@@ -75,6 +75,7 @@ in {
   }: let
     path = lib.${namespace}.get-path {
       inherit config;
+      as-string = out-of-store;
       cb = get-path;
     };
   in

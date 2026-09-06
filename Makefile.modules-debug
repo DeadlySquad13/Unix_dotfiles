@@ -1,0 +1,51 @@
+# Module-enablement debugging targets.
+#
+# These targets inspect the `lib.${namespace}.modules.<category>.<name>.enable`
+# tree for a home, NixOS, or Darwin target. The `HOST` variable selects the
+# target; for home targets the full `<user>@<host>` form is required. Include
+# this file from the main Makefile.
+#
+# Usage:
+#   make modules-home tangerineDream@darkGreen-tangerineDream_inner
+#   make modules-system darkGreen-tangerineDream_inner
+#   make modules-darwin creamsoda
+#   make modules-home-category cli-utility      # (requires MODULE_CATEGORY=)
+#   make modules-system-category development.nix
+
+# The flake host to debug.
+HOST ?= darkGreen-tangerineDream_inner
+
+# The namespace used for `lib.<namespace>.modules.*` lookups.
+NS ?= ds-omega
+
+# The module category to show (for category targets).
+MODULE_CATEGORY ?= $(or $(filter-out $@,$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))),all)
+
+# Build the mkIfEnabled unit test.
+modules-check:
+	nix build --impure --print-out-paths .#checks.x86_64-linux.mkIfEnabled
+
+# Show all enabled modules for a home target.
+modules-home:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#homeConfigurations."$(HOST)"'.config.lib.$(NS).modules
+
+# Show all enabled modules for a NixOS system target.
+modules-system:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#nixosConfigurations."$(HOST)"'.config.lib.$(NS).modules
+
+# Show all enabled modules for a Darwin system target.
+modules-darwin:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#darwinConfigurations."$(HOST)"'.config.lib.$(NS).modules
+
+# Show enabled modules for a specific category of a home target.
+modules-home-category:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#homeConfigurations."$(HOST)"'.config.lib.$(NS).modules.$(MODULE_CATEGORY)
+
+# Show enabled modules for a specific category of a NixOS system target.
+modules-system-category:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#nixosConfigurations."$(HOST)"'.config.lib.$(NS).modules.$(MODULE_CATEGORY)

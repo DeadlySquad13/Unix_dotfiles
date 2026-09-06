@@ -66,6 +66,32 @@ The `paths` checks are what guard against the `path '…' is a symlink` error:
 they assert the resolved value is a real path before it reaches any Nix path
 context. See `docs/adr/0002-path-resolution.md`.
 
+## mcp-logseq check
+
+`checks/mcp-logseq/default.nix` is an evaluation-layer check that asserts the
+per-agent Logseq namespace ACL contract derived by
+`modules/home/apps/ai-assistance/opencode/mcp.nix`. It imports the real module
+and sources the global namespace values from the new
+`modules/home/apps/ai-assistance/opencode/logseq-profiles.nix` module (only the
+host glue `logseqEnvironmentFile`/`logseqHost` is a fixture), and aborts loudly
+on any mismatch:
+
+| Check | Layer | Purpose |
+| --- | --- | --- |
+| `checks/mcp-logseq` | Evaluation | Assert the 7 derived `logseq-<name>` servers against the oracle (exact `LOGSEQ_WRITE_INCLUDES` / `LOGSEQ_INCLUDE_NAMESPACES` / `LOGSEQ_EXCLUDE_NAMESPACES`, ports, stdio pin, `LOGSEQ_API_URL`, environmentFile); per-agent tool-grant isolation (no cross-agent `logseq-*` glob, including the `<agent>-kbn` summarizer counterparts whose set is exactly `{logseq-kbn*, logseq-<parent>*}`); the `permission.task` delegation wiring (each parent grants exactly its own `<agent>-kbn`); counterpart personas (`mode: subagent`, `hidden: true`, `permission.bash = deny`); and that the three global namespace options resolve identically from `logseq-profiles.nix`. |
+
+Run just this check:
+
+```sh
+nix build .#checks.x86_64-linux.mcp-logseq
+```
+
+The `mcp-logseq` flake check only exists once the new files are git-tracked
+(Snowfall discovers checks from the git tree); a bare `git add` suffices. The
+`checks/mcp-logseq/debug.nix` debug dump (per-agent ACL contract as JSON) is
+wired to the Makefile independently and is not a check. See
+`docs/guides/logseq-agent-namespaces.md#debugging`.
+
 ## Namespaced `lib` in checks
 
 Reusable modules under `modules/` often call `lib.ds-omega.mkIfEnabled`, which

@@ -251,6 +251,26 @@ Place modules in `modules/nixos/`, `modules/darwin/`, or `modules/home/` dependi
 mkdir -p modules/nixos/my-module
 ```
 
+The three trees feed three **separate module graphs**:
+
+| Kind | Module tree | Configured from | Flake output |
+| --- | --- | --- | --- |
+| NixOS | `modules/nixos/...` | `systems/...` | `nixosConfigurations.<host>` |
+| Home Manager | `modules/home/...` | `homes/...` | `homeConfigurations.<user>@<host>` |
+| Darwin | `modules/darwin/...` | Darwin configs | `darwinConfigurations.<host>` |
+
+Do not set a Home Manager-only option from a NixOS system module (or vice
+versa); they intersect only when NixOS embeds Home Manager through
+`home-manager.users`.
+
+Reusable modules are enabled deliberately via `mkIfEnabled`
+(`lib/modules/default.nix`), which populates the enable tree
+`config.lib.<namespace>.modules.<category>.<name>.enable`. A child module with
+an explicit `enable` overrides a disabled category. Inspect the enabled set for
+a target with the Makefile targets in `Makefile.modules-debug`
+(`make modules-home <user>@<host>`, `make modules-system <host>`, …). Unit tests
+for `mkIfEnabled` live in `checks/mkIfEnabled`.
+
 Create `modules/nixos/my-module/default.nix`:
 
 ```nix

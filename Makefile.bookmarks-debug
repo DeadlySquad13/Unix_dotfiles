@@ -1,0 +1,39 @@
+# Bookmarks / paths debugging targets.
+#
+# These targets use the `resolveRuntimePaths` pipeline (docker hosts) and let
+# you inspect which real path a `.bookmarks` entry resolves to for a given
+# host, or the opencode skill paths a host resolves to. Include this file from
+# the main Makefile.
+#
+# Usage (pass the target host as the trailing argument):
+#   make bookmarks-paths darkGreen-tangerineDream_inner
+#   make bookmarks-skills darkGreen-tangerineDream_inner
+#   make bookmarks-catalog darkGreen-tangerineDream
+
+# The flake host to debug.
+HOST ?= darkGreen-tangerineDream_inner
+
+# The namespace used for `lib.<namespace>.paths` / catalog lookups.
+NS ?= ds-omega
+
+# Build the unit + integration checks that cover `get-path`, `resolveRuntimePaths`
+# and the bookmark pipeline.
+bookmarks-check:
+	nix build --impure --print-out-paths .#checks.x86_64-linux.paths
+	nix build --impure --print-out-paths .#checks.x86_64-linux.bookmarks
+
+# Print the resolved `lib.<namespace>.paths` (after `resolveRuntimePaths`) for a
+# home target.
+bookmarks-paths:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#homeConfigurations."$(HOST)"'.config.lib.$(NS).paths
+
+# Print the opencode skill paths a NixOS host resolves to (the original failure).
+bookmarks-skills:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#nixosConfigurations."$(HOST)"'.config.home-manager.users.tangerineDream.programs.opencode.skillPaths
+
+# Print the runtime-home-bridge variant catalog a system serializes at build time.
+bookmarks-catalog:
+	nix --extra-experimental-features 'nix-command flakes' eval --impure --json \
+		'.#nixosConfigurations."$(HOST)"'.config.services.runtime-home-bridge.variants

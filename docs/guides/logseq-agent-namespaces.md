@@ -102,40 +102,101 @@ The values are the global namespace ACL, defined in
 values a host could override). Only the per-host glue (`logseqEnvironmentFile`,
 `logseqHost`) stays in `homes/x86_64-linux/ds13@salt/apps/ecosystem/sops-opencode/default.nix`.
 
+## Container runtime: no git in the image
+
+The workflow containers use `supercorp/supergateway:uvx`, which ships `uv` and
+Python but **not** `git` — so a `uvx --from git+https://…@rev mcp-logseq` spec
+fails at container start ("Git executable not found"). The Nix fix: instead of
+a git URL, the mcp-logseq **source** is pinned as the flake input `mcp-logseq`
+(`flake = false`, rev `aa5550e64d8486ee8329ee9320fc82452e4eb0c2` in
+`flake.nix`), provided to the containers via `logseqSrc` (set by default in
+`logseq-profiles.nix`). When `logseqSrc` is set, each logseq server:
+- mounts the source read-only: `${logseqSrc}:/app/mcp-logseq:ro`, and
+- runs `uvx --refresh --from /app/mcp-logseq mcp-logseq` (uv installs from a
+  local directory — no git required).
+
+To bump the installed revision, change the commit in the `mcp-logseq` flake
+input URL (and the `aa5550e…` strings) and let the lockfile record the new
+sha256 (`nix flake lock`, then `make switch`). If `logseqSrc` is `null` the
+module falls back to the git-URL spec (backward compatible).
+
 OpenCode wiring (in `mcp.nix`, `settings.agent`): the module adds the tool
 glob `"logseq-<name>*" = true` to each agent whose profile exists — each agent
 is wired to **its own** instance only, never another agent's (cross-instance
 grants would leak other profile trees). Top-level `"logseq*" = false`
 disables everything for everyone else, so an agent without a profile glob gets
-no logseq tools at all. There is deliberately **no generic `logseq` server** —
-logseq access exists only through explicit profiles.
+no logseq tools at all. There is deliberately **no generic `logseq` container
+server** — logseq access exists only through explicit profiles. The legacy
+`logseq-mcpo` gateway stays registered for NON-opencode consumers of the shared
+MCP stack but is DISABLED in OpenCode only (`settings.mcp."logseq-mcpo".enabled
+= false`); MCP tool ids are `<mcp-client>_<tool>`, e.g. `logseq-plan_<tool>`.
+
+Agent relationships (bank inheritance, delegation, and the per-agent namespace
+instances) are drawn in
+[`docs/_diagrams/OpencodeAgents_diagram.puml`](../../docs/_diagrams/OpencodeAgents_diagram.puml).
+The runtime/config boundary between the Unix_dotfiles MCP module and the
+logseq-mcp fork (incl. the ACL contract and the operational gotchas) is drawn at
+the repository root:
+[`McpBoundaries_diagram.puml`](../../McpBoundaries_diagram.puml).
 
 ## Subagent delegation: `permission.task`, not `tools`
 
 Since v1.2.5, OpenCode gates **subagent invocation** via `permission.task`
 (glob/name → "allow"|"ask"|"deny") — the `task` tool filters which subagents a
 caller may invoke, and a `deny`ed subagent is dropped from the Task tool
-description. Users can still `@`-mention any subagent directly. The `tools`
-key is deprecated upstream but intentionally retained in this repo for the MCP
-`logseq-*` glob grants (tool availability), which is a different concern from
-delegation. So: **tool grants use `tools`; delegation uses `permission.task`.**
+description. Evaluation semantics (from source): **the last matching rule
+wins** (`findLast`); if NO rule matches the default action is `ask`; and the
+`task` tool only hides subagents whose evaluation is `deny` (an `ask`e still
+lists them). That is why delegation must block the OTHER counterparts
+explicitly (`"*-kbn" = "deny"`); simply allowing one does not hide the rest.
+`permission.task."<agent>-kbn" = "allow"` alone does NOT block other
+subagents. The `tools` key is deprecated upstream but intentionally retained
+in this repo for the MCP `logseq-*` glob grants (tool availability), which is a
+different concern from delegation. So: **tool grants use `tools`; delegation
+uses `permission.task`.**
 
 ### Counterparts (`<agent>-kbn`)
 
 Each producing agent (build, plan, nix-build, nix-plan, docs-writer) delegates
 result-summarization to a hidden `<agent>-kbn` counterpart:
 
-- Parent gets `permission.task."<agent>-kbn" = "allow"` — exactly its own
-  counterpart, nothing broader.
+- Parent gets `permission.task = { "*-kbn" = "deny"; "<agent>-kbn" = "allow" }` —
+  block the OTHER agents' counterparts, allow exactly its own (last-match-wins).
+  We deliberately do NOT deny `*`: the parent agent must keep calling generic
+  subagents (general/explore/etc.) for task decomposition.
 - The counterpart is `mode: subagent`, `hidden: true` (invoked programmatically
   only), with its persona (`description`, `permission.bash = deny`) and its
   tool grants defined in `mcp.nix` `settings.agent`.
-- A counterpart's logseq glob set is exactly `{logseq-kbn*, logseq-<parent>*}`:
-  `logseq-kbn*` is its only write surface (the knowledge-noter instance);
-  `logseq-<parent>*` lets it read the parent's results to summarize them. It
-  gets **no other** agent's logseq grant.
+- Each counterpart uses a **dedicated, narrow instance** `logseq-summ-<parent>`
+  (ports 18114–18118) whose ACL is: WRITE the parent's own
+  `<parent-own>/_journals` tree (+ the global shared tree); READ the parent's
+  own tree only (derived from the profile name). The counterpart's logseq glob
+  set is exactly `{logseq-summ-<parent>*}` — it is **not** given the broad
+  `logseq-kbn*` instance (which may reach personal/shared) nor the parent's
+  instance, so it can never read or write personal namespaces.
 
 kbn (the noter) and orchestrator (the reviewer) have no counterparts.
+
+## Debugging actual permissions (no e2e needed)
+
+The committed source defines the effective permissions; verify them statically:
+
+```sh
+opencode debug config            # fully resolved config, incl. per-agent `permission` (task rules, tools→permission)
+opencode debug agent <name>      # per TOOL availability map ({<tool-id>: true|false}) for an agent,
+                                 # e.g. `opencode debug agent plan` shows logseq-plan_* on/off
+opencode agent list              # list agents (their mode/description)
+```
+
+Source semantics to reason about the output (v1.2.5 clone): legacy `tools`
+entries become permissions (`true`→`allow`, `false`→`deny`, mapping write/edit/
+patch/multiedit→`edit`), merged per agent AFTER the global rules (so an
+agent-level `logseq-plan* = allow` overrides the top-level `logseq* = deny`);
+`permission` is evaluated with **last-match-wins** and **default `ask`**;
+`task` only removes `deny`ed subagents. MCP tool ids are `<client>_<tool>`, so
+glob `logseq-<name>*` matches them. A static Nix audit of the derived grants/
+task rules is in `checks/mcp-logseq/default.nix` (the `permission.task`
+`*-kbn` blocking + per-agent glob isolation are asserted there).
 
 ## Adding a new agent profile
 
@@ -165,10 +226,18 @@ kbn (the noter) and orchestrator (the reviewer) have no counterparts.
 | nix-build | `logseq-nix-build` (18111) | own, ai-shared, build-shared | — |
 | nix-plan | `logseq-nix-plan` (18112) | own, ai-shared, plan-shared | `personal` |
 | orchestrator | `logseq-orchestrator` (18113) | own, ai-shared | every other profile's own |
+| build-kbn | `logseq-summ-build` (18114) | ai-bld …/_journals, ai-shared | build's own (read) |
+| plan-kbn | `logseq-summ-plan` (18115) | ai-pln …/_journals, ai-shared | plan's own (read) |
+| docs-writer-kbn | `logseq-summ-docs-writer` (18116) | ai-dwt …/_journals, ai-shared | docs-writer's own (read) |
+| nix-build-kbn | `logseq-summ-nix-build` (18117) | ai-nxb …/_journals, ai-shared | nix-build's own (read) |
+| nix-plan-kbn | `logseq-summ-nix-plan` (18118) | ai-nxp …/_journals, ai-shared | nix-plan's own (read) |
 
 `ai-shared` is the global `ai Agents_system`; `build-shared`/`plan-shared` are
 the `buildPair`/`planPair` bundles. `personal` is the derived complement
-(everything not under an agent namespace) — never enumerated.
+(everything not under an agent namespace) — never enumerated. The `-kbn`
+summarizer instances are dedicated and narrow: they never reach the broad
+`logseq-kbn*` instance, so they can neither read nor write personal
+namespaces.
 
 **Current namespace values** (from `logseq-profiles.nix`, `ds13@salt` host): kbn
 `ai-kbn KnowledgeBaseNoter_system`, build `ai-bld Builder_system`, plan

@@ -78,7 +78,7 @@ on any mismatch:
 
 | Check | Layer | Purpose |
 | --- | --- | --- |
-| `checks/mcp-logseq` | Evaluation | Assert the 7 derived `logseq-<name>` servers against the oracle (exact `LOGSEQ_WRITE_INCLUDES` / `LOGSEQ_INCLUDE_NAMESPACES` / `LOGSEQ_EXCLUDE_NAMESPACES`, ports, stdio pin, `LOGSEQ_API_URL`, environmentFile); per-agent tool-grant isolation (no cross-agent `logseq-*` glob, including the `<agent>-kbn` summarizer counterparts whose set is exactly `{logseq-kbn*, logseq-<parent>*}`); the `permission.task` delegation wiring (each parent grants exactly its own `<agent>-kbn`); counterpart personas (`mode: subagent`, `hidden: true`, `permission.bash = deny`); and that the three global namespace options resolve identically from `logseq-profiles.nix`. |
+| `checks/mcp-logseq` | Evaluation | Assert the 12 derived `logseq-<name>` servers (7 agent profiles + 5 `logseq-summ-<parent>` summarizer instances) against the oracle: exact `LOGSEQ_WRITE_INCLUDES` / `LOGSEQ_INCLUDE_NAMESPACES` / `LOGSEQ_EXCLUDE_NAMESPACES`, ports, `LOGSEQ_API_URL`, environmentFile, and (with `logseqSrc` set) the local-source stdio `uvx --refresh --from /app/mcp-logseq mcp-logseq` plus the `${src}:/app/mcp-logseq:ro` volume, with a backward-compat re-eval asserting the git-URL stdio when `logseqSrc = null`; per-agent tool-grant isolation (each parent `{logseq-<own>*}`, each `<agent>-kbn` counterpart exactly `{logseq-summ-<parent>*}`); the `permission.task` delegation wiring (deny-by-default `{"*": "deny", "<agent>-kbn": "allow"}` per parent); counterpart personas (`mode: subagent`, `hidden: true`, `permission.bash = deny`); no generic `logseq`/`logseq-mcpo` client; and that the global namespace options resolve identically from `logseq-profiles.nix`. |
 
 Run just this check:
 

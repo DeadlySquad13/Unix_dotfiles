@@ -10,13 +10,14 @@
   # (import { lib; config; } directly) so the internal `let` bindings
   # (resolveSets, profileExcludes, mkLogseqServer, ...) evaluate faithfully, then
   # asserts:
-  #   - the 7-server env oracle (ports, WRITE/INCLUDE/EXCLUDE strings, stdio
-  #     pin, LOGSEQ_API_URL, environmentFile) of docs/guides/logseq-agent-namespaces.md,
+  #   - the 12-server env oracle (7 agent profiles + 5 `summ-<parent>`
+  #     summarizer instances; ports, WRITE/INCLUDE/EXCLUDE strings, stdio,
+  #     LOGSEQ_API_URL, environmentFile) of docs/guides/logseq-agent-namespaces.md,
   #   - the per-agent tool-grant isolation invariant (no cross-agent logseq glob)
-  #     including the <agent>-kbn summarizer counterparts,
-  #   - the counterpart delegation wiring (each parent grants exactly its own
-  #     <agent>-kbn via permission.task; counterparts are subagents with the
-  #     exact {logseq-kbn*, logseq-<parent>*} glob set),
+  #     including the <agent>-kbn summarizer counterparts (dedicated
+  #     `logseq-summ-<parent>*` instance only),
+  #   - the counterpart delegation wiring (each parent's `permission.task` is
+  #     deny-by-default + allow exactly its own `<agent>-kbn`),
   #   - that the three global namespace options resolve identically from
   #     modules/home/apps/ai-assistance/opencode/logseq-profiles.nix.
   # Any mismatch aborts loudly, so `nix build .#checks.<system>.mcp-logseq` fails.
@@ -49,6 +50,10 @@
   lessThan = builtins.lessThan;
 
   # Source the global namespace values from the real logseq-profiles.nix module.
+  # `inputs.mcp-logseq` is the Nix store source the real flake provides; here a
+  # repo-relative stand-in path.
+  mcpLogseqSrc = repoRoot + "/.";
+
   profileLib = lib // {
     mkDefault = x: x;
     ${namespace} = lib // {
@@ -58,6 +63,7 @@
   profileVals = (import profilesPath {
     lib = profileLib;
     inherit namespace;
+    inputs = {mcp-logseq = mcpLogseqSrc;};
   }).${namespace}.ai-assistance.opencode.mcp;
 
   # Option defaults are NOT auto-applied outside the module system: merge each
@@ -71,6 +77,7 @@
     };
 
   profiles = builtins.mapAttrs withDefaults profileVals.logseqAgentProfiles;
+  summarizerProfiles = builtins.mapAttrs withDefaults profileVals.logseqSummarizerProfiles;
 
   # Overlay mkIf so the plain `settings` config body (agent/tools/mcp) is
   # readable. Both enable conditions are true under `providedConfig`, so
@@ -89,13 +96,18 @@
     programs.opencode.mcpContainers = {
       enable = true;
       accessMode = "host";
+      # Real option default (container registry incl. `// logseqAgentServers`);
+      # Nix `let` is recursive so `m.options…` is reachable here.
+      servers = m.options.programs.opencode.mcpContainers.servers.default;
     };
     "ds-omega".ai-assistance.opencode.mcp = {
       logseqEnvironmentFile = mcpEnvFile;
       inherit logseqHost;
+      logseqSrc = mcpLogseqSrc;
       logseqSharedNamespaces = profileVals.logseqSharedNamespaces;
       logseqNamespaceSets = profileVals.logseqNamespaceSets;
       logseqAgentProfiles = profiles;
+      logseqSummarizerProfiles = summarizerProfiles;
     };
   };
 
@@ -107,6 +119,17 @@
 
   servers = m.options.programs.opencode.mcpContainers.servers.default;
   settings = m.config.programs.opencode.settings;
+  mcpServers = m.config.programs.mcp.servers;
+
+  # Backward compatibility: with logseqSrc = null the module must keep the
+  # git-URL stdio and derive NO source volume. Re-evaluate with a null src.
+  providedConfigNoSrc = providedConfig // {
+    "ds-omega".ai-assistance.opencode.mcp = providedConfig."ds-omega".ai-assistance.opencode.mcp // {logseqSrc = null;};
+  };
+  mNoSrc = module {lib = moduleLib; config = providedConfigNoSrc;};
+  logseqServersNoSrc = filterAttrs (
+    n: _: hasPrefix "logseq-" n
+  ) mNoSrc.options.programs.opencode.mcpContainers.servers.default;
 
   # Assertion helper: fails the whole eval loudly when a condition is false.
   check = name: cond: msg:
@@ -131,6 +154,11 @@
     "logseq-nix-plan"
     "logseq-orchestrator"
     "logseq-plan"
+    "logseq-summ-build"
+    "logseq-summ-docs-writer"
+    "logseq-summ-nix-build"
+    "logseq-summ-nix-plan"
+    "logseq-summ-plan"
   ];
 
   markerProfiles = ["plan" "nix-plan" "kbn"];
@@ -146,8 +174,9 @@
 
   # Every PURE agent must carry exactly {logseq-<own>*}.
   pureAgents = producingParents ++ ["kbn" "orchestrator"];
-  # Counterparts carry exactly {logseq-kbn*, logseq-<parent>*}.
+  # Counterparts carry exactly the dedicated summary instance {logseq-summ-<parent>*}.
   parentOf = name: builtins.replaceStrings ["-kbn"] [""] name;
+  summOf = name: "summ-${parentOf name}";
 
   allAgentNames = pureAgents ++ counterparts;
 
@@ -197,6 +226,40 @@
       include = "personal";
       exclude = "ai-bld Builder_system,ai-dwt DocsWriter_system,ai-kbn KnowledgeBaseNoter_system,ai-nxb NixBuilder_system,ai-nxp NixPlanner_system,ai-orc Orchestrator_system,ai-s-bld shared-Builder_system";
     };
+    # Dedicated summarizer instances (one per <parent>-kbn counterpart): WRITE
+    # the parent's own `<parent-own>/_journals` tree (+ the global shared tree);
+    # READ the parent's own tree only. NO personal, NO broad kbn instance,
+    # NO excludes.
+    "logseq-summ-build" = {
+      hostPort = 18114;
+      write = "ai-bld Builder_system/_journals,ai Agents_system";
+      include = "ai-bld Builder_system";
+      exclude = null;
+    };
+    "logseq-summ-plan" = {
+      hostPort = 18115;
+      write = "ai-pln Planner_system/_journals,ai Agents_system";
+      include = "ai-pln Planner_system";
+      exclude = null;
+    };
+    "logseq-summ-docs-writer" = {
+      hostPort = 18116;
+      write = "ai-dwt DocsWriter_system/_journals,ai Agents_system";
+      include = "ai-dwt DocsWriter_system";
+      exclude = null;
+    };
+    "logseq-summ-nix-build" = {
+      hostPort = 18117;
+      write = "ai-nxb NixBuilder_system/_journals,ai Agents_system";
+      include = "ai-nxb NixBuilder_system";
+      exclude = null;
+    };
+    "logseq-summ-nix-plan" = {
+      hostPort = 18118;
+      write = "ai-nxp NixPlanner_system/_journals,ai Agents_system";
+      include = "ai-nxp NixPlanner_system";
+      exclude = null;
+    };
   };
 
   # Validate one server against the oracle + common invariants (7 & 8).
@@ -221,17 +284,32 @@
     && check "${name}/sopsEnvFile"
       (svc.environmentFile == mcpEnvFile)
       "expected '${mcpEnvFile}' got '${toString svc.environmentFile}'"
-    && check "${name}/stdioPin" (builtins.match ".*${pinned}.*" joinedCmd != null)
-      "stdioCommand must pin ${pinned}; got: ${joinedCmd}";
+    && check "${name}/stdioLocal"
+      (svc.stdioCommand == ["uvx" "--refresh" "--from" "/app/mcp-logseq" "mcp-logseq"])
+      "with logseqSrc set, stdio must be 'uvx --refresh --from /app/mcp-logseq mcp-logseq'; got '${joinedCmd}'"
+    && check "${name}/srcVolume"
+      (builtins.elem "${mcpLogseqSrc}:/app/mcp-logseq:ro" (svc.volumes or []))
+      "expected source mount volume '${mcpLogseqSrc}:/app/mcp-logseq:ro'; got '${concatStringsSep "," (svc.volumes or [])}'";
 
   # ---------------------------------------------------------------------------
   # Invariant 1.
   # ---------------------------------------------------------------------------
-  assertNoGeneric = check "no generic 'logseq' server"
+  assertNoGeneric = check "no generic bare 'logseq' server"
     (!(servers ? logseq))
-    "a bare 'logseq' server must not exist";
+    "a bare 'logseq' server must not exist (only logseq-<profile> and the disabled logseq-mcpo)";
 
-  assertNamedServers = check "exactly the 7 expected logseq servers"
+  assertBackwardCompat = all (name: let
+    svc = logseqServersNoSrc.${name};
+    joined = concatStringsSep " " svc.stdioCommand;
+  in
+    check "backcompat/${name} stdio keeps git url"
+      (builtins.match ".*${pinned}.*" joined != null)
+      "without logseqSrc stdio must keep the git URL; got '${joined}'"
+    && check "backcompat/${name} no src volume"
+      ((svc.volumes or []) == [])
+      "without logseqSrc there must be no src volume") expectedNames;
+
+  assertNamedServers = check "exactly the 12 expected logseq servers"
     (logseqServerNames == expectedNames)
     "expected [${concatStringsSep "," expectedNames}] got [${concatStringsSep "," logseqServerNames}]";
 
@@ -239,9 +317,11 @@
     (settings.tools."logseq*" == false)
     "settings.tools.logseq* must be false";
 
-  assertMcpoDisabled = check "logseq-mcpo disabled"
-    (settings.mcp ? "logseq-mcpo" && settings.mcp."logseq-mcpo".enabled == false)
-    "logseq-mcpo must be disabled";
+  assertNoGenericMcpoInSettings = check "logseq-mcpo registered but DISABLED in opencode"
+    (mcpServers ? logseq-mcpo
+      && settings.mcp ? "logseq-mcpo"
+      && settings.mcp."logseq-mcpo".enabled == false)
+    "logseq-mcpo must stay registered (other consumers) but be disabled in OpenCode";
 
   # ---------------------------------------------------------------------------
   # Invariant 2 & 3: excludes exist ONLY for marker profiles; never a raw
@@ -324,9 +404,9 @@
     check "agent/${name} isolation" (logseqGlobsOf name == ["logseq-${name}*"])
       "expected exactly [logseq-${name}*] got [${concatStringsSep "," (logseqGlobsOf name)}]";
 
-  # For counterparts: exactly {logseq-kbn*, logseq-<parent>*}.
+  # For counterparts: exactly the dedicated summary instance {logseq-summ-<parent>*}.
   checkCounterpart = name: let
-    want = sort lessThan ["logseq-kbn*" "logseq-${parentOf name}*"];
+    want = ["logseq-${summOf name}*"];
   in
     check "counterpart/${name} globs" (logseqGlobsOf name == want)
       "expected [${concatStringsSep "," want}] got [${concatStringsSep "," (logseqGlobsOf name)}]";
@@ -342,10 +422,15 @@
   # ---------------------------------------------------------------------------
   assertDelegation = all (name: let
     task = (settings.agent.${name}.permission or {}).task or {};
+    wantKeys = sort lessThan ["*-kbn" "${name}-kbn"];
   in
-    check "parent/${name} delegates one counterpart" (attrNames task == ["${name}-kbn"])
-      "expected exactly [${name}-kbn] got [${concatStringsSep "," (attrNames task)}]"
-    && check "parent/${name} task allow"
+    check "parent/${name} task blocks other counterparts"
+      (attrNames task == wantKeys)
+      "expected exactly [${concatStringsSep "," wantKeys}] got [${concatStringsSep "," (attrNames task)}]"
+    && check "parent/${name} task deny *-kbn"
+      (task."*-kbn" == "deny")
+      "task '*-kbn' must be deny"
+    && check "parent/${name} task allow own counterpart"
       (task."${name}-kbn" == "allow")
       "expected allow for ${name}-kbn") producingParents;
 
@@ -426,13 +511,51 @@
       buildPair = ["ai-s-bld shared-Builder_system"];
       planPair = ["ai-s-pln shared-Planner_system"];
     })
-    "logseqNamespaceSets must contain buildPair and planPair";
+    "logseqNamespaceSets must contain only buildPair and planPair";
+
+  expectedSummarizers = {
+    summ-build = {
+      own = "ai-bld Builder_system/_journals";
+      writeSets = [];
+      readSets = [];
+      readAllAgentOwns = false;
+    };
+    summ-plan = {
+      own = "ai-pln Planner_system/_journals";
+      writeSets = [];
+      readSets = [];
+      readAllAgentOwns = false;
+    };
+    summ-docs-writer = {
+      own = "ai-dwt DocsWriter_system/_journals";
+      writeSets = [];
+      readSets = [];
+      readAllAgentOwns = false;
+    };
+    summ-nix-build = {
+      own = "ai-nxb NixBuilder_system/_journals";
+      writeSets = [];
+      readSets = [];
+      readAllAgentOwns = false;
+    };
+    summ-nix-plan = {
+      own = "ai-nxp NixPlanner_system/_journals";
+      writeSets = [];
+      readSets = [];
+      readAllAgentOwns = false;
+    };
+  };
+
+  assertSummFromModule = check "logseqSummarizerProfiles values"
+    (summarizerProfiles == expectedSummarizers)
+    "summarizer profiles must match the documented values";
 in
   assert assertNoGeneric;
+  assert assertBackwardCompat;
   assert assertNamedServers;
   assert (all (name: checkServer name expected.${name}) expectedNames);
   assert assertToolsGlobOff;
-  assert assertMcpoDisabled;
+  assert assertNoGenericMcpoInSettings;
   assert assertExcludes;
   assert assertPersonalPair;
   assert assertStrictClean;
@@ -443,6 +566,7 @@ in
   assert assertProfilesFromModule;
   assert assertSharedFromModule;
   assert assertSetsFromModule;
+  assert assertSummFromModule;
   # Asserts above force evaluation of every invariant (aborting on mismatch),
   # so this trivial derivation only exists to satisfy Snowfall check discovery
   # and to mark success.

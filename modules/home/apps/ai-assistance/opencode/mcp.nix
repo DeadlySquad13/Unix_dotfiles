@@ -15,6 +15,11 @@
   mcpoBaseUrl = "http://localhost:8001";
   mcpoUrl = serverName: mcpoBaseUrl + "/" + serverName;
 
+  # The legacy `mcpo` (Model Context Protocol Orchestrator) gateway stays
+  # registered for NON-opencode consumers of the shared MCP stack: everything
+  # `logseq-mcpo` here is registered but DISABLED in OPENCODE ONLY (see
+  # `settings.mcp."logseq-mcpo".enabled = false` below), so other agents/tools
+  # over mcpo can still reach the graph-wide `logseq` endpoint.
   mcpoServers = {
     filesystem-mcpo = {
       url = mcpoUrl "filesystem";
@@ -78,6 +83,14 @@
     nix-build = 18111;
     nix-plan = 18112;
     orchestrator = 18113;
+    # Dedicated narrow instances for the <parent>-kbn summarizer subagents:
+    # each writes ONLY the parent's own <parent-own>/_journals tree and reads
+    # the parent's own (derived in logseq-profiles.nix, no config round-trip).
+    summ-build = 18114;
+    summ-plan = 18115;
+    summ-docs-writer = 18116;
+    summ-nix-build = 18117;
+    summ-nix-plan = 18118;
   };
 
   allAgentOwns = lib.mapAttrs (_: profile: profile.own) cfg.logseqAgentProfiles;
@@ -104,8 +117,16 @@
     ++ cfg.logseqSharedNamespaces
     ++ resolveSets profile.writeSets;
 
+  # A summarizer profile is named `summ-<parent>`; it is READ-only on its
+  # parent's own tree (so it can summarize results but never write there).
+  # The parent's own is derived from the parent profile — no set bundle needed.
+  summerParent = name: builtins.replaceStrings ["summ-"] [""] name;
+
   profileReadIncludes = name: profile:
     resolveSets profile.readSets
+    ++ lib.optionals (lib.hasPrefix "summ-" name) [
+      cfg.logseqAgentProfiles.${summerParent name}.own
+    ]
     ++ lib.optionals profile.readAllAgentOwns (
       lib.attrValues (lib.filterAttrs (other: _: other != name) allAgentOwns)
     );
@@ -140,6 +161,30 @@
     write = profileWriteIncludes name profile;
     read = profileReadIncludes name profile;
     exclude = profileExcludes name profile;
+    # When a Nix-pinned source (`logseqSrc`) is provided, mount it read-only
+    # and install with `uvx --from <dir>` — the supercorp/supergateway:uvx
+    # image ships uv/python but NOT git, so a `git+https://…@rev` spec fails
+    # at container start. Without it we keep the git-URL spec (backward compat).
+    hasLocalSrc = cfg.logseqSrc != null;
+    stdioCommand =
+      if hasLocalSrc
+      then [
+        "uvx"
+        "--refresh"
+        "--from"
+        "/app/mcp-logseq"
+        "mcp-logseq"
+      ]
+      else [
+        "uvx"
+        "--refresh"
+        "--from"
+        "git+https://github.com/dsOmega-StratoFrame/Mcp__Logseq.git@aa5550e64d8486ee8329ee9320fc82452e4eb0c2"
+        "mcp-logseq"
+      ];
+    volumes =
+      (lib.optionals hasLocalSrc ["${cfg.logseqSrc}:/app/mcp-logseq:ro"])
+      ++ (profile.volumes or []);
   in {
     image = "supercorp/supergateway:uvx";
     hostPort =
@@ -147,15 +192,7 @@
       or (throw "mcp-logseq: no host port allocated for agent profile '${name}'");
     endpointPath = "/mcp";
     clientEndpointPath = "/sse";
-    # Fork source pinned to the pushed commit (mcp 2.x support + write/read
-    # ACL). Always a commit hash — the branch moves, a hash cannot.
-    stdioCommand = [
-      "uvx"
-      "--refresh"
-      "--from"
-      "git+https://github.com/dsOmega-StratoFrame/Mcp__Logseq.git@aa5550e64d8486ee8329ee9320fc82452e4eb0c2"
-      "mcp-logseq"
-    ];
+    inherit stdioCommand volumes;
     environment =
       {LOGSEQ_API_URL = "http://${cfg.logseqHost}:12315";}
       // lib.optionalAttrs (write != []) {LOGSEQ_WRITE_INCLUDES = lib.concatStringsSep "," write;}
@@ -167,7 +204,7 @@
 
   logseqAgentServers = lib.mapAttrs' (
     name: profile: lib.nameValuePair "logseq-${name}" (mkLogseqServer name profile)
-  ) cfg.logseqAgentProfiles;
+  ) (cfg.logseqAgentProfiles // cfg.logseqSummarizerProfiles);
 in {
   options.programs.opencode.mcpContainers = {
     enable = mkOption {
@@ -196,7 +233,7 @@ in {
     servers = mkOption {
       type = types.attrsOf (
         types.submodule (
-          {...}: {
+          _: {
             options = {
               image = mkOption {type = types.str;};
               hostPort = mkOption {type = types.port;};
@@ -224,6 +261,11 @@ in {
               environmentFile = mkOption {
                 type = types.nullOr types.str;
                 default = null;
+              };
+              volumes = mkOption {
+                type = types.listOf types.str;
+                default = [];
+                description = "Extra Docker volume mounts (`name:path:ro` strings appended to the Compose service).";
               };
             };
           }
@@ -308,6 +350,22 @@ in {
       description = "Runtime SOPS environment file for the Logseq MCP server.";
     };
 
+    # Nix-pinned mcp-logseq source. When non-null the logseq containers mount
+    # it read-only at /app/mcp-logseq and install with `uvx --from` (the
+    # supercorp/supergateway:uvx image has uv/python but NO git, so a
+    # `git+https://…@rev` spec fails at container start). See flake input
+    # `mcp-logseq`.
+    logseqSrc = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = ''
+        Nix store path of the mcp-logseq fork source at the pinned revision,
+        mounted into each logseq container and installed via `uvx --from
+        /app/mcp-logseq` (no git needed in the container image). Provided by
+        `logseq-profiles.nix` from the `mcp-logseq` flake input.
+      '';
+    };
+
     logseqHost = mkOption {
       type = types.str;
       default = "localhost";
@@ -371,6 +429,11 @@ in {
                 default = false;
                 description = "Also read every OTHER profile's own namespace (orchestrator role).";
               };
+              volumes = mkOption {
+                type = types.listOf types.str;
+                default = [];
+                description = "Extra Docker volumes added to this profile's logseq container (`name:path:ro` strings).";
+              };
             };
           }
         )
@@ -389,6 +452,47 @@ in {
 
         The global default is provided by `logseq-profiles.nix` (as mkDefault);
         hosts only override when they need different values.
+      '';
+    };
+
+    logseqSummarizerProfiles = mkOption {
+      type = types.attrsOf (
+        types.submodule (
+          {name, ...}: {
+            options = {
+              own = mkOption {
+                type = types.str;
+                description = "The kbn `<parent>/**` tree the summarizer may WRITE.";
+              };
+              writeSets = mkOption {
+                type = types.listOf types.str;
+                default = [];
+              };
+              readSets = mkOption {
+                type = types.listOf types.str;
+                default = [];
+                description = "Bundles granting READ of the parent's own tree (to summarize results).";
+              };
+              readAllAgentOwns = mkOption {
+                type = types.bool;
+                default = false;
+              };
+              volumes = mkOption {
+                type = types.listOf types.str;
+                default = [];
+              };
+            };
+          }
+        )
+      );
+      default = {};
+      description = ''
+        Dedicated, NARROW instances for the `<parent>-kbn` summarizer subagents:
+        each produces one `logseq-summ-<parent>` server whose WRITE list is the
+        kbn `<parent>/**` tree (plus the global shared tree) and whose
+        READ list is the parent's own tree only. They must never grant access
+        to the broad `logseq-kbn*` instance (which may reach personal/shared).
+        Provided by `logseq-profiles.nix` (as mkDefault).
       '';
     };
   };
@@ -411,6 +515,8 @@ in {
           fetch-mcpo = {
             enabled = false;
           };
+          # Disabled in OPENCODE ONLY: the mcpo `logseq` gateway stays
+          # available for non-opencode consumers of the shared MCP stack.
           logseq-mcpo = {
             enabled = false;
           };
@@ -462,25 +568,40 @@ in {
             nix-plan = plan // baseTools.nixos;
             orchestrator = docs-writer;
           };
-          # A `<parent>-kbn` counterpart: a hidden summarizer subagent that can
-          # read the parent's own tree (logseq-<parent>*) to produce a summary
-          # and writes it ONLY through the kbn knowledge-noter instance
-          # (logseq-kbn*), plus kbn's non-logseq banks. No other logseq grant.
-          # Persona (mode/hidden/description) and tool grants live together in
-          # `settings.agent` (opencode.json `agent` map): the repo defines
-          # build/plan/nix-build/nix-plan the same way, and keeping them here
-          # lets the mcp-logseq check assert them from the derived config.
-          mkKbnCounterpart = parent: {
-            mode = "subagent";
-            hidden = true;
-            description = "Summarizes ${parent} results into the kbn knowledge base (ai-kbn KnowledgeBaseNoter_system); may read ${parent}'s tree, writes only via the kbn instance";
-            # Summarizers never run bash; they only read via logseq and write
-            # summaries through the kbn instance.
-            permission.bash = "deny";
-            tools =
-              (logseqGrant "kbn").tools
-              // (logseqGrant parent).tools
-              // agentBanks.kbn;
+          # A `<parent>-kbn` counterpart: a hidden summarizer subagent that reads the
+          # parent's own tree and writes a summary into the parent's own
+          # `_journals` tree. It uses a DEDICATED narrow instance
+          # `logseq-summ-<parent>` (ACL: write <parent-own>/_journals, read the
+          # parent's own tree) — never the broad `logseq-kbn*` instance (which
+          # may reach personal/shared) nor the parent's own instance. Persona
+          # (mode/hidden/description) and tool grants live together in
+          # `settings.agent` (opencode.json `agent` map), which the repo uses
+          # for build/plan/nix-build/nix-plan the same way, and which lets the
+          # mcp-logseq check assert them from the derived config.
+          mkKbnCounterpart = parent:
+            {
+              mode = "subagent";
+              hidden = true;
+              description =
+                "Reports ${parent} results into the knowledge-base journal (${cfg.logseqSummarizerProfiles."summ-${parent}".own}); reads ${parent}'s own tree, writes only via its dedicated journal instance or to shared instances it's included into";
+              # Summarizers never run bash; they only read via logseq and write
+              # summaries through the dedicated summary instance.
+              permission.bash = "deny";
+            }
+            // {
+              inherit (logseqGrant "summ-${parent}") tools;
+            };
+          # Subagent invocation is gated by permission.task (a `tools` glob
+          # cannot). We do NOT deny `*` — that would forbid the agent's normal
+          # task decomposition (general/explore/etc.). Instead deny only the
+          # OTHER agents' `-kbn` counterparts (`*-kbn`) and allow exactly the
+          # parent's own one; last matching rule wins, and OpenCode's default
+          # for an unmatched subagent is "ask".
+          delegateTo = parent: {
+            permission.task = {
+              "*-kbn" = "deny";
+              "${parent}-kbn" = "allow";
+            };
           };
         in {
           # Counterpart personas (mode/hidden/description) live in these
@@ -493,16 +614,13 @@ in {
             # Delegate result-summarization to its counterpart. `permission.task`
             # gates subagent invocation (a `tools` glob cannot), see
             # docs/guides/logseq-agent-namespaces.md.
-            permission.task."build-kbn" = "allow";
-          };
+          } // delegateTo "build";
           plan = {
             tools = agentBanks.plan // (logseqGrant "plan").tools;
-            permission.task."plan-kbn" = "allow";
-          };
+          } // delegateTo "plan";
           docs-writer = {
             tools = agentBanks.docs-writer // (logseqGrant "docs-writer").tools;
-            permission.task."docs-writer-kbn" = "allow";
-          };
+          } // delegateTo "docs-writer";
           kbn = {
             tools = agentBanks.kbn // (logseqGrant "kbn").tools;
           };
@@ -510,12 +628,10 @@ in {
           # These agents are currently defined in Unix_dotfiles.
           nix-build = {
             tools = agentBanks.nix-build // (logseqGrant "nix-build").tools;
-            permission.task."nix-build-kbn" = "allow";
-          };
+          } // delegateTo "nix-build";
           nix-plan = {
             tools = agentBanks.nix-plan // (logseqGrant "nix-plan").tools;
-            permission.task."nix-plan-kbn" = "allow";
-          };
+          } // delegateTo "nix-plan";
           orchestrator = {
             tools = agentBanks.orchestrator // (logseqGrant "orchestrator").tools;
           };

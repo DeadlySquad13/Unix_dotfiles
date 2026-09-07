@@ -27,7 +27,10 @@ let
   logseqHost = "salt";
 
   # Unwrap lib.mkDefault and mock the namespace mkIfEnabled so the global
-  # profile module evaluates unconditionally.
+  # profile module evaluates unconditionally. `inputs.mcp-logseq` is the Nix
+  # store source path the real flake provides (here a repo-relative stand-in).
+  mcpLogseqSrc = repoRoot + "/.";
+
   profileLib = pkgs.lib // {
     mkDefault = x: x;
     ${namespace} = pkgs.lib // {
@@ -40,6 +43,7 @@ let
     {
       lib = profileLib;
       inherit namespace;
+      inputs = {mcp-logseq = mcpLogseqSrc;};
     };
 
   profileVals = profileModule.${namespace}.ai-assistance.opencode.mcp;
@@ -70,9 +74,11 @@ let
     };
     "ds-omega".ai-assistance.opencode.mcp = {
       inherit logseqEnvironmentFile logseqHost;
+      logseqSrc = mcpLogseqSrc;
       logseqSharedNamespaces = profileVals.logseqSharedNamespaces;
       logseqNamespaceSets = profileVals.logseqNamespaceSets;
       logseqAgentProfiles = profiles;
+      logseqSummarizerProfiles = builtins.mapAttrs withDefaults profileVals.logseqSummarizerProfiles;
     };
   };
 
@@ -92,7 +98,12 @@ let
   contract = name: server: let
     e = server.environment;
     get = k: if e ? ${k} then e.${k} else null;
-    agent = builtins.replaceStrings ["logseq-"] [""] name;
+    # The grant for a `logseq-summ-<parent>` server lives on the `<parent>-kbn`
+    # counterpart AGENT; for regular servers it is the profile-named agent.
+    agent =
+      if builtins.match "logseq-summ-.*" name != null
+      then "${builtins.replaceStrings ["logseq-summ-"] [""] name}-kbn"
+      else builtins.replaceStrings ["logseq-"] [""] name;
     agentTools = settings.agent.${agent}.tools or {};
     grant = builtins.filter (hasPrefix "logseq-") (builtins.attrNames agentTools);
   in {
@@ -104,6 +115,7 @@ let
     LOGSEQ_EXCLUDE_NAMESPACES = get "LOGSEQ_EXCLUDE_NAMESPACES";
     stdioPin = pinned;
     stdioCommand = server.stdioCommand;
+    volumes = server.volumes or [];
     logseqToolGrant = grant;
   };
 

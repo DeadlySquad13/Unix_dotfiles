@@ -15,6 +15,7 @@ in
   {
     sops = {
       secrets = {
+        opencode_go_api_key = {};
         cheap_vibe_code_api_key = {};
         codexapi_api_key = {};
         logseq_api_token = {};
@@ -36,6 +37,10 @@ in
             */
             ''
               {
+                  "opencode-go": {
+                      "type": "api",
+                      "key": "${config.sops.placeholder.opencode_go_api_key}"
+                  },
                   "cheapvibecode": {
                       "type": "api",
                       "key": "${config.sops.placeholder.cheap_vibe_code_api_key}"

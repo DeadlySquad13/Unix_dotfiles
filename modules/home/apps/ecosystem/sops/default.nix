@@ -40,6 +40,7 @@
       yandex_disk_username = {};
       yandex_disk_password = {};
       codexapi_api_key = {};
+      opencode_go_api_key = {};
       cheap_vibe_code_api_key = {};
     };
     templates."opencode-auth.json" = {
@@ -49,6 +50,10 @@
         */
         ''
           {
+            "opencode-go": {
+                "type": "api",
+                "key": "${config.sops.placeholder.opencode_go_api_key}"
+            },
             "cheapvibecode": {
               "type": "api",
               "key": "${config.sops.placeholder.cheap_vibe_code_api_key}"

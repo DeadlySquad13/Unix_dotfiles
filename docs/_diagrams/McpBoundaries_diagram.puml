@@ -1,0 +1,96 @@
+@startuml
+title C4 (container) — boundaries between Unix_dotfiles MCP module and logseq-mcp
+left to right direction
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontSize 12
+
+' ---------------------------------------------------------------------------
+' C4 container diagram hand-rolled with plain primitives so it renders with a
+' local PlantUML (no network !include), consistent with the other _diagrams.
+' ---------------------------------------------------------------------------
+
+
+' ===========================================================================
+' System boundary: Unix_dotfiles — the configuration source of truth
+' ===========================================================================
+package "Unix_dotfiles — Nix configuration\n(source of truth; derives, never hand-writes)" #EEF6FD {
+  component "logseq-profiles.nix\nGLOBAL namespace ACL values (mkDefault)\nshared · sets · agentProfiles ·\nsummarizerProfiles · logseqSrc" as profiles #438DD5
+  component "mcp.nix\noptions + derivation:\nper-agent servers · opencode settings\n(agent personas, tools globs,\npermission.task) · compose endpoints" as mcpnix #438DD5
+  component "host glue\nhomes/…/sops-opencode\nlogseqEnvironmentFile (SOPS) · logseqHost" as glue #438DD5
+  component "lib/mcp-compose\npure YAML generator" as compose #438DD5
+  component "checks/mcp-logseq\nstatic oracle\n(nix build .#checks.<sys>.mcp-logseq)" as check #438DD5
+
+  profiles -[dashed]-> mcpnix : "mkDefault values\n(shared/sets/profiles/summ/logseqSrc)"
+  glue -[dashed]-> mcpnix : "per-host glue only"
+  mcpnix -[dashed]-> compose : "mcpContainers.servers\nregistry"
+  mcpnix -[dashed]-> check : "derives the same env the check asserts"
+  check -[dashed]-> mcpnix : "forces derivation /\nasserts contract"
+}
+
+' ===========================================================================
+' System boundary: logseq-mcp — the MCP server fork, one process per agent
+' ===========================================================================
+package "logseq-mcp fork — per-agent MCP gateway\n(one container per agent profile)" #FBEBFC {
+  component "supergateway\n(supercorp/supergateway:uvx — no git)" as gw #A74FE0
+  component "mcp-logseq process\nconfig.py (env loaders) ·\naccess.py (namespace+tag+block gates) ·\nnamespace.py (matching + personal marker)" as mcp #A74FE0
+  database "Logseq app / graph\nhttp://<logseqHost>:12315\n(/kbn shared graph)" as logseq #999999
+  gw -[dashed]-> mcp : "stdio child:\nuvx --refresh --from\n/app/mcp-logseq mcp-logseq"
+  mcp -[dashed]-> logseq : "HTTP API\n(token from environmentFile)"
+}
+
+' ===========================================================================
+' The contract across the boundary (this IS the ACL)
+' ===========================================================================
+mcpnix --> gw : "PER-PROCESS ENV = the hard namespace ACL:\nLOGSEQ_WRITE_INCLUDES\nLOGSEQ_INCLUDE_NAMESPACES\nLOGSEQ_EXCLUDE_NAMESPACES\nLOGSEQ_API_URL\n+ env_file (SOPS token)\n+ ${logseqSrc}:/app/mcp-logseq:ro"
+compose --> gw : "compose.yaml\n(image, loopback ports, volumes, env_file)"
+
+legend right
+  |= Color | Meaning |
+  |#438DD5| Unix_dotfiles Nix module (source of truth) |
+  |#A74FE0| logseq-mcp fork (runtime, one process per agent) |
+  |#999999| External system |
+endlegend
+
+' ---------------------------------------------------------------------------
+' Important notes gathered while building this (the gotchas) — summary only,
+' details in ADR 0004 (Unix_dotfiles) and ADR 0001 (logseq-mcp).
+' ---------------------------------------------------------------------------
+note top of gw
+  ACL is enforced at the PROCESS level (env), because OpenCode's permission
+  model is tool-name patterns and cannot express namespace granularity.
+end note
+
+note top of profiles
+  "personal" is DERIVED, never enumerated: the reserved allow-list marker
+  `personal` matches every page, and `exclude_namespaces` = other profiles'
+  own + unreferenced bundles (computed by mcp.nix) turns it into "everything
+  outside the agent-defined world". A marker without excludes grants
+  everything — except the `readAllNamespaces` profile (kbn only) which
+  deliberately reads the whole graph with personal + NO excludes.
+  Delivery agents (plan/build/nix-plan/nix-build/verifier) have NO profile.
+end note
+
+note bottom of mcp
+  ./ read = include ∪ write ("read extends write"); writes gate on
+     write_includes (fallback include_namespaces); excludes apply to both.
+  ./ delegation is permission.task deny-by-default ({ "*-kbn" = deny,
+     "<parent>-kbn" = allow }) — last-match-wins; an unlisted subagent is "ask";
+     the task tool only hides deny. `tools` is deprecated upstream but kept
+     here for MCP glob grants.
+  ./ rename_page write-gates BOTH names -> approval is COPY-based.
+  ./ knowledge roles each get a <parent>-kbn summarizer (logseq-summ-<parent>)
+     that journals "Updated [[page]]" entries into <parent-own>/_journals.
+end note
+
+note bottom of gw
+  The :uvx image has NO git -> a git+https spec fails at container start.
+  Fix: flake input `mcp-logseq` pinned (flake=false, rev aa5550e…), source
+  mounted read-only, installed via `uvx --from <dir>`.
+  `logseq-mcpo` stays registered for NON-opencode consumers but is disabled in
+  OpenCode only (settings.mcp."logseq-mcpo".enabled = false).
+  Host ports are gateway ports; every instance talks to the SAME Logseq app.
+  After any wiring change: `make switch` then `make mcp-restart` BEFORE an
+  OpenCode session (tools are registered at session start).
+end note
+@enduml

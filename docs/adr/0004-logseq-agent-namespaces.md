@@ -1,7 +1,20 @@
 # ADR 0004: Per-agent Logseq namespace ACL + OpenCode agent wiring
 
-- Status: Accepted
+- Status: Superseded by [ADR 0005](0005-agent-roles-and-logseq-access.md)
 - Date: 2026-09-06
+
+> **Superseded (2026-09-07).** The agent model in this ADR — the 12-server set
+> of delivery producers (`build`, `plan`, `nix-build`, `nix-plan`,
+> `docs-writer`) each delegating summarization to a `<parent>-kbn` counterpart,
+> with the corresponding ports and profile table — has been reworked. ADR 0005
+> records the implemented model: knowledge roles (9 `logseq-<role>` profiles)
+> versus DELIVERY agents (`plan`, `nix-plan`, `build`, `nix-build`, `verifier`)
+> that get no Logseq at all, with only the producing knowledge roles getting
+> hidden `<parent>-kbn` summarizer counterparts. The machinery decisions below
+> that are still true (per-process env ACL, `personal` complement, no generic
+> `logseq` server, `logseq-mcpo` disabled in OpenCode, Nix-pinned source,
+> `permission.task` semantics, the static check) are carried forward by
+> ADR 0005. This document is retained intact as history.
 
 ## Context
 

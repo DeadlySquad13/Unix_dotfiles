@@ -1,0 +1,152 @@
+@startuml
+title OpenCode agents — knowledge roles with own Logseq instances + journaling; delivery agents have NO Logseq
+left to right direction
+skinparam componentStyle rectangle
+skinparam defaultFontSize 12
+
+' ---------------------------------------------------------------------------
+' Agents are individuals with different GOALS. The small non-logseq tool BANK
+' subset is shared (mcp.nix `agentBanks`: knowledge / delivery / deliveryNix).
+' The logseq instance grant and permission.task delegation are always applied
+' at the leaf, never inherited.
+'
+' Knowledge roles (write Logseq): orchestrator, strategist, tactician,
+' architect, researcher, analyst, nix-analyst, reporter, kbn.
+' DELIVERY roles (plan, build, nix-plan, nix-build, verifier) have NO Logseq
+' server/tool at all — their namespaces are populated by analyst / reporter.
+' ---------------------------------------------------------------------------
+
+package "Agents (primary)" {
+  component "orchestrator" as orch
+  component "strategist" as strat
+  component "kbn (the noter)" as kbn
+}
+
+package "Agents (knowledge subagents)" {
+  component "tactician" as tcn
+  component "architect" as arc
+  component "researcher" as rsh
+  component "analyst" as anl
+  component "nix-analyst" as nxl
+  component "reporter" as rpt
+}
+
+package "Agents (delivery — NO Logseq)" {
+  component "plan" as plan
+  component "nix-plan" as nxp
+  component "build" as build
+  component "nix-build" as nxb
+  component "verifier" as ver
+}
+
+package "Agents (hidden summarizer counterparts)" {
+  component "strategist-kbn" as strat_kbn
+  component "tactician-kbn" as tcn_kbn
+  component "architect-kbn" as arc_kbn
+  component "researcher-kbn" as rsh_kbn
+  component "analyst-kbn" as anl_kbn
+  component "nix-analyst-kbn" as nxl_kbn
+  component "reporter-kbn" as rpt_kbn
+}
+
+' --------------------------- tool banks (subset only) ----------------------
+component "knowledge bank" as kb
+component "delivery bank" as db
+component "delivery+nixos bank" as dnb
+
+orch *-- kb : "+ logseq-orchestrator*"
+strat *-- kb : "+ logseq-strategist*"
+tcn *-- kb : "+ logseq-tactician*"
+arc *-- kb : "+ logseq-architect*"
+rsh *-- kb : "+ logseq-researcher*"
+anl *-- kb : "+ logseq-analyst*"
+nxl *-- kb : "+ nixos +\nlogseq-nix-analyst*"
+rpt *-- kb : "+ logseq-reporter*"
+kbn *-- kb : "+ filesystem(/kbn vault) +\nlogseq-kbn*"
+
+plan *-- db : "banks only"
+ver *-- db : "banks only"
+build *-- db : "banks only"
+nxp *-- dnb : "banks only"
+nxb *-- dnb : "banks only"
+
+strat_kbn *-- "logseq-summ-strategist*" : "bank"
+tcn_kbn *-- "logseq-summ-tactician*" : "bank"
+arc_kbn *-- "logseq-summ-architect*" : "bank"
+rsh_kbn *-- "logseq-summ-researcher*" : "bank"
+anl_kbn *-- "logseq-summ-analyst*" : "bank"
+nxl_kbn *-- "logseq-summ-nix-analyst*" : "bank"
+rpt_kbn *-- "logseq-summ-reporter*" : "bank"
+
+' --------------------------- delegation (permission.task) --------------------
+strat --> strat_kbn : "permission.task:\n{ *-kbn = deny, strategist-kbn = allow }"
+tcn --> tcn_kbn : "permission.task:\n{ *-kbn = deny, tactician-kbn = allow }"
+arc --> arc_kbn : "permission.task:\n{ *-kbn = deny, architect-kbn = allow }"
+rsh --> rsh_kbn : "permission.task:\n{ *-kbn = deny, researcher-kbn = allow }"
+anl --> anl_kbn : "permission.task:\n{ *-kbn = deny, analyst-kbn = allow }"
+nxl --> nxl_kbn : "permission.task:\n{ *-kbn = deny, nix-analyst-kbn = allow }"
+rpt --> rpt_kbn : "permission.task:\n{ *-kbn = deny, reporter-kbn = allow }"
+
+' --------------------------- Logseq instances (process env = the ACL) ---------
+database "Logseq graph\n(pages/namespaces)" as graph
+
+package "logseq-<role> instances\n(per knowledge role)" {
+  component "logseq-strategist*" as s_inst
+  component "logseq-tactician*" as t_inst
+  component "logseq-architect*" as a_inst
+  component "logseq-researcher*" as r_inst
+  component "logseq-analyst*" as an_inst
+  component "logseq-nix-analyst*" as n_inst
+  component "logseq-reporter*" as p_inst
+  component "logseq-orchestrator*" as o_inst
+  component "logseq-kbn*" as k_inst
+}
+
+package "logseq-summ-<parent> instances\n(narrow: write <parent-own>/_journals,\nread the parent's own)" as summ_inst
+
+strat --> s_inst
+tcn --> t_inst
+arc --> a_inst
+rsh --> r_inst
+anl --> an_inst
+nxl --> n_inst
+rpt --> p_inst
+orch --> o_inst
+kbn --> k_inst
+
+strat_kbn --> summ_inst
+tcn_kbn --> summ_inst
+arc_kbn --> summ_inst
+rsh_kbn --> summ_inst
+anl_kbn --> summ_inst
+nxl_kbn --> summ_inst
+rpt_kbn --> summ_inst
+
+s_inst --> graph
+t_inst --> graph
+a_inst --> graph
+r_inst --> graph
+an_inst --> graph
+n_inst --> graph
+p_inst --> graph
+o_inst --> graph
+k_inst --> graph
+summ_inst --> graph
+
+' --------------------------- delivery → knowledge flow ---------------------
+plan ..> anl : "plan authored\ninto ai-pln Planner_system"
+nxp ..> nxl : "plan authored\ninto ai-nxp NixPlanner_system"
+build ..> rpt : "result reported\ninto ai-bld Builder_system"
+nxb ..> rpt : "result reported\ninto ai-nxb NixBuilder_system"
+ver ..> rpt : "verification evidence"
+
+note bottom of graph
+Every instance is a client of the SAME Logseq app; the host
+ports are gateway ports, not Logseq instances. The per-process env
+(LOGSEQ_WRITE_INCLUDES/INCLUDE/EXCLUDE) is the hard namespace ACL —
+OpenCode's tool-permission model cannot express namespaces.
+"personal" = the derived complement (reserved marker + exclude_namespaces);
+kbn is the one `readAllNamespaces` profile (personal marker, NO excludes).
+Delivery agents never mount Logseq tools/namespaces/credentials.
+end note
+@enduml

@@ -33,9 +33,9 @@ lib.${namespace}.mkIfEnabled {
       # to be set. Restore the login environment here so the personal profile
       # works in both login and non-login contexts. /etc/profile is idempotent
       # (has the __ETC_PROFILE_DONE guard).
-      if [ -f /etc/profile ]; then
-        . /etc/profile
-      fi
+      # NOTE: Unverified that it's hard requirement with our config. But it
+      # doesn't break.
+      [[ -f /etc/profile ]] && . /etc/profile
 
       # Personal profile.
       [[ -f ~/.bash/.bashrc ]] && . ~/.bash/.bashrc

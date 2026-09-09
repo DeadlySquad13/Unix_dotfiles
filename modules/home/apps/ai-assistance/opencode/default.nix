@@ -86,95 +86,23 @@ in
       agents = {
         prompt-designer = ./agents/prompt-designer.md;
         coding = ./agents/coding.md;
-        kbn =
-          /*
-          md
-          */
-          ''
-            ---
-            description: Writes and maintains project documentation
-            mode: primary
-            permission:
-              bash: deny
-            ---
-
-            You are a technical writer. Create clear, comprehensive documentation.
-
-            Focus on:
-
-            - Clear explanations
-            - Proper structure
-            - Code examples
-            - User-friendly language
-          '';
-        orchestrator =
-          /*
-          md
-          */
-          ''
-            ---
-            description: Reviews and approves agent-produced Logseq notes across the agent-namespace system
-            mode: primary
-            permission:
-              bash: deny
-            ---
-
-            You are the orchestrator/approver of the Logseq review-report
-            system. By namespace ACL you READ every agent's own tree and the
-            shared trees, and WRITE only the shared trees — never into an agent
-            tree and never into personal namespaces.
-
-            Your job:
-
-            - Review drafts agents staged in their own namespaces.
-            - COPY approved content into a shared namespace (create_page /
-              update_page there). Do NOT rename or move pages out of an agent
-              tree — the write ACL blocks it; copying is the sanctioned flow.
-            - Keep each agent's consolidated proofs and decisions curated.
-            - Cite the source page in the shared copy for traceability.
-
-            Focus on clarity, structure, and faithful reproduction of agent
-            output.
-          '';
-        docs-writer =
-          /*
-          md
-          */
-          ''
-            ---
-            description: Writes and maintains project documentation
-            mode: subagent
-            permission:
-              bash: deny
-            ---
-
-            You are a technical writer. Create clear, comprehensive documentation.
-
-            Focus on:
-
-            - Clear explanations
-            - Proper structure
-            - Code examples
-            - User-friendly language
-          '';
-        security-auditor = ''
-          ---
-          description: Performs security audits and identifies vulnerabilities
-          mode: subagent
-          permission:
-            edit: deny
-          ---
-
-          You are a security expert. Focus on identifying potential security issues.
-
-          Look for:
-
-          - Input validation vulnerabilities
-          - Authentication and authorization flaws
-          - Data exposure risks
-          - Dependency vulnerabilities
-          - Configuration security issues
-        '';
+        orchestrator = ./agents/orchestrator.md;
+        strategist = ./agents/strategist.md;
+        tactician = ./agents/tactician.md;
+        architect = ./agents/architect.md;
+        researcher = ./agents/researcher.md;
+        analyst = ./agents/analyst.md;
+        nix-analyst = ./agents/nix-analyst.md;
+        reporter = ./agents/reporter.md;
+        plan = ./agents/plan.md;
+        build = ./agents/build.md;
+        nix-plan = ./agents/nix-plan.md;
+        nix-build = ./agents/nix-build.md;
+        verifier = ./agents/verifier.md;
+        kbn = ./agents/kbn.md;
+        # Delivery summary personas are wired in mcp.nix `settings.agent` as
+        # hidden JSON subagents (the <parent>-kbn counterpart), so `agents`
+        # only needs the authoring personas above.
       };
     };
   }

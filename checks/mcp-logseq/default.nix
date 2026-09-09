@@ -10,15 +10,17 @@
   # (import { lib; config; } directly) so the internal `let` bindings
   # (resolveSets, profileExcludes, mkLogseqServer, ...) evaluate faithfully, then
   # asserts:
-  #   - the 12-server env oracle (7 agent profiles + 5 `summ-<parent>`
-  #     summarizer instances; ports, WRITE/INCLUDE/EXCLUDE strings, stdio,
-  #     LOGSEQ_API_URL, environmentFile) of docs/guides/logseq-agent-namespaces.md,
+  #   - the 16-server env oracle (9 knowledge-role profiles + 7 `<parent>-kbn`
+  #     `logseq-summ-<parent>` summarizer instances; ports, WRITE/INCLUDE/
+  #     EXCLUDE strings, stdio, LOGSEQ_API_URL, environmentFile),
   #   - the per-agent tool-grant isolation invariant (no cross-agent logseq glob)
-  #     including the <agent>-kbn summarizer counterparts (dedicated
-  #     `logseq-summ-<parent>*` instance only),
-  #   - the counterpart delegation wiring (each parent's `permission.task` is
-  #     deny-by-default + allow exactly its own `<agent>-kbn`),
-  #   - that the three global namespace options resolve identically from
+  #     including the summarizer counterparts (dedicated `logseq-summ-<parent>*`
+  #     instance only) and that DELIVERY agents (plan/build/nix-plan/nix-build/
+  #     verifier) carry NO logseq glob at all,
+  #   - the counterpart delegation wiring (each producing parent's
+  #     `permission.task` is deny-*-kbn + allow exactly its own `<parent>-kbn`).
+  #   - kbn's `readAllNamespaces` exception (personal marker with NO excludes).
+  #   - that the global namespace options resolve identically from
   #     modules/home/apps/ai-assistance/opencode/logseq-profiles.nix.
   # Any mismatch aborts loudly, so `nix build .#checks.<system>.mcp-logseq` fails.
   #
@@ -67,13 +69,15 @@
   }).${namespace}.ai-assistance.opencode.mcp;
 
   # Option defaults are NOT auto-applied outside the module system: merge each
-  # profile's defaults ourselves (writeSets/readSets = [], readAllAgentOwns = false).
+  # profile's defaults ourselves (writeSets/readSets/readAllAgentOwns/
+  # readAllNamespaces).
   withDefaults = _: prof:
     prof
     // {
       writeSets = prof.writeSets or [];
       readSets = prof.readSets or [];
       readAllAgentOwns = prof.readAllAgentOwns or false;
+      readAllNamespaces = prof.readAllNamespaces or false;
     };
 
   profiles = builtins.mapAttrs withDefaults profileVals.logseqAgentProfiles;
@@ -147,122 +151,178 @@
   logseqServerNames = attrNames logseqServers;
 
   expectedNames = sort lessThan [
-    "logseq-build"
-    "logseq-docs-writer"
+    # Knowledge-role instances.
+    "logseq-analyst"
+    "logseq-architect"
     "logseq-kbn"
-    "logseq-nix-build"
-    "logseq-nix-plan"
+    "logseq-nix-analyst"
     "logseq-orchestrator"
-    "logseq-plan"
-    "logseq-summ-build"
-    "logseq-summ-docs-writer"
-    "logseq-summ-nix-build"
-    "logseq-summ-nix-plan"
-    "logseq-summ-plan"
+    "logseq-reporter"
+    "logseq-researcher"
+    "logseq-strategist"
+    "logseq-tactician"
+    # Dedicated <parent>-kbn summarizer instances.
+    "logseq-summ-analyst"
+    "logseq-summ-architect"
+    "logseq-summ-nix-analyst"
+    "logseq-summ-reporter"
+    "logseq-summ-researcher"
+    "logseq-summ-strategist"
+    "logseq-summ-tactician"
   ];
 
-  markerProfiles = ["plan" "nix-plan" "kbn"];
-  strictProfiles = ["build" "docs-writer" "nix-build" "orchestrator"];
+  markerProfiles = [
+    "strategist" # personal via readSets
+    # kbn is a readAllNamespaces profile → personal in include but NO excludes (see below).
+  ];
+  # readAllNamespaces profiles: personal marker WITHOUT excludes (deliberate kbn exception).
+  globalReadProfiles = ["kbn"];
+  # Strict profiles: no personal marker, no excludes.
+  strictProfiles = [
+    "orchestrator"
+    "tactician"
+    "architect"
+    "researcher"
+    "analyst"
+    "nix-analyst"
+    "reporter"
+  ];
   profileOfServer = name: builtins.replaceStrings ["logseq-"] [""] name;
   rawSetNames = attrNames profileVals.logseqNamespaceSets;
 
   # ---------------------------------------------------------------------------
-  # Counterpart model.
+  # Summarizer (counterpart) model.
   # ---------------------------------------------------------------------------
-  producingParents = ["build" "plan" "nix-build" "nix-plan" "docs-writer"];
+  producingParents = [
+    "strategist"
+    "tactician"
+    "architect"
+    "researcher"
+    "analyst"
+    "nix-analyst"
+    "reporter"
+  ];
   counterparts = map (p: "${p}-kbn") producingParents;
 
-  # Every PURE agent must carry exactly {logseq-<own>*}.
-  pureAgents = producingParents ++ ["kbn" "orchestrator"];
-  # Counterparts carry exactly the dedicated summary instance {logseq-summ-<parent>*}.
+  # Every knowledge agent carries exactly {logseq-<own>*}.
+  knowledgeAgents = producingParents ++ ["orchestrator" "kbn"];
+  # Delivery agents carry NO logseq glob at all.
+  deliveryAgents = ["plan" "nix-plan" "build" "nix-build" "verifier"];
   parentOf = name: builtins.replaceStrings ["-kbn"] [""] name;
   summOf = name: "summ-${parentOf name}";
 
-  allAgentNames = pureAgents ++ counterparts;
+  allAgentNames = knowledgeAgents ++ counterparts ++ deliveryAgents;
 
   # ---------------------------------------------------------------------------
   # The full oracle env per server (write / include / exclude).
   # ---------------------------------------------------------------------------
+  shared = "ai Agents_system";
+  discovery = "ai-shared-Discovery_system";
+  architecture = "ai-shared-Architecture_system";
   expected = {
-    "logseq-build" = {
-      hostPort = 18108;
-      write = "ai-bld Builder_system,ai Agents_system,ai-s-bld shared-Builder_system";
-      include = null;
+    "logseq-orchestrator" = {
+      hostPort = 18113;
+      write = "ai-orc Orchestrator_system,${shared}";
+      include = "${discovery},${architecture},ai-anl Analyst_system,ai-arc Architect_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-str Strategist_system,ai-tcn Tactician_system";
       exclude = null;
     };
-    "logseq-docs-writer" = {
+    "logseq-strategist" = {
+      hostPort = 18108;
+      write = "ai-str Strategist_system,${shared},${discovery}";
+      include = "personal,${architecture}";
+      exclude = "ai-anl Analyst_system,ai-arc Architect_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-orc Orchestrator_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-tcn Tactician_system,ai-s-bld shared-Builder_system,ai-bld Builder_system,ai-nxb NixBuilder_system,ai-nxp NixPlanner_system,ai-pln Planner_system,ai-s-pln shared-Planner_system";
+    };
+    "logseq-tactician" = {
+      hostPort = 18109;
+      write = "ai-tcn Tactician_system,${shared}";
+      include = "${discovery},${architecture},ai-anl Analyst_system,ai-arc Architect_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-orc Orchestrator_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-str Strategist_system";
+      exclude = null;
+    };
+    "logseq-architect" = {
       hostPort = 18110;
-      write = "ai-dwt DocsWriter_system,ai Agents_system";
-      include = null;
+      write = "ai-arc Architect_system,${shared},${architecture}";
+      include = "${discovery},${architecture}";
+      exclude = null;
+    };
+    "logseq-researcher" = {
+      hostPort = 18111;
+      write = "ai-rsh Researcher_system,${shared}";
+      include = "${discovery},${architecture}";
+      exclude = null;
+    };
+    "logseq-analyst" = {
+      hostPort = 18112;
+      write = "ai-anl Analyst_system,${shared},ai-pln Planner_system,ai-s-pln shared-Planner_system";
+      include = "${discovery},${architecture}";
+      exclude = null;
+    };
+    "logseq-nix-analyst" = {
+      hostPort = 18114;
+      write = "ai-nxl NixAnalyst_system,${shared},ai-nxp NixPlanner_system";
+      include = "${discovery},${architecture}";
+      exclude = null;
+    };
+    "logseq-reporter" = {
+      hostPort = 18115;
+      write = "ai-rpt Reporter_system,${shared},ai-bld Builder_system,ai-nxb NixBuilder_system,ai-s-bld shared-Builder_system";
+      include = "${discovery},${architecture}";
       exclude = null;
     };
     "logseq-kbn" = {
       hostPort = 18103;
-      write = "ai-kbn KnowledgeBaseNoter_system,ai Agents_system,ai-s-pln shared-Planner_system,personal";
-      include = null;
-      exclude = "ai-bld Builder_system,ai-dwt DocsWriter_system,ai-nxb NixBuilder_system,ai-nxp NixPlanner_system,ai-orc Orchestrator_system,ai-pln Planner_system,ai-s-bld shared-Builder_system";
-    };
-    "logseq-nix-build" = {
-      hostPort = 18111;
-      write = "ai-nxb NixBuilder_system,ai Agents_system,ai-s-bld shared-Builder_system";
-      include = null;
+      write = "ai-kbn KnowledgeBaseNoter_system,${shared}";
+      include = "personal";
       exclude = null;
     };
-    "logseq-nix-plan" = {
-      hostPort = 18112;
-      write = "ai-nxp NixPlanner_system,ai Agents_system,ai-s-pln shared-Planner_system";
-      include = "personal";
-      exclude = "ai-bld Builder_system,ai-dwt DocsWriter_system,ai-kbn KnowledgeBaseNoter_system,ai-nxb NixBuilder_system,ai-orc Orchestrator_system,ai-pln Planner_system,ai-s-bld shared-Builder_system";
-    };
-    "logseq-orchestrator" = {
-      hostPort = 18113;
-      write = "ai-orc Orchestrator_system,ai Agents_system";
-      include = "ai-bld Builder_system,ai-dwt DocsWriter_system,ai-kbn KnowledgeBaseNoter_system,ai-nxb NixBuilder_system,ai-nxp NixPlanner_system,ai-pln Planner_system";
-      exclude = null;
-    };
-    "logseq-plan" = {
-      hostPort = 18109;
-      write = "ai-pln Planner_system,ai Agents_system,ai-s-pln shared-Planner_system";
-      include = "personal";
-      exclude = "ai-bld Builder_system,ai-dwt DocsWriter_system,ai-kbn KnowledgeBaseNoter_system,ai-nxb NixBuilder_system,ai-nxp NixPlanner_system,ai-orc Orchestrator_system,ai-s-bld shared-Builder_system";
-    };
-    # Dedicated summarizer instances (one per <parent>-kbn counterpart): WRITE
-    # the parent's own `<parent-own>/_journals` tree (+ the global shared tree);
+    # Dedicated summarizer instances (one per producing parent): WRITE the
+    # parent's own `<parent-own>/_journals` tree (+ the global shared tree);
     # READ the parent's own tree only. NO personal, NO broad kbn instance,
     # NO excludes.
-    "logseq-summ-build" = {
-      hostPort = 18114;
-      write = "ai-bld Builder_system/_journals,ai Agents_system";
-      include = "ai-bld Builder_system";
-      exclude = null;
-    };
-    "logseq-summ-plan" = {
-      hostPort = 18115;
-      write = "ai-pln Planner_system/_journals,ai Agents_system";
-      include = "ai-pln Planner_system";
-      exclude = null;
-    };
-    "logseq-summ-docs-writer" = {
+    "logseq-summ-strategist" = {
       hostPort = 18116;
-      write = "ai-dwt DocsWriter_system/_journals,ai Agents_system";
-      include = "ai-dwt DocsWriter_system";
+      write = "ai-str Strategist_system/_journals,${shared}";
+      include = "ai-str Strategist_system";
       exclude = null;
     };
-    "logseq-summ-nix-build" = {
+    "logseq-summ-tactician" = {
       hostPort = 18117;
-      write = "ai-nxb NixBuilder_system/_journals,ai Agents_system";
-      include = "ai-nxb NixBuilder_system";
+      write = "ai-tcn Tactician_system/_journals,${shared}";
+      include = "ai-tcn Tactician_system";
       exclude = null;
     };
-    "logseq-summ-nix-plan" = {
+    "logseq-summ-architect" = {
       hostPort = 18118;
-      write = "ai-nxp NixPlanner_system/_journals,ai Agents_system";
-      include = "ai-nxp NixPlanner_system";
+      write = "ai-arc Architect_system/_journals,${shared}";
+      include = "ai-arc Architect_system";
+      exclude = null;
+    };
+    "logseq-summ-researcher" = {
+      hostPort = 18119;
+      write = "ai-rsh Researcher_system/_journals,${shared}";
+      include = "ai-rsh Researcher_system";
+      exclude = null;
+    };
+    "logseq-summ-analyst" = {
+      hostPort = 18120;
+      write = "ai-anl Analyst_system/_journals,${shared}";
+      include = "ai-anl Analyst_system";
+      exclude = null;
+    };
+    "logseq-summ-nix-analyst" = {
+      hostPort = 18121;
+      write = "ai-nxl NixAnalyst_system/_journals,${shared}";
+      include = "ai-nxl NixAnalyst_system";
+      exclude = null;
+    };
+    "logseq-summ-reporter" = {
+      hostPort = 18122;
+      write = "ai-rpt Reporter_system/_journals,${shared}";
+      include = "ai-rpt Reporter_system";
       exclude = null;
     };
   };
 
-  # Validate one server against the oracle + common invariants (7 & 8).
+  # Validate one server against the oracle + common invariants.
   checkServer = name: exp: let
     svc = logseqServers.${name};
     env = svc.environment;
@@ -309,7 +369,7 @@
       ((svc.volumes or []) == [])
       "without logseqSrc there must be no src volume") expectedNames;
 
-  assertNamedServers = check "exactly the 12 expected logseq servers"
+  assertNamedServers = check "exactly the 16 expected logseq servers"
     (logseqServerNames == expectedNames)
     "expected [${concatStringsSep "," expectedNames}] got [${concatStringsSep "," logseqServerNames}]";
 
@@ -324,37 +384,49 @@
     "logseq-mcpo must stay registered (other consumers) but be disabled in OpenCode";
 
   # ---------------------------------------------------------------------------
-  # Invariant 2 & 3: excludes exist ONLY for marker profiles; never a raw
-  # set NAME (e.g. `buildPair`); always the RESOLVED namespace.
+  # Invariant 2 & 3: excludes exist ONLY for marker profiles (personal via
+  # readSets/writeSets); NEVER a raw set NAME; always the RESOLVED namespace.
+  # readAllNamespaces profiles are the deliberate exception: personal marker
+  # in include, NO excludes.
   # ---------------------------------------------------------------------------
   assertExcludes = all (name: let
     prof = profileOfServer name;
     isMarker = builtins.elem prof markerProfiles;
+    isGlobal = builtins.elem prof globalReadProfiles;
     exclude = envGet logseqServers.${name}.environment "LOGSEQ_EXCLUDE_NAMESPACES";
     tokens = if exclude == null then [] else splitCsv exclude;
   in
     check "${name}/excludeDerivation"
       (if isMarker then exclude != null else exclude == null)
-      "exclude must exist for marker profile and be absent for strict (marker=${toString isMarker})"
+      "exclude must exist for marker profile, be absent for strict and be absent for readAllNamespaces"
+    && check "${name}/globalReadNoExclude"
+      (if isGlobal then exclude == null else true)
+      "readAllNamespaces profile must have NO excludes"
     && check "${name}/excludeResolvedOnly"
       (all (raw: ! builtins.elem raw tokens) rawSetNames)
       "exclude must never contain a raw set name; got ${toString tokens}") logseqServerNames;
 
   # ---------------------------------------------------------------------------
-  # Invariant 4: `personal` marker pairs with a non-empty exclude (same server).
+  # Invariant 4: `personal` marker pairs with a non-empty exclude, EXCEPT for
+  # readAllNamespaces profiles (kbn) which intentionally read the whole graph.
   # ---------------------------------------------------------------------------
   checkPersonalPair = name: let
     env = logseqServers.${name}.environment;
+    prof = profileOfServer name;
     w = envGet env "LOGSEQ_WRITE_INCLUDES";
     i = envGet env "LOGSEQ_INCLUDE_NAMESPACES";
     e = envGet env "LOGSEQ_EXCLUDE_NAMESPACES";
     hasPersonal =
       (w != null && builtins.elem "personal" (splitCsv w))
       || (i != null && builtins.elem "personal" (splitCsv i));
+    isGlobal = builtins.elem prof globalReadProfiles;
   in
     check "${name}/personalPairsWithExclude"
-      (if hasPersonal then e != null else e == null)
-      "if 'personal' appears, exclude must be non-empty; if absent, exclude must be absent";
+      (if hasPersonal && ! isGlobal then e != null else true)
+      "non-global profile with 'personal' must have excludes; readAllNamespaces (kbn) is exempt without"
+    && check "${name}/globalReadPersonalOnly"
+      (if isGlobal then i != null && builtins.elem "personal" (splitCsv i) else true)
+      "readAllNamespaces profile must carry the personal marker in include";
 
   assertPersonalPair = all (name: checkPersonalPair name) logseqServerNames;
 
@@ -374,33 +446,45 @@
       "strict profile must have no excludes and no personal marker") strictProfiles;
 
   # ---------------------------------------------------------------------------
-  # Invariant 6: orchestrator include == exactly every OTHER profile's own.
-  # (attrValues on filterAttrs yields values sorted by key, so sort the owns.)
+  # Invariant 6: orchestrator/tactician include == readSets resolved + every
+  # OTHER profile's own tree.
   # ---------------------------------------------------------------------------
-  otherOwns = let
-    sortedProfiles = sort lessThan (attrNames profiles);
+  readAllOwnsIncludes = name: let
+    o = (builtins.filter (p: p != name) (sort lessThan (attrNames profiles)));
   in
-    map (p: profiles.${p}.own) (
-      builtins.filter (p: p != "orchestrator") sortedProfiles
-    );
+    (concatStringsSep "," [
+      discovery
+      architecture
+    ])
+    + ","
+    + concatStringsSep "," (map (p: profiles.${p}.own) o);
 
-  assertOrchestratorInclude = check "orchestrator include == other owns"
+  assertOrchestratorInclude = check "orchestrator include == discovery/research?? own tree"
     (let
       inc = envGet logseqServers."logseq-orchestrator".environment "LOGSEQ_INCLUDE_NAMESPACES";
-      want = concatStringsSep "," otherOwns;
+      want = readAllOwnsIncludes "orchestrator";
     in
       inc == want)
-    "orchestrator include must be exactly every other profile's own tree";
+    "orchestrator include must be discovery+architecture then every other profile's own tree";
+
+  assertTacticianInclude = check "tactician include == discovery/architecture + other owns"
+    (let
+      inc = envGet logseqServers."logseq-tactician".environment "LOGSEQ_INCLUDE_NAMESPACES";
+      want = readAllOwnsIncludes "tactician";
+    in
+      inc == want)
+    "tactician include must be discovery+architecture then every other profile's own tree";
 
   # ---------------------------------------------------------------------------
-  # Invariant 9 + new: per-agent tool grants; isolation; counterpart glob sets.
+  # Invariant 9 + delivery: per-agent tool grants; isolation; counterpart glob
+  # sets; NO logseq glob on delivery agents.
   # ---------------------------------------------------------------------------
   logseqGlobsOf = name: sort lessThan (
     builtins.filter (hasPrefix "logseq-") (attrNames (settings.agent.${name}.tools or {}))
   );
 
-  # For pure agents the only allowed glob is {logseq-<own>*}.
-  checkPureAgent = name:
+  # For knowledge agents the only allowed glob is {logseq-<own>*}.
+  checkKnowledgeAgent = name:
     check "agent/${name} isolation" (logseqGlobsOf name == ["logseq-${name}*"])
       "expected exactly [logseq-${name}*] got [${concatStringsSep "," (logseqGlobsOf name)}]";
 
@@ -411,14 +495,21 @@
     check "counterpart/${name} globs" (logseqGlobsOf name == want)
       "expected [${concatStringsSep "," want}] got [${concatStringsSep "," (logseqGlobsOf name)}]";
 
+  # Delivery agents (plan/build/nix-plan/nix-build/verifier): zero logseq globs.
+  checkDeliveryNoLogseq = name:
+    check "delivery/${name} no logseq" (logseqGlobsOf name == [])
+      "delivery agent must carry NO logseq glob; got [${concatStringsSep "," (logseqGlobsOf name)}]";
+
   assertIsolation = all (name:
     if builtins.elem name counterparts
     then checkCounterpart name
-    else checkPureAgent name
+    else if builtins.elem name deliveryAgents
+    then checkDeliveryNoLogseq name
+    else checkKnowledgeAgent name
   ) allAgentNames;
 
   # ---------------------------------------------------------------------------
-  # Invariant (new): delegation via permission.task.
+  # Invariant (new): delegation via permission.task for producing parents.
   # ---------------------------------------------------------------------------
   assertDelegation = all (name: let
     task = (settings.agent.${name}.permission or {}).task or {};
@@ -450,51 +541,72 @@
       "counterpart must have a description") counterparts;
 
   # ---------------------------------------------------------------------------
-  # Invariant (new): the three global options resolve identically to the known
-  # values via logseq-profiles.nix (they moved out of the salt host file).
+  # Invariant: the global options resolve identically to the known values via
+  # logseq-profiles.nix (they moved out of the salt host file).
   # ---------------------------------------------------------------------------
   expectedProfiles = {
-    kbn = {
-      own = "ai-kbn KnowledgeBaseNoter_system";
-      writeSets = ["planPair" "personal"];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-    build = {
-      own = "ai-bld Builder_system";
-      writeSets = ["buildPair"];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-    plan = {
-      own = "ai-pln Planner_system";
-      writeSets = ["planPair"];
-      readSets = ["personal"];
-      readAllAgentOwns = false;
-    };
-    docs-writer = {
-      own = "ai-dwt DocsWriter_system";
-      writeSets = [];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-    nix-build = {
-      own = "ai-nxb NixBuilder_system";
-      writeSets = ["buildPair"];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-    nix-plan = {
-      own = "ai-nxp NixPlanner_system";
-      writeSets = ["planPair"];
-      readSets = ["personal"];
-      readAllAgentOwns = false;
-    };
     orchestrator = {
       own = "ai-orc Orchestrator_system";
       writeSets = [];
-      readSets = [];
+      readSets = ["discovery" "architecture"];
       readAllAgentOwns = true;
+      readAllNamespaces = false;
+    };
+    strategist = {
+      own = "ai-str Strategist_system";
+      writeSets = ["discovery"];
+      readSets = ["personal" "architecture"];
+      readAllAgentOwns = false;
+      readAllNamespaces = false;
+    };
+    tactician = {
+      own = "ai-tcn Tactician_system";
+      writeSets = [];
+      readSets = ["discovery" "architecture"];
+      readAllAgentOwns = true;
+      readAllNamespaces = false;
+    };
+    architect = {
+      own = "ai-arc Architect_system";
+      writeSets = ["architecture"];
+      readSets = ["discovery" "architecture"];
+      readAllAgentOwns = false;
+      readAllNamespaces = false;
+    };
+    researcher = {
+      own = "ai-rsh Researcher_system";
+      writeSets = [];
+      readSets = ["discovery" "architecture"];
+      readAllAgentOwns = false;
+      readAllNamespaces = false;
+    };
+    analyst = {
+      own = "ai-anl Analyst_system";
+      writeSets = ["planOwn" "planPair"];
+      readSets = ["discovery" "architecture"];
+      readAllAgentOwns = false;
+      readAllNamespaces = false;
+    };
+    nix-analyst = {
+      own = "ai-nxl NixAnalyst_system";
+      writeSets = ["nixPlanOwn"];
+      readSets = ["discovery" "architecture"];
+      readAllAgentOwns = false;
+      readAllNamespaces = false;
+    };
+    reporter = {
+      own = "ai-rpt Reporter_system";
+      writeSets = ["builderOwn" "nixBuilderOwn" "buildPair"];
+      readSets = ["discovery" "architecture"];
+      readAllAgentOwns = false;
+      readAllNamespaces = false;
+    };
+    kbn = {
+      own = "ai-kbn KnowledgeBaseNoter_system";
+      writeSets = [];
+      readSets = [];
+      readAllAgentOwns = false;
+      readAllNamespaces = true;
     };
   };
 
@@ -506,45 +618,28 @@
     (profileVals.logseqSharedNamespaces == ["ai Agents_system"])
     "logseqSharedNamespaces must be ['ai Agents_system']";
 
-  assertSetsFromModule = check "logseqNamespaceSets == buildPair/planPair"
+  assertSetsFromModule = check "logseqNamespaceSets == the 8 documented bundles"
     (profileVals.logseqNamespaceSets == {
+      planOwn = ["ai-pln Planner_system"];
+      nixPlanOwn = ["ai-nxp NixPlanner_system"];
+      builderOwn = ["ai-bld Builder_system"];
+      nixBuilderOwn = ["ai-nxb NixBuilder_system"];
       buildPair = ["ai-s-bld shared-Builder_system"];
       planPair = ["ai-s-pln shared-Planner_system"];
+      discovery = ["ai-shared-Discovery_system"];
+      architecture = ["ai-shared-Architecture_system"];
     })
-    "logseqNamespaceSets must contain only buildPair and planPair";
+    "logseqNamespaceSets must contain exactly the 8 documented bundles";
 
-  expectedSummarizers = {
-    summ-build = {
-      own = "ai-bld Builder_system/_journals";
+  summOwn = p: profiles.${p}.own + "/_journals";
+  expectedSummarizers = builtins.listToAttrs (map (p:
+    lib.nameValuePair "summ-${p}" {
+      own = summOwn p;
       writeSets = [];
       readSets = [];
       readAllAgentOwns = false;
-    };
-    summ-plan = {
-      own = "ai-pln Planner_system/_journals";
-      writeSets = [];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-    summ-docs-writer = {
-      own = "ai-dwt DocsWriter_system/_journals";
-      writeSets = [];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-    summ-nix-build = {
-      own = "ai-nxb NixBuilder_system/_journals";
-      writeSets = [];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-    summ-nix-plan = {
-      own = "ai-nxp NixPlanner_system/_journals";
-      writeSets = [];
-      readSets = [];
-      readAllAgentOwns = false;
-    };
-  };
+      readAllNamespaces = false;
+    }) producingParents);
 
   assertSummFromModule = check "logseqSummarizerProfiles values"
     (summarizerProfiles == expectedSummarizers)
@@ -560,6 +655,7 @@ in
   assert assertPersonalPair;
   assert assertStrictClean;
   assert assertOrchestratorInclude;
+  assert assertTacticianInclude;
   assert assertIsolation;
   assert assertDelegation;
   assert assertCounterpartPersona;

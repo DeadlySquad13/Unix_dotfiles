@@ -71,26 +71,37 @@
   #
   # There is deliberately NO generic `logseq` server: logseq access exists
   # only through explicit per-agent profiles (see
-  # docs/guides/logseq-agent-namespaces.md).
+  # docs/guides/logseq-agent-namespaces.md). DELIVERY agents (plan / build /
+  # nix-plan / nix-build / verifier) have NO profile at all — they never mount
+  # Logseq tools, namespaces or credentials into their context.
   # --------------------------------------------------------------
 
   # Centrally allocated, non-conflicting host ports (registry uses 18101-18107).
   logseqPorts = {
-    kbn = 18103;
-    build = 18108;
-    plan = 18109;
-    docs-writer = 18110;
-    nix-build = 18111;
-    nix-plan = 18112;
+    # Role instances (one per logseq-capable profile).
     orchestrator = 18113;
+    strategist = 18108;
+    tactician = 18109;
+    architect = 18110;
+    researcher = 18111;
+    analyst = 18112;
+    nix-analyst = 18114;
+    reporter = 18115;
+    kbn = 18103;
+    # Escalated write-everywhere instance for the kbn noter (profile from
+    # logseq-profiles.nix): WRITE = the `personal` complement marker, READ =
+    # every namespace, NO excludes. Per-tool "ask" permission in settings.
+    kbn-escalated = 18123;
     # Dedicated narrow instances for the <parent>-kbn summarizer subagents:
     # each writes ONLY the parent's own <parent-own>/_journals tree and reads
     # the parent's own (derived in logseq-profiles.nix, no config round-trip).
-    summ-build = 18114;
-    summ-plan = 18115;
-    summ-docs-writer = 18116;
-    summ-nix-build = 18117;
-    summ-nix-plan = 18118;
+    summ-strategist = 18116;
+    summ-tactician = 18117;
+    summ-architect = 18118;
+    summ-researcher = 18119;
+    summ-analyst = 18120;
+    summ-nix-analyst = 18121;
+    summ-reporter = 18122;
   };
 
   allAgentOwns = lib.mapAttrs (_: profile: profile.own) cfg.logseqAgentProfiles;
@@ -112,14 +123,21 @@
         names
     );
 
+  # A `writeAllNamespaces` profile (kbn-escalated) writes the WHOLE graph: its
+  # write list is JUST the reserved `personal` complement marker (with NO
+  # excludes — see profileExcludes), which subsumes own/shared/sets.
   profileWriteIncludes = name: profile:
-    [profile.own]
-    ++ cfg.logseqSharedNamespaces
-    ++ resolveSets profile.writeSets;
+    if profile.writeAllNamespaces
+    then [personalMarker]
+    else
+      [profile.own]
+      ++ cfg.logseqSharedNamespaces
+      ++ resolveSets profile.writeSets;
 
   # A summarizer profile is named `summ-<parent>`; it is READ-only on its
-  # parent's own tree (so it can summarize results but never write there).
-  # The parent's own is derived from the parent profile — no set bundle needed.
+  # parent's own tree (so it can journal changes there but never write into the
+  # source tree). The parent's own is derived from the parent profile — no set
+  # bundle needed.
   summerParent = name: builtins.replaceStrings ["summ-"] [""] name;
 
   profileReadIncludes = name: profile:
@@ -129,7 +147,8 @@
     ]
     ++ lib.optionals profile.readAllAgentOwns (
       lib.attrValues (lib.filterAttrs (other: _: other != name) allAgentOwns)
-    );
+    )
+    ++ lib.optionals profile.readAllNamespaces [personalMarker];
 
   # Does the profile carry the `personal` complement marker (read or write)?
   usesPersonal = profile:
@@ -144,8 +163,15 @@
   # bundle this profile does not reference. Only derived when the profile
   # uses the marker — strict allow-lists already isolate the profile, and a
   # deny-list would otherwise block write access to its own referenced sets.
+  # Whole-graph profiles are the deliberate exceptions: a `readAllNamespaces`
+  # profile (kbn) reads EVERY page and a `writeAllNamespaces` profile
+  # (kbn-escalated) writes EVERY page, so both must have NO excludes.
   profileExcludes = name: profile:
-    if ! usesPersonal profile
+    if profile.writeAllNamespaces
+    then []
+    else if ! (usesPersonal profile || profile.readAllNamespaces)
+    then []
+    else if profile.readAllNamespaces
     then []
     else
       lib.attrValues (lib.filterAttrs (other: _: other != name) allAgentOwns)
@@ -204,7 +230,7 @@
 
   logseqAgentServers = lib.mapAttrs' (
     name: profile: lib.nameValuePair "logseq-${name}" (mkLogseqServer name profile)
-  ) (cfg.logseqAgentProfiles // cfg.logseqSummarizerProfiles);
+  ) (cfg.logseqAgentProfiles // cfg.logseqSummarizerProfiles // cfg.logseqEscalatedProfiles);
 in {
   options.programs.opencode.mcpContainers = {
     enable = mkOption {
@@ -397,9 +423,11 @@ in {
       description = ''
         Named namespace bundles referenced by a profile's `writeSets` /
         `readSets` (e.g. a `buildPair` tree shared by build+nix-build, a
-        `planPair` tree shared by plan/nix-plan/kbn). Do NOT enumerate
-        personal namespaces here — "personal" is derived as the complement
-        of the agent-defined namespaces (see `readSets` / `writeSets`).
+        `planPair` tree shared by plan/nix-plan/kbn, or the own trees of the
+        non-instance plan/build roles that analyst/reporter populate). Do NOT
+        enumerate personal namespaces here — "personal" is derived as the
+        complement of the agent-defined namespaces (see `readSets` /
+        `writeSets`).
 
         The global default is provided by `logseq-profiles.nix` (as mkDefault).
       '';
@@ -427,7 +455,17 @@ in {
               readAllAgentOwns = mkOption {
                 type = types.bool;
                 default = false;
-                description = "Also read every OTHER profile's own namespace (orchestrator role).";
+                description = "Also read every OTHER profile's own namespace (orchestrator/tactician roles).";
+              };
+              readAllNamespaces = mkOption {
+                type = types.bool;
+                default = false;
+                description = "Read EVERY namespace including personal (reserved `personal` marker with NO excludes — the whole graph). Only for the trusted kbn noter; deliberate exception to the personal⇒exclude pairing rule.";
+              };
+              writeAllNamespaces = mkOption {
+                type = types.bool;
+                default = false;
+                description = "Write EVERY namespace: LOGSEQ_WRITE_INCLUDES collapses to the reserved `personal` complement marker with NO excludes (the whole graph becomes writable; own/shared/sets are subsumed). Only for the trusted kbn-escalated profile; deliberate exception to the personal⇒exclude pairing rule.";
               };
               volumes = mkOption {
                 type = types.listOf types.str;
@@ -444,11 +482,12 @@ in {
         gateway container (`logseq-<name>`) whose env is the hard namespace
         ACL: LOGSEQ_WRITE_INCLUDES = own ++ shared ++ sets(writeSets);
         LOGSEQ_INCLUDE_NAMESPACES = sets(readSets) (+ every other profile's
-        own when readAllAgentOwns); LOGSEQ_EXCLUDE_NAMESPACES is derived for
-        profiles using the `personal` marker (defines personal = everything
-        not under an agent namespace). No profiles → no logseq servers at all
-        (logseq access is entirely profile-driven). OpenCode per-agent `tools`
-        globs wire each agent to its instance.
+        own when readAllAgentOwns; + the `personal` marker when
+        readAllNamespaces); LOGSEQ_EXCLUDE_NAMESPACES is derived for profiles
+        using the `personal` marker (defines personal = everything not under
+        an agent namespace). No profiles → no logseq servers at all (logseq
+        access is entirely profile-driven). OpenCode per-agent `tools` globs
+        wire each agent to its instance.
 
         The global default is provided by `logseq-profiles.nix` (as mkDefault);
         hosts only override when they need different values.
@@ -462,7 +501,7 @@ in {
             options = {
               own = mkOption {
                 type = types.str;
-                description = "The kbn `<parent>/**` tree the summarizer may WRITE.";
+                description = "The parent's `<own>/_journals` tree the summarizer may WRITE.";
               };
               writeSets = mkOption {
                 type = types.listOf types.str;
@@ -471,9 +510,16 @@ in {
               readSets = mkOption {
                 type = types.listOf types.str;
                 default = [];
-                description = "Bundles granting READ of the parent's own tree (to summarize results).";
               };
               readAllAgentOwns = mkOption {
+                type = types.bool;
+                default = false;
+              };
+              readAllNamespaces = mkOption {
+                type = types.bool;
+                default = false;
+              };
+              writeAllNamespaces = mkOption {
                 type = types.bool;
                 default = false;
               };
@@ -489,15 +535,65 @@ in {
       description = ''
         Dedicated, NARROW instances for the `<parent>-kbn` summarizer subagents:
         each produces one `logseq-summ-<parent>` server whose WRITE list is the
-        kbn `<parent>/**` tree (plus the global shared tree) and whose
+        parent's `<own>/_journals` tree (plus the global shared tree) and whose
         READ list is the parent's own tree only. They must never grant access
         to the broad `logseq-kbn*` instance (which may reach personal/shared).
         Provided by `logseq-profiles.nix` (as mkDefault).
       '';
     };
+
+    logseqEscalatedProfiles = mkOption {
+      type = types.attrsOf (
+        types.submodule (
+          {name, ...}: {
+            options = {
+              own = mkOption {
+                type = types.str;
+                description = "The profile's dedicated top-level namespace (subsumed by the `personal` write marker).";
+              };
+              writeSets = mkOption {
+                type = types.listOf types.str;
+                default = [];
+              };
+              readSets = mkOption {
+                type = types.listOf types.str;
+                default = [];
+              };
+              readAllAgentOwns = mkOption {
+                type = types.bool;
+                default = false;
+              };
+              readAllNamespaces = mkOption {
+                type = types.bool;
+                default = false;
+              };
+              writeAllNamespaces = mkOption {
+                type = types.bool;
+                default = false;
+              };
+              volumes = mkOption {
+                type = types.listOf types.str;
+                default = [];
+              };
+            };
+          }
+        )
+      );
+      default = {};
+      description = ''
+        ESCALATED, write-everywhere instances (one: `kbn-escalated`). A
+        `writeAllNamespaces` profile collapses LOGSEQ_WRITE_INCLUDES to the
+        reserved `personal` complement marker with NO excludes — the WHOLE
+        graph becomes writable (own/shared/set lists are subsumed) — and reads
+        every namespace like `readAllNamespaces`. Intentionally separate from
+        `logseqAgentProfiles` so ordinary profiles' derived ACLs
+        (readAllAgentOwns enumerations, excludes) never change. Provided by
+        `logseq-profiles.nix` (as mkDefault).
+      '';
+    };
   };
 
-  # QUESTION: Levae as mcp.nix in opencode and move rest to a seperate generic module mcp?
+  # QUESTION: Leave as mcp.nix in opencode and move rest to a separate generic module mcp?
   config = mkIf (config.programs.opencode.enable && mcpContainersCfg.enable) {
     programs = {
       opencode.enableMcpIntegration = true;
@@ -554,38 +650,27 @@ in {
             filesystem = {"filesystem*" = true;};
             nixos = {"nixos*" = true;};
           };
-          # rec-inheritance of the NON-logseq banks showing the logical agent
-          # permission relationship (build → plan → docs-writer → kbn →
-          # orchestrator; nix-build/nix-plan branch off build/plan). Only the
-          # bank subsets flow through this chain — `logseqGrant` and
-          # `permission.task` are applied per-agent at the leaf, never inherited.
-          agentBanks = rec {
-            build = baseTools.time // baseTools.memory;
-            plan = build // baseTools.fetch // baseTools.ddg;
-            docs-writer = plan // baseTools.filesystem;
-            kbn = docs-writer;
-            nix-build = build // baseTools.nixos;
-            nix-plan = plan // baseTools.nixos;
-            orchestrator = docs-writer;
-          };
-          # A `<parent>-kbn` counterpart: a hidden summarizer subagent that reads the
-          # parent's own tree and writes a summary into the parent's own
-          # `_journals` tree. It uses a DEDICATED narrow instance
-          # `logseq-summ-<parent>` (ACL: write <parent-own>/_journals, read the
-          # parent's own tree) — never the broad `logseq-kbn*` instance (which
-          # may reach personal/shared) nor the parent's own instance. Persona
-          # (mode/hidden/description) and tool grants live together in
-          # `settings.agent` (opencode.json `agent` map), which the repo uses
-          # for build/plan/nix-build/nix-plan the same way, and which lets the
-          # mcp-logseq check assert them from the derived config.
+          # Knowledge/delivery tool banks. The `filesystem` bank (the /kbn MCP
+          # with the vault mount) is granted ONLY to kbn; delivery agents use
+          # banks alone and are deliberately NOT granted any `logseq-*` glob.
+          knowledge = baseTools.time // baseTools.memory // baseTools.fetch // baseTools.ddg;
+          delivery = baseTools.time // baseTools.memory // baseTools.fetch // baseTools.ddg;
+          deliveryNix = delivery // baseTools.nixos;
+          # A `<parent>-kbn` counterpart: a hidden summarizer subagent that
+          # journals a change the parent wrote into the parent's own tree:
+          #   Updated [[<parent>/page]] + a simplified copy
+          # It uses a DEDICATED narrow instance `logseq-summ-<parent>` (ACL:
+          # write <parent-own>/_journals, read the parent's own tree) — never
+          # the broad `logseq-kbn*` instance (which may reach personal/shared)
+          # nor the parent's own instance.
           mkKbnCounterpart = parent:
             {
               mode = "subagent";
               hidden = true;
               description =
-                "Reports ${parent} results into the knowledge-base journal (${cfg.logseqSummarizerProfiles."summ-${parent}".own}); reads ${parent}'s own tree, writes only via its dedicated journal instance or to shared instances it's included into";
+                "Journals ${parent}'s changes into ${cfg.logseqSummarizerProfiles."summ-${parent}".own} as `Updated [[${parent} page]]` + a simplified copy; reads ${parent}'s own tree, writes only via its dedicated journal instance";
               # Summarizers never run bash; they only read via logseq and write
-              # summaries through the dedicated summary instance.
+              # journal entries through the dedicated summarizer instance.
               permission.bash = "deny";
             }
             // {
@@ -604,46 +689,77 @@ in {
             };
           };
         in {
-          # Counterpart personas (mode/hidden/description) live in these
-          # `settings.agent` blocks alongside their tool grants; opencode's
-          # `agent` map supports pure-JSON subagents. The existing primary
-          # personas (kbn/orchestrator/docs-writer) use the settings.agents
-          # markdown route; both deep-merge with these grants.
-          build = {
-            tools = agentBanks.build // (logseqGrant "build").tools;
-            # Delegate result-summarization to its counterpart. `permission.task`
-            # gates subagent invocation (a `tools` glob cannot), see
-            # docs/guides/logseq-agent-namespaces.md.
-          } // delegateTo "build";
-          plan = {
-            tools = agentBanks.plan // (logseqGrant "plan").tools;
-          } // delegateTo "plan";
-          docs-writer = {
-            tools = agentBanks.docs-writer // (logseqGrant "docs-writer").tools;
-          } // delegateTo "docs-writer";
-          kbn = {
-            tools = agentBanks.kbn // (logseqGrant "kbn").tools;
-          };
-
-          # These agents are currently defined in Unix_dotfiles.
-          nix-build = {
-            tools = agentBanks.nix-build // (logseqGrant "nix-build").tools;
-          } // delegateTo "nix-build";
-          nix-plan = {
-            tools = agentBanks.nix-plan // (logseqGrant "nix-plan").tools;
-          } // delegateTo "nix-plan";
+          # --- Knowledge roles (each granted its own logseq instance) ---
           orchestrator = {
-            tools = agentBanks.orchestrator // (logseqGrant "orchestrator").tools;
+            tools = knowledge // (logseqGrant "orchestrator").tools;
+          };
+          strategist = {
+            tools = knowledge // (logseqGrant "strategist").tools;
+          } // delegateTo "strategist";
+          tactician = {
+            tools = knowledge // (logseqGrant "tactician").tools;
+          } // delegateTo "tactician";
+          architect = {
+            tools = knowledge // (logseqGrant "architect").tools;
+          } // delegateTo "architect";
+          researcher = {
+            tools = knowledge // (logseqGrant "researcher").tools;
+          } // delegateTo "researcher";
+          analyst = {
+            tools = knowledge // (logseqGrant "analyst").tools;
+          } // delegateTo "analyst";
+          nix-analyst = {
+            tools = knowledge // baseTools.nixos // (logseqGrant "nix-analyst").tools;
+          } // delegateTo "nix-analyst";
+          reporter = {
+            tools = knowledge // (logseqGrant "reporter").tools;
+          } // delegateTo "reporter";
+          # kbn — the noter — is the ONLY agent with the filesystem (/kbn
+          # vault) bank, in addition to its broad logseq-kbn instance. The own
+          # glob is inlined as `logseq-kbn_*` (NOT `logseq-kbn*`, which would
+          # also swallow the escalated instance's tools), and the escalated
+          # instance is granted too — with every escalated write gated behind
+          # an "ask" permission (per-tool user confirmation).
+          kbn = {
+            tools =
+              knowledge
+              // baseTools.filesystem
+              // {
+                "logseq-kbn_*" = true;
+                "logseq-kbn-escalated_*" = true;
+              };
+            permission = {
+              "logseq-kbn-escalated_*" = "ask";
+            };
           };
 
-          # Hidden summarizer subagents (mode: subagent, hidden: true) invoked
-          # programmatically by the parent via permission.task. Each gets
-          # exactly {logseq-kbn*, logseq-<parent>*} + kbn's non-logseq banks.
-          "build-kbn" = mkKbnCounterpart "build";
-          "plan-kbn" = mkKbnCounterpart "plan";
-          "docs-writer-kbn" = mkKbnCounterpart "docs-writer";
-          "nix-build-kbn" = mkKbnCounterpart "nix-build";
-          "nix-plan-kbn" = mkKbnCounterpart "nix-plan";
+          # --- Delivery agents: NO Logseq at all (banks only) ---
+          plan = {
+            tools = delivery;
+          };
+          nix-plan = {
+            tools = deliveryNix;
+          };
+          build = {
+            tools = delivery;
+          };
+          nix-build = {
+            tools = deliveryNix;
+          };
+          verifier = {
+            tools = delivery;
+          };
+
+          # --- Hidden summarizer subagents (mode: subagent, hidden: true)
+          # invoked programmatically by the parent via permission.task. Each
+          # gets exactly {logseq-summ-<parent>*} — never broad kbn/personal.
+          "strategist-kbn" = mkKbnCounterpart "strategist";
+          "tactician-kbn" = mkKbnCounterpart "tactician";
+          "architect-kbn" = mkKbnCounterpart "architect";
+          "researcher-kbn" = mkKbnCounterpart "researcher";
+          "analyst-kbn" = mkKbnCounterpart "analyst";
+          "nix-analyst-kbn" = mkKbnCounterpart "nix-analyst";
+          "reporter-kbn" = mkKbnCounterpart "reporter";
         };
       };
       mcp = {

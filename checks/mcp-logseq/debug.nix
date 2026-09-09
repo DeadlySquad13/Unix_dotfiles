@@ -49,13 +49,15 @@ let
   profileVals = profileModule.${namespace}.ai-assistance.opencode.mcp;
 
   # Option defaults are NOT auto-applied outside the module system: merge each
-  # profile's defaults ourselves (writeSets/readSets = [], readAllAgentOwns = false).
+  # profile's defaults ourselves (writeSets/readSets/readAllAgentOwns/
+  # readAllNamespaces).
   withDefaults = _: prof:
     prof
     // {
       writeSets = prof.writeSets or [];
       readSets = prof.readSets or [];
       readAllAgentOwns = prof.readAllAgentOwns or false;
+      readAllNamespaces = prof.readAllNamespaces or false;
     };
 
   profiles = builtins.mapAttrs withDefaults profileVals.logseqAgentProfiles;

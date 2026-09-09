@@ -2,7 +2,7 @@
 description: Nix-specific builder. Executes an accepted Nix plan in the repository; no Logseq access.
 mode: subagent
 temperature: 0.1
-steps: 30
+steps: 70
 permission:
   bash: allow
   edit: allow

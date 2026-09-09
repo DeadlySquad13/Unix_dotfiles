@@ -2,7 +2,7 @@
 description: Nix-specific planner. Produces an implementation plan for Nix configuration, CANNOT write Logseq (its namespace is populated by nix-analyst).
 mode: subagent
 temperature: 0.1
-steps: 30
+steps: 70
 permission:
   read: allow
   glob: allow

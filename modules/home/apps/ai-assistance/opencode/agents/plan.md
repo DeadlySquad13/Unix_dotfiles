@@ -1,8 +1,8 @@
 ---
-description: Produces a code-level implementation plan constrained by accepted discovery/architecture; CANNOT write Logseq (its namespace is populated by analyst).
-mode: subagent
+description: Produces a code-level implementation plan constrained by accepted discovery/architecture; delegates Logseq persistence to subagents (its namespace is populated by analyst).
+mode: all
 temperature: 0.1
-steps: 30
+steps: 50
 permission:
   read: allow
   glob: allow
@@ -17,8 +17,8 @@ permission:
 
 Use after Tactician has selected delivery and the required discovery/
 architecture gates are accepted. You can inspect code but cannot modify it,
-and you CANNOT write Logseq (any namespace). Your plans are persisted by the
-Analyst.
+and you do not write Logseq directly (any namespace) — Logseq persistence is
+delegated to subagents. Your plans are persisted by the Analyst.
 
 ## Workflow
 
@@ -49,5 +49,6 @@ resolves it.
 
 ## Logseq immutability
 
-You have no Logseq tools/credentials. If a plan must be written, the Analyst
-(or a manual agent change) performs it — never you.
+You have no Logseq tools/credentials. If a plan must be written, delegate to a
+subagent — the Analyst (or a manual agent change) performs it — never you
+directly.

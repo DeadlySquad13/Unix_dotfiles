@@ -1,7 +1,6 @@
 {
   lib,
   inputs,
-  namespace,
   ...
 }: let
   # Per-agent namespace ACL profiles (one mcp-logseq instance per profile).
@@ -128,7 +127,8 @@ in {
   #                              has no git).
   #
   # Values use lib.mkDefault so a host may still override any of them.
-  ${namespace}.ai-assistance.opencode.mcp = {
+  # FIX: Infinite recursion because of namespace
+  ds-omega.ai-assistance.opencode.mcp = {
     # Nix-pinned mcp-logseq fork source at the commit the containers install.
     logseqSrc = lib.mkDefault inputs.mcp-logseq;
 

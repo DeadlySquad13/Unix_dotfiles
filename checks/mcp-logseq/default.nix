@@ -10,7 +10,8 @@
   # (import { lib; config; } directly) so the internal `let` bindings
   # (resolveSets, profileExcludes, mkLogseqServer, ...) evaluate faithfully, then
   # asserts:
-  #   - the 16-server env oracle (9 knowledge-role profiles + 7 `<parent>-kbn`
+  #   - the 17-server env oracle (9 knowledge-role profiles + the
+  #     `kbn-escalated` write-everywhere instance + 7 `<parent>-kbn`
   #     `logseq-summ-<parent>` summarizer instances; ports, WRITE/INCLUDE/
   #     EXCLUDE strings, stdio, LOGSEQ_API_URL, environmentFile),
   #   - the per-agent tool-grant isolation invariant (no cross-agent logseq glob)
@@ -20,6 +21,10 @@
   #   - the counterpart delegation wiring (each producing parent's
   #     `permission.task` is deny-*-kbn + allow exactly its own `<parent>-kbn`).
   #   - kbn's `readAllNamespaces` exception (personal marker with NO excludes).
+  #   - the `kbn-escalated` `writeAllNamespaces` instance (write = the
+  #     `personal` marker, NO excludes) and kbn's narrowed `logseq-kbn_*`
+  #     grant with the escalated `logseq-kbn-escalated_*` tools gated behind
+  #     an "ask" permission.
   #   - that the global namespace options resolve identically from
   #     modules/home/apps/ai-assistance/opencode/logseq-profiles.nix.
   # Any mismatch aborts loudly, so `nix build .#checks.<system>.mcp-logseq` fails.
@@ -70,7 +75,7 @@
 
   # Option defaults are NOT auto-applied outside the module system: merge each
   # profile's defaults ourselves (writeSets/readSets/readAllAgentOwns/
-  # readAllNamespaces).
+  # readAllNamespaces/writeAllNamespaces).
   withDefaults = _: prof:
     prof
     // {
@@ -78,10 +83,12 @@
       readSets = prof.readSets or [];
       readAllAgentOwns = prof.readAllAgentOwns or false;
       readAllNamespaces = prof.readAllNamespaces or false;
+      writeAllNamespaces = prof.writeAllNamespaces or false;
     };
 
   profiles = builtins.mapAttrs withDefaults profileVals.logseqAgentProfiles;
   summarizerProfiles = builtins.mapAttrs withDefaults profileVals.logseqSummarizerProfiles;
+  escalatedProfiles = builtins.mapAttrs withDefaults profileVals.logseqEscalatedProfiles;
 
   # Overlay mkIf so the plain `settings` config body (agent/tools/mcp) is
   # readable. Both enable conditions are true under `providedConfig`, so
@@ -112,6 +119,7 @@
       logseqNamespaceSets = profileVals.logseqNamespaceSets;
       logseqAgentProfiles = profiles;
       logseqSummarizerProfiles = summarizerProfiles;
+      logseqEscalatedProfiles = escalatedProfiles;
     };
   };
 
@@ -155,6 +163,7 @@
     "logseq-analyst"
     "logseq-architect"
     "logseq-kbn"
+    "logseq-kbn-escalated"
     "logseq-nix-analyst"
     "logseq-orchestrator"
     "logseq-reporter"
@@ -177,6 +186,9 @@
   ];
   # readAllNamespaces profiles: personal marker WITHOUT excludes (deliberate kbn exception).
   globalReadProfiles = ["kbn"];
+  # writeAllNamespaces profiles (escalated): `personal` WRITE marker WITHOUT
+  # excludes — exempt from the personal⇒exclude pairing like globalReadProfiles.
+  escalatedProfileNames = attrNames escalatedProfiles;
   # Strict profiles: no personal marker, no excludes.
   strictProfiles = [
     "orchestrator"
@@ -204,7 +216,8 @@
   ];
   counterparts = map (p: "${p}-kbn") producingParents;
 
-  # Every knowledge agent carries exactly {logseq-<own>*}.
+  # Every knowledge agent carries exactly {logseq-<own>*} — except kbn (see
+  # checkKnowledgeAgent: narrowed `logseq-kbn_*` + escalated glob).
   knowledgeAgents = producingParents ++ ["orchestrator" "kbn"];
   # Delivery agents carry NO logseq glob at all.
   deliveryAgents = ["plan" "nix-plan" "build" "nix-build" "verifier"];
@@ -271,6 +284,15 @@
     "logseq-kbn" = {
       hostPort = 18103;
       write = "ai-kbn KnowledgeBaseNoter_system,${shared}";
+      include = "personal";
+      exclude = null;
+    };
+    # Escalated write-everywhere instance (writeAllNamespaces): WRITE
+    # collapses to the `personal` complement marker (subsumes own/shared/sets),
+    # READ = every namespace, and — like kbn — NO excludes.
+    "logseq-kbn-escalated" = {
+      hostPort = 18123;
+      write = "personal";
       include = "personal";
       exclude = null;
     };
@@ -369,7 +391,7 @@
       ((svc.volumes or []) == [])
       "without logseqSrc there must be no src volume") expectedNames;
 
-  assertNamedServers = check "exactly the 16 expected logseq servers"
+  assertNamedServers = check "exactly the 17 expected logseq servers"
     (logseqServerNames == expectedNames)
     "expected [${concatStringsSep "," expectedNames}] got [${concatStringsSep "," logseqServerNames}]";
 
@@ -420,10 +442,11 @@
       (w != null && builtins.elem "personal" (splitCsv w))
       || (i != null && builtins.elem "personal" (splitCsv i));
     isGlobal = builtins.elem prof globalReadProfiles;
+    isEscalated = builtins.elem prof escalatedProfileNames;
   in
     check "${name}/personalPairsWithExclude"
-      (if hasPersonal && ! isGlobal then e != null else true)
-      "non-global profile with 'personal' must have excludes; readAllNamespaces (kbn) is exempt without"
+      (if hasPersonal && ! isGlobal && ! isEscalated then e != null else true)
+      "non-exempt profile with 'personal' must have excludes; readAllNamespaces (kbn) and writeAllNamespaces (kbn-escalated) are exempt without"
     && check "${name}/globalReadPersonalOnly"
       (if isGlobal then i != null && builtins.elem "personal" (splitCsv i) else true)
       "readAllNamespaces profile must carry the personal marker in include";
@@ -483,9 +506,21 @@
     builtins.filter (hasPrefix "logseq-") (attrNames (settings.agent.${name}.tools or {}))
   );
 
-  # For knowledge agents the only allowed glob is {logseq-<own>*}.
+  # For knowledge agents the only allowed glob is {logseq-<own>*} — except
+  # kbn: its own glob is narrowed to `logseq-kbn_*` (so it cannot swallow the
+  # escalated instance's tools; `-` < `_` lexicographically) and the escalated
+  # glob is granted too, gated behind an "ask" permission.
   checkKnowledgeAgent = name:
-    check "agent/${name} isolation" (logseqGlobsOf name == ["logseq-${name}*"])
+    if name == "kbn"
+    then
+      check "agent/kbn isolation"
+      (logseqGlobsOf name == ["logseq-kbn-escalated_*" "logseq-kbn_*"])
+      "expected exactly [logseq-kbn-escalated_*,logseq-kbn_*] got [${concatStringsSep "," (logseqGlobsOf name)}]"
+      && check "agent/kbn escalated ask permission"
+      ((settings.agent.kbn.permission or {})."logseq-kbn-escalated_*" or null == "ask")
+      "kbn must gate 'logseq-kbn-escalated_*' behind an ask permission"
+    else
+      check "agent/${name} isolation" (logseqGlobsOf name == ["logseq-${name}*"])
       "expected exactly [logseq-${name}*] got [${concatStringsSep "," (logseqGlobsOf name)}]";
 
   # For counterparts: exactly the dedicated summary instance {logseq-summ-<parent>*}.
@@ -551,6 +586,7 @@
       readSets = ["discovery" "architecture"];
       readAllAgentOwns = true;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     strategist = {
       own = "ai-str Strategist_system";
@@ -558,6 +594,7 @@
       readSets = ["personal" "architecture"];
       readAllAgentOwns = false;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     tactician = {
       own = "ai-tcn Tactician_system";
@@ -565,6 +602,7 @@
       readSets = ["discovery" "architecture"];
       readAllAgentOwns = true;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     architect = {
       own = "ai-arc Architect_system";
@@ -572,6 +610,7 @@
       readSets = ["discovery" "architecture"];
       readAllAgentOwns = false;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     researcher = {
       own = "ai-rsh Researcher_system";
@@ -579,6 +618,7 @@
       readSets = ["discovery" "architecture"];
       readAllAgentOwns = false;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     analyst = {
       own = "ai-anl Analyst_system";
@@ -586,6 +626,7 @@
       readSets = ["discovery" "architecture"];
       readAllAgentOwns = false;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     nix-analyst = {
       own = "ai-nxl NixAnalyst_system";
@@ -593,6 +634,7 @@
       readSets = ["discovery" "architecture"];
       readAllAgentOwns = false;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     reporter = {
       own = "ai-rpt Reporter_system";
@@ -600,6 +642,7 @@
       readSets = ["discovery" "architecture"];
       readAllAgentOwns = false;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     };
     kbn = {
       own = "ai-kbn KnowledgeBaseNoter_system";
@@ -607,6 +650,7 @@
       readSets = [];
       readAllAgentOwns = false;
       readAllNamespaces = true;
+      writeAllNamespaces = false;
     };
   };
 
@@ -639,11 +683,27 @@
       readSets = [];
       readAllAgentOwns = false;
       readAllNamespaces = false;
+      writeAllNamespaces = false;
     }) producingParents);
 
   assertSummFromModule = check "logseqSummarizerProfiles values"
     (summarizerProfiles == expectedSummarizers)
     "summarizer profiles must match the documented values";
+
+  expectedEscalatedProfiles = {
+    kbn-escalated = {
+      own = "ai-kbn KnowledgeBaseNoter_system";
+      writeSets = [];
+      readSets = [];
+      readAllAgentOwns = false;
+      readAllNamespaces = true;
+      writeAllNamespaces = true;
+    };
+  };
+
+  assertEscalatedFromModule = check "logseqEscalatedProfiles values"
+    (escalatedProfiles == expectedEscalatedProfiles)
+    "escalated profiles must match the documented values";
 in
   assert assertNoGeneric;
   assert assertBackwardCompat;
@@ -663,6 +723,7 @@ in
   assert assertSharedFromModule;
   assert assertSetsFromModule;
   assert assertSummFromModule;
+  assert assertEscalatedFromModule;
   # Asserts above force evaluation of every invariant (aborting on mismatch),
   # so this trivial derivation only exists to satisfy Snowfall check discovery
   # and to mark success.

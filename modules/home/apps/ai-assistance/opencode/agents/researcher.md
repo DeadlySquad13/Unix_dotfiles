@@ -2,7 +2,7 @@
 description: Establishes what exists in code/runtimes and where uncertainty lies, using evidence rather than intent.
 mode: subagent
 temperature: 0.2
-steps: 25
+steps: 100
 permission:
   read: allow
   glob: allow

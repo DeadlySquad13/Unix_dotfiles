@@ -161,4 +161,9 @@ trampoline:
 add-opencode-skill:
 	invoke --search-root=./tasks add-opencode-skill $(call args,default)
 
+# Debug the OBS virtual microphone chain (PipeWire -> OBS -> browser).
+# See `~/.bookmarks/shared-scripts/_features/docs/Audio__VirtualMicrophone`.
+debug-virtual-microphone:
+	invoke --search-root=$(HOME)/.bookmarks/shared-scripts virtual-microphone.debug
+
 include Makefile.opencode-mcp

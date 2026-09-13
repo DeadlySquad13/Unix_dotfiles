@@ -120,7 +120,12 @@ in {
       media = {
         enable = true;
         # FIX: Has to be enabled explicitly.
-        audio = enabled;
+        audio = {
+          enable = true;
+          # NOTE: After switching run `systemctl --user restart pipewire-pulse`
+          # so this module's `pipewire-pulse` drop-in is loaded.
+          pipewire-pulse = enabled;
+        };
       };
       gui-utility = {
         enable = true;

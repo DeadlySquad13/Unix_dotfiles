@@ -23,6 +23,7 @@ in {
   imports = [
     ./syncthing/default.nix
     ./apps/network/sshfs/default.nix
+    ./apps/network/ssh/default.nix
     ./apps/ecosystem/sops-opencode/default.nix
   ];
 

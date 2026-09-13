@@ -186,6 +186,23 @@
         "type": "github"
       }
     },
+    "mcp-logseq": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788699882,
+        "narHash": "sha256-SbvmT2XRqKZYTE7aeQMle8G13P39OXWTPIeoqqlIyTk=",
+        "owner": "dsOmega-StratoFrame",
+        "repo": "Mcp__Logseq",
+        "rev": "aa5550e64d8486ee8329ee9320fc82452e4eb0c2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dsOmega-StratoFrame",
+        "repo": "Mcp__Logseq",
+        "rev": "aa5550e64d8486ee8329ee9320fc82452e4eb0c2",
+        "type": "github"
+      }
+    },
     "neovim-config-prod": {
       "flake": false,
       "locked": {
@@ -354,6 +371,7 @@
         "darwin": "darwin",
         "deploy-rs": "deploy-rs",
         "home-manager": "home-manager",
+        "mcp-logseq": "mcp-logseq",
         "neovim-config-prod": "neovim-config-prod",
         "neovim-config-stage": "neovim-config-stage",
         "nixgl": "nixgl",

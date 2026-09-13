@@ -60,6 +60,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # mcp-logseq fork source, rev-pinned at the exact commit the logseq MCP
+    # containers install. It is mounted into each logseq container and installed
+    # with `uvx --from <dir>` (no git needed at container start — the
+    # supercorp/supergateway:uvx image ships uv/python but NOT git, so a
+    # `git+https://…@rev` package spec fails). Bump the pin by changing the
+    # revision in this URL; the lockfile records its sha256.
+    mcp-logseq = {
+      url = "github:dsOmega-StratoFrame/Mcp__Logseq/aa5550e64d8486ee8329ee9320fc82452e4eb0c2";
+      flake = false;
+    };
+
     # INFO: Requires nix version >= 2.27
     self.submodules = true;
 

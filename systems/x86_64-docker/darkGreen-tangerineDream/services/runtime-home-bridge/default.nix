@@ -20,5 +20,9 @@ in
       homeDirectory = home;
       inherit (catalog) namespaceRoot zNamespaceRoot variants;
       required = true;
+      # Full catalog artifact, host-readable via the compose bind mount
+      # /zsalt/var-/<systemBaseName>@<containerUserName>/share/runtime-home-bridge
+      # (see the @tangerineDream docker-compose repo).
+      catalogArtifactPath = "${catalog.zNamespaceRoot}/share/runtime-home-bridge/catalog.json";
     };
   }

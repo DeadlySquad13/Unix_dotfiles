@@ -1,16 +1,29 @@
 {
   pkgs,
   lib,
+  namespace,
+  inputs,
   ...
 }: let
   module = ../../modules/nixos/services/runtime-home-bridge;
-  # The reusable module reads `lib.ds-omega.mkIfEnabled` (repo lib namespace).
+  # The reusable module reads `lib.ds-omega.mkIfEnabled` (repo lib namespace)
+  # and the runtime-home-bridge lib (`catalogJsonContent`/`mkResolutions`).
   # In the real flake Snowfall injects that namespaced lib; here we mock it so
-  # the module's config body is applied unconditionally, which the check wants.
-  # We replicate `mkIfEnabled`'s final wrapping: `{ config = <body>; }`.
+  # the module's config body is applied unconditionally, which the check
+  # wants, while merging the real bridge lib (same pattern as the `bookmarks`
+  # check). We replicate `mkIfEnabled`'s final wrapping: `{ config = <body>; }`.
   mkIfEnabledMock = _opts: module: { config = module; };
+  bridgeLib = import ../../lib/runtime-home-bridge {
+    inherit inputs namespace;
+    lib = lib // {
+      ${namespace} = {
+        disabled = { enable = false; };
+        enabled = { enable = true; };
+      };
+    };
+  };
   libWithNamespace = lib // {
-    ds-omega = lib // {
+    ds-omega = bridgeLib // {
       mkIfEnabled = mkIfEnabledMock;
     };
   };
@@ -29,6 +42,7 @@
       homeDirectory = "/tmp/bridge-home";
       namespaceRoot = "/tmp/bridge-namespace";
       zNamespaceRoot = "/tmp/z-namespace";
+      catalogArtifactPath = "/tmp/bridge-namespace/_runtime/catalog-artifact.json";
       variants = {
         default = [
           { source = "_configs"; target = ".bookmarks/shared-configs"; }
@@ -75,5 +89,13 @@ pkgs.runCommand "runtime-home-bridge" {
     mkdir -p "$namespace/_zdata"
     test "$(readlink "$home/.bookmarks/z-data")" = "$namespace/_zdata"
     test "$(readlink "$namespace/_zdata")" = "$z/shared-/@salt/z-data"
+
+    # Full catalog artifact was emitted (ADDITIVE) and is valid JSON with the
+    # interchange contract fields, including resolved host paths.
+    artifact="$namespace/_runtime/catalog-artifact.json"
+    test -f "$artifact"
+    test "$(jq -er '.version' "$artifact")" = 1
+    jq -e '.homeDirectory == "/tmp/bridge-home" and .zNamespaceRoot == "/tmp/z-namespace"' "$artifact" >/dev/null
+    jq -e '.resolutions["/tmp/bridge-home/.bookmarks/z-data"] == "/tmp/z-namespace/shared-/@salt/z-data"' "$artifact" >/dev/null
   touch $out
 ''

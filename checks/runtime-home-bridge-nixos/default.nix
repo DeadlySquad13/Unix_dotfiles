@@ -1,10 +1,22 @@
-{pkgs, lib, ...}: let
+{pkgs, lib, namespace, inputs, ...}: let
   # Reuse the same mock as the fast check: the reusable module reads
-  # `lib.ds-omega.mkIfEnabled`; Snowfall injects that namespaced lib in a real
-  # system, so here we mock it to apply the module body unconditionally.
+  # `lib.ds-omega.mkIfEnabled` and the runtime-home-bridge lib
+  # (`catalogJsonContent`/`mkResolutions`); Snowfall injects that namespaced
+  # lib in a real system, so here we mock `mkIfEnabled` to apply the module
+  # body unconditionally while merging the real bridge lib (same pattern as
+  # the `bookmarks` check).
   mkIfEnabledMock = _opts: module: { config = module; };
+  bridgeLib = import ../../lib/runtime-home-bridge {
+    inherit inputs namespace;
+    lib = lib // {
+      ${namespace} = {
+        disabled = { enable = false; };
+        enabled = { enable = true; };
+      };
+    };
+  };
   libWithNamespace = lib // {
-    ds-omega = lib // {
+    ds-omega = bridgeLib // {
       mkIfEnabled = mkIfEnabledMock;
     };
   };

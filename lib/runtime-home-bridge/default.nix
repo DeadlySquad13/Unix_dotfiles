@@ -19,6 +19,37 @@
     source = "shared-Projects";
     target = ".bookmarks/shared-projects";
   };
+  # Map every bridge link target (relative to the home directory) to its fully
+  # resolved, symlink-free real path, across all variants. Keys are absolute so
+  # they match what `resolveBookmarks` normalizes `~/.bookmarks/<x>` into.
+  # [[fix]] Null-safe resolution: a mapping may omit `zSource`/`source`, or
+  # carry them as explicit `null` (the module option type `nullOr str` defaults
+  # to `null`, and a check mock may pass a catalog without the roots). `null`
+  # is NOT empty-string, so `(m.zSource or "") != ""` alone let a null through
+  # into `"${...}/${m.zSource}"` and crashed with `cannot coerce null to a
+  # string`. Resolve zSource only when BOTH endpoints are non-null/non-empty,
+  # else fall back to `source`, else to `null` (no resolution for that key).
+  resolveMapping = { catalog }: m:
+    let
+      zSource = m.zSource or null;
+      source = m.source or null;
+      zNamespaceRoot = catalog.zNamespaceRoot or null;
+      namespaceRoot = catalog.namespaceRoot or null;
+      nonEmpty = v: v != null && v != "";
+    in
+      if nonEmpty zSource && nonEmpty zNamespaceRoot
+      then "${zNamespaceRoot}/${zSource}"
+      else if nonEmpty source && nonEmpty namespaceRoot
+      then "${namespaceRoot}/${source}"
+      else null;
+
+  mkResolutions = { homeDirectory, catalog }:
+    concatMapAttrs (_variant: mappings:
+      listToAttrs (map (m:
+        nameValuePair "${homeDirectory}/${m.target}" (
+          resolveMapping { inherit catalog; } m
+        )) mappings)
+    ) catalog.variants;
 in {
   # Host-specific runtime-home-bridge catalogs. Pure data; the system side
   # feeds them into the bridge service and the home side derives bookmark
@@ -81,23 +112,27 @@ in {
   # JSON interchange contract for a catalog. Both the system-side bridge and
   # the home-side consumers derive the identical store artifact from this, so
   # augmentations on either side stay in sync as long as they go through the
-  # same catalog data.
+  # same catalog data. Includes `resolutions` (mkResolutions output) so a
+  # single serialized artifact carries both the raw variants and the fully
+  # resolved absolute host paths.
   catalogJsonContent = { homeDirectory }: catalog:
     toJSON {
       version = 1;
       inherit homeDirectory;
       inherit (catalog) namespaceRoot zNamespaceRoot variants;
+      resolutions = mkResolutions { inherit homeDirectory; inherit catalog; };
     };
 
   # Map every bridge link target (relative to the home directory) to its fully
   # resolved, symlink-free real path, across all variants. Keys are absolute so
   # they match what `resolveBookmarks` normalizes `~/.bookmarks/<x>` into.
+  # [[fix]] Same null-safe body as the let-bound `mkResolutions` above (kept in
+  # sync; see `resolveMapping` for the null semantics).
   mkResolutions = { homeDirectory, catalog }:
     concatMapAttrs (_variant: mappings:
       listToAttrs (map (m:
         nameValuePair "${homeDirectory}/${m.target}" (
-          if (m.zSource or "") != "" then "${catalog.zNamespaceRoot}/${m.zSource}"
-          else "${catalog.namespaceRoot}/${m.source}"
+          resolveMapping { inherit catalog; } m
         )) mappings)
     ) catalog.variants;
 }

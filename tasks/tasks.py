@@ -5,8 +5,13 @@ from invoke import task, Collection, Context
 from nix.nix_shell import nix_shell
 
 import secrets
+import packages.debug
+import opencode.debug
 
-namespace = Collection(secrets)
+_pkg_debug = Collection.from_module(packages.debug, name="pkg")
+_oc_debug = Collection.from_module(opencode.debug, name="opencode")
+
+namespace = Collection(secrets, _pkg_debug, _oc_debug)
 
 # REFACTOR:
 def invoke_cmd(c: Context, *cmd, **kwargs):

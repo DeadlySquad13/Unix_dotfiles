@@ -71,6 +71,29 @@
       flake = false;
     };
 
+    # opencode-ssh-session plugin source, rev-pinned (v0.3.0) so the plugin is
+    # built by Nix and loaded via a `file://` entry in `programs.opencode
+    # .settings.plugin`. OpenCode npm-installs `config.plugin` entries that do
+    # NOT start with `file://` via bun at startup, which must not happen here
+    # (npm is unreachable on this network). Bump the pin by changing the
+    # revision in this URL; the lockfile records its sha256.
+    opencode-ssh-session = {
+      url = "github:PedroKlein/opencode-ssh-session/c1c9d7c23e22daa4ea4429c071addc6141169efa";
+      flake = false;
+    };
+
+    # OpenCode source (pinned to the v1.2.5 tag commit) used to vendor the
+    # `@opencode-ai/plugin` SDK into the opencode-ssh-session plugin bundle:
+    # a bare `import "@opencode-ai/plugin"` in a `file://` plugin is NOT
+    # resolved by the OpenCode host, and Bun's fallback silently tries an npm
+    # install (unreachable network here), hanging startup. The SDK's only
+    # runtime dependency is `zod` (catalog version 4.1.8, vendored separately
+    # in the package); `@opencode-ai/sdk` is imported as types only.
+    opencode = {
+      url = "github:anomalyco/opencode/62a24c2ddaf56c4234898269b1951ab11483f57a";
+      flake = false;
+    };
+
     # INFO: Requires nix version >= 2.27
     self.submodules = true;
 

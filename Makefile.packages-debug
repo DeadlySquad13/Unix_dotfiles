@@ -1,0 +1,54 @@
+# Package-debugging targets, backed by invoke tasks in `tasks/packages/`.
+#
+# The complex logic lives in the invoke module (see `tasks/packages/debug.py`
+# — with vendored host workarounds: staging-before-build, git/bun fallbacks);
+# these targets are thin wrappers with stable names. Machine-only output is
+# separated from human-oriented reports:
+#
+# Usage:
+#   make package-list                     # enumerate exposed packages
+#   make package-out pkg=<name>           # [machine] print ONLY the path
+#   make package-contents pkg=<name>      # [human]   report + PATH (for ranger)
+#   make package-bare-imports pkg=<name>  # exit 1 if a bare specifier survives
+#   make package-import-test pkg=<name>   # offline load test, 10s timeout
+#
+# You can also call the invoke tasks directly (flags: --pkg=, --entry=...):
+#   invoke --search-root=./tasks pkg.bare-imports --pkg=opencode-ssh-session
+
+INVOKE := invoke --search-root=./tasks
+
+pkg ?= opencode-ssh-session
+
+.PHONY: package-stage package-list package-out package-contents \
+        package-bare-imports package-import-test
+
+# Compose: `ranger "$(make -s package-out pkg=<name>)"` — nothing else prints.
+package-out:
+	@$(INVOKE) pkg.out-path --pkg=$(pkg)
+
+# [human] Tree listing; final `PATH:` line is the copyable store path.
+package-contents:
+	$(INVOKE) pkg.contents --pkg=$(pkg)
+
+# [machine] Exit 1 when the JS bundle still has non-relative specifiers —
+# for OpenCode file:// plugins that means an implicit npm install (hang).
+package-bare-imports:
+	$(INVOKE) pkg.bare-imports --pkg=$(pkg)
+
+# [human] Load test from empty cwd with isolated bun cache and hard timeout;
+# a hang on "Resolving" = registry fallback attempted (vendoring bug).
+package-import-test:
+	$(INVOKE) pkg.import-test --pkg=$(pkg)
+
+# Stage all changes so Nix's dirty-tree flake source contains them (NOT a
+# commit). Required before any build/eval on this host.
+package-stage:
+	@GIT_BIN=$$(command -v git || ls -td /nix/store/*-git-*/bin/git 2>/dev/null | head -1); \
+	$$GIT_BIN add -A
+
+# List all flake-exposed top-level packages (first check whether the flake
+# source actually contains a new directory — see staging note above).
+package-list:
+	nix --extra-experimental-features 'nix-command flakes' eval \
+		--impure --json '.#packages.x86_64-linux' \
+		--apply 'with builtins; (a: attrNames a)'

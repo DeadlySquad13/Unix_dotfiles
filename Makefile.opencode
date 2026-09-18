@@ -1,0 +1,83 @@
+# OpenCode plugin / skill / agent / loading debugging targets, backed by
+# invoke tasks in `tasks/opencode/` (see `tasks/opencode/debug.py` for the
+# implementation and host notes). Each target is marked for its intended
+# consumer: [machine] = single-line JSON-safe output suited to pipelines;
+# [human] = readable report, final `PATH:` line copyable into ranger.
+#
+# Usage:
+#   make oc-config                                  # [human, live shell]
+#   make oc-eval HOST=<user>@<host> ATTR=<attr>     # [machine] raw JSON
+#   make oc-plugins HOST=<user>@<host>              # [machine] plugin list
+#   make oc-plugin-verify HOST=<user>@<host>        # [human] sanity report
+#   make oc-skills HOST=<user>@<host>               # [human] name = value
+#   make oc-agents HOST=<user>@<host>               # [human] name: summary
+#   make oc-agent HOST=<user>@<host> AGENT=<name>   # [machine] one JSON
+#   make oc-home-eval HOST=<user>@<host>            # [machine] drvPath
+#   make oc-home-build HOST=<user>@<host>           # [human] report + PATH
+#   make oc-logs [LINES=100]                        # [human] newest log tail
+#
+# You can call invoke tasks directly (see tasks/opencode/debug.py).
+# For Logseq-ACL agent contracts, prefer Makefile.opencode-mcp targets.
+INVOKE := invoke --search-root=./tasks
+
+HOST ?= ds13@salt
+MAKE_ATTR  ?= config.programs.opencode.settings
+
+.PHONY: oc-stage oc-config oc-eval oc-plugins oc-plugin-verify oc-skills \
+        oc-agents oc-agent oc-home-eval oc-home-build oc-logs
+
+# Machine shortcut for the oc-home-build PATH line: resolve the built tree
+# out path via `nix build ... --print-out-paths .#homeConfigurations."H".activationPackage`,
+# then ranger <out-path>/home-files/.config/opencode.
+oc-stage:
+	@GIT_BIN=$$(command -v git || ls -td /nix/store/*-git-*/bin/git 2>/dev/null | head -1); \
+	$$GIT_BIN add -A
+
+# Live in-session view (no Nix). Only in an interactive environment with
+# opencode installed; agents can use oc-eval on the flake directly.
+oc-config:
+	opencode debug config
+
+# [machine] raw JSON of any attr under homeConfigurations."$(HOST)".
+oc-eval:
+	$(INVOKE) opencode.eval --host='$(HOST)' --attr='$(MAKE_ATTR)'
+
+# [machine] The settings.plugin JSON list. Healthy = ONLY file:// entries.
+oc-plugins:
+	$(INVOKE) opencode.plugins --host='$(HOST)'
+
+# [human] Three-step sanity per file:// entry: path exists on THIS machine,
+# no bare import specifiers left, offline bun import in <10s.
+oc-plugin-verify:
+	$(INVOKE) opencode.plugin-verify --host='$(HOST)'
+
+# [human] Configured session skills, one `name = value` per line.
+oc-skills:
+	$(INVOKE) opencode.skills --host='$(HOST)'
+
+# [human] Configured agents grouped into `name: summary` lines.
+oc-agents:
+	$(INVOKE) opencode.agents --host='$(HOST)'
+
+# [machine] One agent's JSON contract. Required AGENT= e.g. AGENT=verifier.
+# For Logseq-ACL agents prefer `make mcp-logseq-debug`.
+oc-agent:
+	@test -n "$(AGENT)" || { echo "usage: make oc-agent AGENT=<name>"; exit 1; }
+	$(INVOKE) opencode.agent --host='$(HOST)' --name='$(AGENT)'
+
+# [machine] Activation derivation drvPath (proves the target evaluates).
+oc-home-eval:
+	nix --extra-experimental-features 'nix-command flakes' eval \
+		--impure --json \
+		'.#homeConfigurations."$(HOST)".activationPackage.drvPath'
+
+# [human] Build the activation, list generated files (.config/opencode/**),
+# end with `PATH:` for ranger — verify what actually ships (opencode.json,
+# skill/, agent/ symlinks), not what a successful eval suggests.
+oc-home-build:
+	$(INVOKE) opencode.home-build --host='$(HOST)'
+
+# [human] Tail the newest opencode log; `ResolveMessage` errors repeated for
+# one spec = plugin bundle not self-contained. <-> see oc-plugin-verify.
+oc-logs:
+	$(INVOKE) opencode.logs --lines=100

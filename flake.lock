@@ -366,6 +366,40 @@
         "type": "github"
       }
     },
+    "opencode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771181392,
+        "narHash": "sha256-0Zr7705Ya9Aj6ZmwVL6t289JN4XwDYafgGA5cuYOJh4=",
+        "owner": "anomalyco",
+        "repo": "opencode",
+        "rev": "62a24c2ddaf56c4234898269b1951ab11483f57a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "anomalyco",
+        "repo": "opencode",
+        "rev": "62a24c2ddaf56c4234898269b1951ab11483f57a",
+        "type": "github"
+      }
+    },
+    "opencode-ssh-session": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788110624,
+        "narHash": "sha256-WCcyZOu4aZ3WIqufK3Zc4Glgczz1p5FoIENwHXQG+LA=",
+        "owner": "PedroKlein",
+        "repo": "opencode-ssh-session",
+        "rev": "c1c9d7c23e22daa4ea4429c071addc6141169efa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PedroKlein",
+        "repo": "opencode-ssh-session",
+        "rev": "c1c9d7c23e22daa4ea4429c071addc6141169efa",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "darwin": "darwin",
@@ -379,6 +413,8 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-stable": "nixpkgs-stable",
+        "opencode": "opencode",
+        "opencode-ssh-session": "opencode-ssh-session",
         "snowfall-lib": "snowfall-lib",
         "sops-nix": "sops-nix",
         "typenix": "typenix",

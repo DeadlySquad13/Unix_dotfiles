@@ -75,6 +75,7 @@ in {
         enable = true;
         codex = disabled;
         claude-code = disabled;
+        opencode.ssh-session-plugin = enabled;
       };
       architecturing = {
         enable = true;

@@ -68,6 +68,8 @@ check-impure:
 # Include debugging targets as separate makefiles.
 include Makefile.bookmarks-debug
 include Makefile.modules-debug
+include Makefile.packages-debug
+include Makefile.opencode
 
 # TODO: Doesn't work when using Makefile, only manually.
 hm-rollback:

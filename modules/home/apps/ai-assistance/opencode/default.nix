@@ -19,6 +19,8 @@ in
       ./tools/taskwarrior.nix
       ./tools/zotero.nix
       ./skills/logseq-db-queries.nix
+      ./skills/logseq-authoring.nix
+      ./skills/logseq-authoring-suite.nix
       ./skills/file-organizer.nix
       ./skills/mcp-builder.nix
       ./skills/skill-creator.nix
@@ -145,6 +147,8 @@ in
         lib.genAttrs
         [
           "logseq-db-queries"
+          "logseq-authoring"
+          "logseq-authoring-suite"
           "file-organizer"
           "mcp-builder"
           "skill-creator"

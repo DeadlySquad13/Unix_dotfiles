@@ -635,6 +635,17 @@ in {
           "ddg-search*" = false;
           "nixos*" = false;
         };
+        # The Logseq-authoring skills are hidden by default and re-granted
+        # per agent below, but ONLY to agents that hold a Logseq MCP instance
+        # with WRITE access. Delivery agents (plan / build / nix-plan /
+        # nix-build / verifier) keep no Logseq context at all, so they must
+        # not even see the skill. `ask`/`allow` on the specific agents wins
+        # over this wildcard deny.
+        permission = {
+          skill = {
+            "logseq-authoring*" = "deny";
+          };
+        };
         agent = let
           # Per-agent logseq tool grant: every agent is wired to ITS OWN
           # instance ONLY. Tool grants never inherit another agent's
@@ -656,6 +667,18 @@ in {
           knowledge = baseTools.time // baseTools.memory // baseTools.fetch // baseTools.ddg;
           delivery = baseTools.time // baseTools.memory // baseTools.fetch // baseTools.ddg;
           deliveryNix = delivery // baseTools.nixos;
+          # Logseq-authoring skill grants. The global `permission.skill` deny
+          # (above) hides both skills from every agent; these re-enable them
+          # for agents that hold a Logseq MCP instance with WRITE access. The
+          # base skill is for every Logseq writer; the suite (compound /
+          # nested page conventions) is kbn-only.
+          authoringSkills = {
+            "logseq-authoring" = "allow";
+          };
+          authoringSkillsSuite = {
+            "logseq-authoring" = "allow";
+            "logseq-authoring-suite" = "allow";
+          };
           # A `<parent>-kbn` counterpart: a hidden summarizer subagent that
           # journals a change the parent wrote into the parent's own tree:
           #   Updated [[<parent>/page]] + a simplified copy
@@ -670,8 +693,12 @@ in {
               description =
                 "Journals ${parent}'s changes into ${cfg.logseqSummarizerProfiles."summ-${parent}".own} as `Updated [[${parent} page]]` + a simplified copy; reads ${parent}'s own tree, writes only via its dedicated journal instance";
               # Summarizers never run bash; they only read via logseq and write
-              # journal entries through the dedicated summarizer instance.
-              permission.bash = "deny";
+              # journal entries through the dedicated summarizer instance. They
+              # journal pages, so they also get the base authoring skill.
+              permission = {
+                bash = "deny";
+                skill = authoringSkills;
+              };
             }
             // {
               inherit (logseqGrant "summ-${parent}") tools;
@@ -682,16 +709,22 @@ in {
           # OTHER agents' `-kbn` counterparts (`*-kbn`) and allow exactly the
           # parent's own one; last matching rule wins, and OpenCode's default
           # for an unmatched subagent is "ask".
+          # Every agent with a Logseq write instance may also load the base
+          # authoring skill, so fold that grant into the same permission set.
           delegateTo = parent: {
-            permission.task = {
-              "*-kbn" = "deny";
-              "${parent}-kbn" = "allow";
+            permission = {
+              task = {
+                "*-kbn" = "deny";
+                "${parent}-kbn" = "allow";
+              };
+              skill = authoringSkills;
             };
           };
         in {
           # --- Knowledge roles (each granted its own logseq instance) ---
           orchestrator = {
             tools = knowledge // (logseqGrant "orchestrator").tools;
+            permission.skill = authoringSkills;
           };
           strategist = {
             tools = knowledge // (logseqGrant "strategist").tools;
@@ -730,6 +763,7 @@ in {
               };
             permission = {
               "logseq-kbn-escalated_*" = "ask";
+              skill = authoringSkillsSuite;
             };
           };
 

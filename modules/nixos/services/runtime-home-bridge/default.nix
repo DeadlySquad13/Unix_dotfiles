@@ -15,6 +15,18 @@
     }
   );
 
+  # Full catalog artifact (ADDITIVE to the runtime config selector): the
+  # complete catalog serialized through the shared `catalogJsonContent`
+  # interchange contract (including `mkResolutions`-style resolved absolute
+  # host paths). Emitted inside the container at `catalogArtifactPath` (a
+  # bind-mounted, host-readable location) so out-of-container consumers (e.g.
+  # the Neovim opencode launcher) can read the same artifact the bridge uses.
+  catalogArtifactJson = pkgs.writeText "runtime-home-bridge-catalog-full.json" (
+    lib.ds-omega.catalogJsonContent { inherit (cfg) homeDirectory; } {
+      inherit (cfg) namespaceRoot zNamespaceRoot variants;
+    }
+  );
+
   # Standard home directories Home Manager manages during activation. The NixOS
   # image may pre-create some of them as root, so the bridge must make them
   # exist and be owned by the bridge user before Home Manager runs.
@@ -45,11 +57,21 @@
       home=${lib.escapeShellArg cfg.homeDirectory}
       namespace_root=${lib.escapeShellArg cfg.namespaceRoot}
       z_namespace_root=${lib.escapeShellArg cfg.zNamespaceRoot}
+      catalog_artifact=${lib.escapeShellArg cfg.catalogArtifactPath}
+      catalog_artifact_json=${lib.escapeShellArg catalogArtifactJson}
 
       fail() {
         printf 'runtime-home-bridge: %s\n' "$*" >&2
         exit 1
       }
+
+      # Emit the full catalog artifact (ADDITIVE; independent of the runtime
+      # config selector). The destination is expected to be a bind mount
+      # (host-readable); the parent directory is created only if missing.
+      if [ -n "$catalog_artifact" ]; then
+        mkdir -p "$(dirname "$catalog_artifact")"
+        install -m 0644 "$catalog_artifact_json" "$catalog_artifact"
+      fi
 
       if [ ! -e "$config_file" ]; then
         ${
@@ -275,6 +297,18 @@ in
         type = lib.types.bool;
         default = false;
         description = "Fail boot bridge setup instead of doing nothing when runtimeConfig is absent.";
+      };
+
+      catalogArtifactPath = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = ''
+          Absolute path inside the container where the full catalog artifact
+          (catalogJsonContent-serialized, including resolved host paths) is
+          installed at mode 0644. Typically a bind-mounted, host-readable
+          location (e.g. `<zNamespaceRoot>/share/runtime-home-bridge/catalog.json`).
+          Empty disables emission.
+        '';
       };
 
       package = lib.mkOption {

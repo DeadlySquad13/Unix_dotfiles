@@ -54,6 +54,13 @@ in
       enable = true;
 
       settings = {
+        # Always-on guidance, unlike on-demand skills: loaded for every agent
+        # and every session. Kept short; the full conventions live in the
+        # logseq-authoring skill. See instructions/logseq-references.md.
+        instructions = [
+          (toString ./instructions/logseq-references.md)
+        ];
+
         provider = {
           ollama = {
             npm = "@ai-sdk/openai-compatible";

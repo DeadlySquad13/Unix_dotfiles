@@ -16,10 +16,14 @@ Layered structure:
         - define secret,
         - define template.
     3. Tie into opencode config: ../../modules/nixos/ai-assistance/opencode/default.nix
-        - symlink home-manager file to template.
+        - by default, symlink a home-manager file to the template;
+        - when `ds-omega.ai-assistance.opencode.authPath` is set, skip that
+          `home.file` and let the given path own auth (see "`home.file` auth must
+          not shadow the runtime-home-bridge symlink" below).
 2. Per-system overrides
     1. Override keyFile according to our docker volumes, set
-       `ds-omega.ai-assistance.opencode` settings for system layer module:
+       `ds-omega.ai-assistance.opencode` settings for system layer module,
+       including `authPath` pointing at the bind-mounted opencode share:
     ../../systems/x86_64-docker/darkGreen-tangerineDream-green/apps/ecosystem/sops-opencode/default.nix
 3. HomeManager
     1. Define sops settings: ../../modules/home/apps/ecosystem/sops/default.nix
@@ -62,6 +66,25 @@ ${namespace}.ai-assistance.opencode.mcp.logseqEnvironmentFile =
 Do not put this input under `programs.opencode...`; that namespace belongs to
 Home Manager's processed OpenCode options and risks collisions with its option
 space.
+
+### `home.file` auth must not shadow the runtime-home-bridge symlink
+
+`auth.json` cannot have two owners when `~/.local/share/opencode` is a canonical
+symlink managed by `services.runtime-home-bridge`. Home Manager materialises a
+real directory for any managed child file, so declaring
+`home.file.".local/share/opencode/auth.json"` clobbers the bridge's symlink to
+the bind-mounted share (`/usr/local/<spice>-/<system>/_share/opencode`). OpenCode
+then writes to an image-local directory, losing its session database on every
+container start; the next boot also fails on the now non-symlink target.
+
+`ds-omega.ai-assistance.opencode.authPath` therefore selects the owner. `null`
+(default, e.g. a real machine) keeps the `home.file` symlink to
+`/run/secrets/rendered/opencode-auth.json`; when set (e.g. a container) the
+module omits `home.file` and the per-system glue exposes the template at that
+path via `sops.templates."opencode-auth.json".path`, inside the bridged share.
+
+See `0001-runtime-home-bridge.md`; layers running before or alongside the bridge
+must not pre-create its canonical paths.
 
 ### SOPS definitions and layer-specific glue
 

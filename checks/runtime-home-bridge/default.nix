@@ -54,6 +54,14 @@
             target = ".bookmarks/z-data";
           }
         ];
+        # Regression fixture: the source is a symlink to an existing mount, so
+        # the canonical home target becomes a symlink whose referent is a
+        # mountpoint. `findmnt --mountpoint` follows symlinks, so a naive
+        # mountpoint check rejects the bridge's own correct link on the next
+        # run. The script below re-runs this variant to prove idempotency.
+        mountLike = [
+          { source = "_mountsrc"; target = ".bookmarks/mount-like"; }
+        ];
       };
     };
   };
@@ -70,7 +78,11 @@
 in
 assert !(builtins.tryEval invalidSystem.config.system.build.toplevel).success;
 pkgs.runCommand "runtime-home-bridge" {
-  nativeBuildInputs = [ validSystem.config.services.runtime-home-bridge.package ];
+  nativeBuildInputs = [
+    validSystem.config.services.runtime-home-bridge.package
+    pkgs.jq
+    pkgs.util-linux
+  ];
 } ''
     set -euo pipefail
     namespace="/tmp/bridge-namespace"; home="/tmp/bridge-home"
@@ -89,6 +101,28 @@ pkgs.runCommand "runtime-home-bridge" {
     mkdir -p "$namespace/_zdata"
     test "$(readlink "$home/.bookmarks/z-data")" = "$namespace/_zdata"
     test "$(readlink "$namespace/_zdata")" = "$z/shared-/@salt/z-data"
+
+    # Regression: a canonical symlink whose referent is a real mountpoint must
+    # be accepted on the first run and must remain idempotent on the next. Use
+    # whichever mountpoint is available in the build sandbox as the referent.
+    mount_ref=""
+    for candidate in /nix/store /proc /dev /sys; do
+      if findmnt -n --mountpoint "$candidate" >/dev/null 2>&1; then
+        mount_ref="$candidate"
+        break
+      fi
+    done
+    if [ -n "$mount_ref" ]; then
+      ln -s "$mount_ref" "$namespace/_mountsrc"
+      printf '{"version":1,"variant":"mountLike"}' > "$namespace/_runtime/home-bridge.json"
+      runtime-home-bridge
+      test "$(readlink "$home/.bookmarks/mount-like")" = "$namespace/_mountsrc"
+      # Before the fix this second run failed with
+      # "canonical target is a mountpoint" because findmnt resolves symlinks.
+      runtime-home-bridge
+    else
+      echo "warning: skipping symlink-to-mountpoint regression (no mountpoint found)" >&2
+    fi
 
     # Full catalog artifact was emitted (ADDITIVE) and is valid JSON with the
     # interchange contract fields, including resolved host paths.

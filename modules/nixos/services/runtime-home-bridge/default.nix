@@ -108,16 +108,21 @@
         case "$source" in "$namespace_root"/*) ;; *) fail "catalog source escapes namespace: $source" ;; esac
         case "$target" in "$home"/*) ;; *) fail "catalog target escapes home: $target" ;; esac
 
-        if is_mountpoint "$target"; then
-          fail "canonical target is a mountpoint; migrate the bind mount to $namespace_root: $target"
-        fi
-
         parent=$(dirname "$target")
         mkdir -p "$parent"
 
+        # An existing symlink is the expected steady state: it points into the
+        # namespace mount, whose referent is often itself a bind mount.
+        # `findmnt --mountpoint` resolves symlinks, so testing it before the
+        # symlink case made every boot after the first fail for any mapping
+        # whose source is a mount (e.g. ~/.bookmarks/shared-scripts ->
+        # /usr/local/.../_scripts). Only a direct, non-symlink mountpoint at the
+        # canonical path must be rejected.
         if [ -L "$target" ]; then
           [ "$(readlink "$target")" = "$source" ] && return 0
           rm "$target"
+        elif is_mountpoint "$target"; then
+          fail "canonical target is a mountpoint; migrate the bind mount to $namespace_root: $target"
         elif [ -e "$target" ]; then
           fail "refusing to replace existing non-symlink target: $target"
         fi

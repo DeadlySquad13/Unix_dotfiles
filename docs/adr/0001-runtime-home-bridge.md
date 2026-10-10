@@ -40,6 +40,15 @@ The bridge rejects direct canonical-path mountpoints and existing non-symlink
 targets. It does not use a systemd generator, `L+`, recursive permission
 changes, or automatic `chown` of host mounts.
 
+Canonical targets are owned exclusively by the bridge. Layers that run before or
+alongside it must not create or materialise them: a real directory is rejected,
+and only a symlink to the bridge's source is the accepted steady state. Because
+`findmnt --mountpoint` follows symlinks, the mountpoint rejection runs only for
+non-symlink targets; an already-correct symlink is accepted idempotently. In
+particular, a Home Manager `home.file` child under a canonical directory would
+materialise that directory and is therefore not allowed (see
+`sops-opencode.md`).
+
 ## Consequences
 
 - Compose can choose a small profile without rebuilding the image.

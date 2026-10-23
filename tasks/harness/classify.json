@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "description": "Classification -> selector map for `harness.merge` (ADR 0007 D5, Workstream C). The merge task computes propagation targets from the snowfall layout at run time; this file carries only the small classification->selector mapping materialised into the change-proposal manifest. No hand-maintained registry.",
+  "delta": {
+    "description": "A harness merge is bounded: the landed delta must be a subset of the inner trees (ADR 0007 D4).",
+    "allowGlobs": [
+      "**/systems/*/*_inner/**",
+      "**/homes/*/*_inner/**"
+    ],
+    "scaffolding": [
+      "flake.nix",
+      "flake.lock",
+      "lib/inherit/**"
+    ]
+  },
+  "layout": {
+    "childRepo": "ai-/<spice>-/<agent>",
+    "innerSystem": "systems/x86_64-linux/<spice>-<agent>_inner",
+    "outerSystem": "systems/x86_64-docker/<spice>-<agent>",
+    "innerHome": "homes/x86_64-linux/<user>@<spice>-<agent>_inner",
+    "outerHome": "homes/x86_64-linux/<user>@<spice>-<agent>",
+    "systemPlatformMap": {
+      "x86_64-linux": "x86_64-docker"
+    },
+    "note": "Propagation targets are layout-derived: an inner system under x86_64-linux/<spice>-<agent>_inner propagates to the outer x86_64-docker/<spice>-<agent> image; an inner home propagates to the matching outer home (same linux platform). The platform map is the only static part. The child checkout keeps the spice directory suffix: ai-/darkGreen-/tangerineDream-green."
+  },
+  "classifications": {
+    "inner-system": {
+      "selector": "systems/{platform}/*_inner",
+      "promotable": true
+    },
+    "inner-home": {
+      "selector": "homes/{platform}/*_inner",
+      "promotable": true
+    },
+    "harness-module": {
+      "selector": "modules/**",
+      "promotable": false,
+      "note": "Shared modules are not part of the bounded inner delta; they require the harness/shared-module loop (edit parent, then update the child's parent input)."
+    },
+    "scaffolding": {
+      "selector": "flake.nix|flake.lock|lib/inherit/**",
+      "promotable": false,
+      "note": "Child scaffolding is intentionally untracked and must never merge back."
+    }
+  }
+}

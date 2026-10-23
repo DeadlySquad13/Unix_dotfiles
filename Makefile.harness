@@ -1,0 +1,57 @@
+# Agent-harness iteration (invoke collection: tasks/harness/).
+#
+# Host-side only: creates/merges the agent child checkout (ADR 0006 §3,
+# ADR 0007 D4/D5/D6). Every target is a thin wrapper around
+# `invoke --search-root=./tasks harness.<task>`; pass extra flags via ARGS.
+#
+#   make harness-test             # load the collection + validate the map
+#   make harness-selfcheck
+#   make harness-classify
+#   make harness-bootstrap-dry
+#   make harness-merge-dry
+#   make harness-merge            # interactive host gates
+#   make harness-merge ARGS="--yes"
+#   make harness-promote          # derive outer targets (separate phase)
+
+HARNESS_INVOKE := invoke --search-root=./tasks
+ARGS ?=
+
+.PHONY: harness-list harness-test harness-selfcheck harness-classify \
+	harness-bootstrap harness-bootstrap-dry \
+	harness-merge harness-merge-dry harness-promote
+
+# List the tasks exposed by the `harness` collection.
+harness-list:
+	$(HARNESS_INVOKE) --list
+
+# Load the collection (task discovery) and validate the map end to end.
+harness-test:
+	$(HARNESS_INVOKE) --list
+	$(HARNESS_INVOKE) harness.selfcheck
+
+# Validate classify.json + derived paths (no git, no writes).
+harness-selfcheck:
+	$(HARNESS_INVOKE) harness.selfcheck
+
+# Print the merged classification map and layout-derived targets.
+harness-classify:
+	$(HARNESS_INVOKE) harness.classify
+
+# Create the child checkout (default: darkGreen / tangerineDream-green).
+harness-bootstrap:
+	$(HARNESS_INVOKE) harness.bootstrap $(ARGS)
+
+harness-bootstrap-dry:
+	$(HARNESS_INVOKE) harness.bootstrap --dry-run $(ARGS)
+
+# Preview a bounded inner merge (fetches into a transient ref; no tree change).
+harness-merge-dry:
+	$(HARNESS_INVOKE) harness.merge --dry-run $(ARGS)
+
+# Interactive review-state merge with host gates.
+harness-merge:
+	$(HARNESS_INVOKE) harness.merge $(ARGS)
+
+# Derive outer (image) promotion targets; applied by the host, never pushed.
+harness-promote:
+	$(HARNESS_INVOKE) harness.merge --promote $(ARGS)

@@ -1,3 +1,8 @@
+# Agent child-flake checkouts (one per agent at ai-/<spice>-/<agent>); see
+# ADR 0006 and the `harness.bootstrap` invoke task (tasks/harness/). They are
+# separate git repos, never part of the parent tree.
+ai-/
+
 # deploy-rs logs.
 logs
 result

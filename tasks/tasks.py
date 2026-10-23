@@ -7,11 +7,13 @@ from nix.nix_shell import nix_shell
 import secrets
 import packages.debug
 import opencode.debug
+import harness.harness
 
 _pkg_debug = Collection.from_module(packages.debug, name="pkg")
 _oc_debug = Collection.from_module(opencode.debug, name="opencode")
+_harness = Collection.from_module(harness.harness, name="harness")
 
-namespace = Collection(secrets, _pkg_debug, _oc_debug)
+namespace = Collection(secrets, _pkg_debug, _oc_debug, _harness)
 
 # REFACTOR:
 def invoke_cmd(c: Context, *cmd, **kwargs):

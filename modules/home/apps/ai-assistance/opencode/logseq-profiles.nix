@@ -1,8 +1,17 @@
 {
   lib,
   inputs,
+  config ? {},
+  namespace ? "ds-omega",
   ...
 }: let
+  # T1 inner harness provisioner (ADR 0007 D1): the name is namespace-generated
+  # as `<spiceNamespace>-inner-conv-plat-prov` from the outer system's
+  # `common.spiceNamespace`. The home side may not carry `common`, so fall back
+  # to the green default (the check evaluates this module without `config`).
+  spiceNamespace = (config.lib.${namespace}.common or {}).spiceNamespace or "darkGreen";
+  innerProvisionerAgent = "${spiceNamespace}-inner-conv-plat-prov";
+
   # Per-agent namespace ACL profiles (one mcp-logseq instance per profile).
   #
   # Model (see docs/adr/0005 and docs/guides/logseq-agent-namespaces.md):
@@ -61,6 +70,13 @@
       own = "ai-kbn KnowledgeBaseNoter_system";
       readAllNamespaces = true; # reads every namespace incl. personal (no excludes)
     };
+    # T1 inner harness provisioner (ADR 0007 D1): primary, Logseq-producing.
+    # Own tree `ai-ihp InnerHarnessProvisioning_system`; reads the shared
+    # discovery/architecture trees. Name is namespace-generated (see above).
+    "${innerProvisionerAgent}" = {
+      own = "ai-ihp InnerHarnessProvisioning_system";
+      readSets = ["discovery" "architecture"];
+    };
   };
 
   # The agents that PRODUCE knowledge and therefore get a `<parent>-kbn`
@@ -78,6 +94,9 @@
     "analyst"
     "nix-analyst"
     "reporter"
+    # T1 inner harness provisioner (ADR 0007 D1) — journals to its own tree and
+    # gets a `<name>-kbn` summarizer counterpart.
+    innerProvisionerAgent
   ];
 
   # Dedicated narrow instances for the `<parent>-kbn` summarizer subagents:

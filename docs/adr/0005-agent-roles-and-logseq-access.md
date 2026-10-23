@@ -183,9 +183,10 @@ remains last-match-wins with a default of `ask`, and the `task` tool only hides
   `aa5550e64d8486ee8329ee9320fc82452e4eb0c2`), mounted read-only into each
   logseq container and run via `uvx --refresh --from /app/mcp-logseq
   mcp-logseq` (the `supercorp/supergateway:uvx` image has no git).
-- The static oracle at `checks/mcp-logseq/default.nix` asserts the **17-server
-  env** (9 knowledge-role + the `kbn-escalated` write-everywhere instance +
-  7 `logseq-summ-<parent>` instances), per-agent glob
+- The static oracle at `checks/mcp-logseq/default.nix` asserts the **19-server
+  env** (10 knowledge-role incl. the T1 `darkGreen-inner-conv-plat-prov` harness
+  provisioner + the `kbn-escalated` write-everywhere instance +
+  8 `logseq-summ-<parent>` instances), per-agent glob
   isolation, DELIVERY agents carrying no logseq glob, the `*-kbn` deny +
   own-allow `permission.task`, counterpart personas, `logseq-mcpo` disabled in
   OpenCode, the `personal`/exclude pairing, the kbn `readAllNamespaces`

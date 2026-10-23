@@ -7,6 +7,12 @@
   inherit (lib.${namespace}) source;
 
   cfg = config.${namespace}.ai-assistance.opencode;
+
+  # T1 inner harness provisioner (ADR 0007 D1): namespace-generated name, kept
+  # identical to the one used in `logseq-profiles.nix` / `mcp.nix` (falls back
+  # to the green default when the home-side config does not carry `common`).
+  spiceNamespace = (config.lib.${namespace}.common or {}).spiceNamespace or "darkGreen";
+  innerProvisionerAgent = "${spiceNamespace}-inner-conv-plat-prov";
 in
   {
     imports = [
@@ -109,6 +115,12 @@ in
         nix-build = ./agents/nix-build.md;
         verifier = ./agents/verifier.md;
         kbn = ./agents/kbn.md;
+        # T1 inner harness provisioner (primary, Logseq-producing) — the name is
+        # namespace-generated (`<spiceNamespace>-inner-conv-plat-prov`).
+        "${innerProvisionerAgent}" = ./agents/darkGreen-inner-conv-plat-prov.md;
+        # T2 harness provisioner (subagent, no Logseq) — the single door for
+        # harness edits; namespace-agnostic.
+        harness-conv-plat-prov = ./agents/harness-conv-plat-prov.md;
         # Delivery summary personas are wired in mcp.nix `settings.agent` as
         # hidden JSON subagents (the <parent>-kbn counterpart), so `agents`
         # only needs the authoring personas above.

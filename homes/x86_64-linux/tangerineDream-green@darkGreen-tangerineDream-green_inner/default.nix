@@ -1,0 +1,162 @@
+{
+  # Snowfall Lib provides a customized `lib` instance with access to your flake's library
+  # as well as the libraries available from your flake's inputs.
+  lib,
+  # An instance of `pkgs` with your overlays and packages applied is also available.
+  pkgs,
+  # You also have access to your flake's inputs.
+  inputs,
+  # Additional metadata is provided by Snowfall Lib.
+  namespace, # The namespace used for your flake, defaulting to "internal" if not set.
+  home, # The home architecture for this host (eg. `x86_64-linux`).
+  target, # The Snowfall Lib target for this home (eg. `x86_64-home`).
+  format, # A normalized name for the home target (eg. `home`).
+  virtual, # A boolean to determine whether this home is a virtual target using nixos-generators.
+  host, # The host name for this home.
+  # All other arguments come from the home home.
+  config,
+  ...
+}: let
+  inherit (lib.${namespace}) disabled enabled;
+in {
+  home = {
+    # This value determines the Home Manager release that your configuration is
+    # compatible with. This helps avoid breakage when a new Home Manager release
+    # introduces backwards incompatible changes.
+    #
+    # You should not change this value, even if you update Home Manager. If you do
+    # want to update the value, then make sure to first check the Home Manager
+    # release notes.
+    stateVersion = "24.11";
+    # Home Manager needs a bit of information about you and the paths it should
+    # manage.
+    username = "tangerineDream-green";
+    homeDirectory = "/home/tangerineDream-green";
+  };
+
+  lib.${namespace} = {
+    # Resolve runtime-home-bridge-created `.bookmarks` links to their symlink-free
+    # real paths, so they can be handed to Nix as paths. Only keys present in the
+    # host's bridge catalog are rewritten; other `.bookmarks` keys pass through.
+    # See lib/runtime-home-bridge/default.nix.
+    paths = lib.${namespace}.resolveRuntimePaths {
+      inherit (config.home) homeDirectory;
+      resolutions = lib.${namespace}.mkResolutions {
+        inherit (config.home) homeDirectory;
+        catalog = lib.${namespace}.catalogs.darkGreen-tangerineDream-green;
+      };
+    } rec {
+      kbd = ~/.bookmarks/kbd;
+      kbn = ~/.bookmarks/kbn;
+      projects = "~/.bookmarks/projects";
+
+      dotfiles = "~/.local/dotfiles-";
+
+      # TODO: Make like in @creamsoda.
+      # shared-dotfiles = "${dotfiles}/shared-";
+      shared-configs = "~/.bookmarks/shared-configs";
+      shared-scripts = "~/.bookmarks/shared-scripts";
+
+      # TODO: Append home- like in @creamsoda.
+      # As far as I can tell, we would need at least change paths in Ansible
+      # Keyszer templates.
+      home-dotfiles = "${dotfiles}";
+      home-configs = "${home-dotfiles}/_configs";
+      home-scripts = "${home-dotfiles}/_scripts";
+    };
+
+    # TODO: Add as default value.
+    # TODO: Move to a system level in a separate module? Why it's home
+    # dependent?
+    deploymentOptions = {
+      isDeployedFromDarwin = false;
+      isNixGlNotWorking = true;
+    };
+
+    modules = {
+      ai-assistance = {
+        enable = true;
+        codex = disabled;
+        claude-code = disabled;
+      };
+      architecturing = {
+        enable = false;
+      };
+      cli-utility = {
+        enable = false;
+
+        bat = enabled;
+        # TODO: Something in our bash config breaks nixos.
+        bash = disabled;
+        zoxide = enabled;
+        invoke = enabled;
+        complete-alias = enabled;
+        fdupes = enabled;
+      };
+      development = {
+        enable = false;
+
+        git = enabled;
+        lazygit = enabled;
+        nodejs = enabled;
+        direnv = enabled;
+        nix = enabled;
+      };
+      ecosystem = {
+        enable = false;
+      };
+      general = {
+        enable = false;
+
+        neovim = {
+          enabled = true;
+          dev = true;
+          stage = false;
+        };
+      };
+      media = {
+        enable = false;
+      };
+      gui-utility = {
+        enable = false;
+      };
+      productivity = {
+        enable = false;
+      };
+      misc = {
+        enable = false;
+      };
+      writing = {
+        enable = false;
+      };
+      network = {
+        enable = false;
+      };
+
+      tools = {
+        enabled = false;
+
+        ranger = {
+          enabled = false;
+          dev = false;
+          stage = false;
+        };
+      };
+    };
+  };
+
+  # FIX:Infinite recursion.
+  ds-omega.ai-assistance.opencode = {
+    # @ts: IOpenCodeToolOptions
+    customTools = {
+      pizza = false;
+      zotero = false;
+      taskwarrior = false;
+    };
+    # @ts: IOpenCodeSkillOptions
+    enabledSkills = {
+      # TODO: Requires workaround like an extra volume to kbn.
+      logseq-db-queries = false;
+    };
+  };
+}

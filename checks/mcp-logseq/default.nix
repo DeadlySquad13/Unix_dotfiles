@@ -10,10 +10,14 @@
   # (import { lib; config; } directly) so the internal `let` bindings
   # (resolveSets, profileExcludes, mkLogseqServer, ...) evaluate faithfully, then
   # asserts:
-  #   - the 17-server env oracle (9 knowledge-role profiles + the
-  #     `kbn-escalated` write-everywhere instance + 7 `<parent>-kbn`
-  #     `logseq-summ-<parent>` summarizer instances; ports, WRITE/INCLUDE/
-  #     EXCLUDE strings, stdio, LOGSEQ_API_URL, environmentFile),
+  #   - the 19-server env oracle: 10 knowledge-role profiles, the
+  #     `kbn-escalated` write-everywhere instance, and 8 `<parent>-kbn`
+  #     `logseq-summ-<parent>` summarizer instances (ports, WRITE/INCLUDE/
+  #     EXCLUDE strings, stdio, LOGSEQ_API_URL, environmentFile). The 10
+  #     knowledge roles include the `darkGreen-inner-conv-plat-prov` harness
+  #     provisioner (see the
+  #     [agent persona](../../modules/home/apps/ai-assistance/opencode/agents/darkGreen-inner-conv-plat-prov.md)
+  #     and [ADR 0007](../../docs/adr/0007-agent-harness-iteration-and-merge-gates.md)),
   #   - the per-agent tool-grant isolation invariant (no cross-agent logseq glob)
   #     including the summarizer counterparts (dedicated `logseq-summ-<parent>*`
   #     instance only) and that DELIVERY agents (plan/build/nix-plan/nix-build/
@@ -49,12 +53,11 @@
     hasPrefix
     attrNames
     concatStringsSep
-    any
     all
     filterAttrs
     sort
     ;
-  lessThan = builtins.lessThan;
+  inherit (builtins) lessThan;
 
   # Source the global namespace values from the real logseq-profiles.nix module.
   # `inputs.mcp-logseq` is the Nix store source the real flake provides; here a
@@ -115,8 +118,7 @@
       logseqEnvironmentFile = mcpEnvFile;
       inherit logseqHost;
       logseqSrc = mcpLogseqSrc;
-      logseqSharedNamespaces = profileVals.logseqSharedNamespaces;
-      logseqNamespaceSets = profileVals.logseqNamespaceSets;
+      inherit (profileVals) logseqSharedNamespaces logseqNamespaceSets;
       logseqAgentProfiles = profiles;
       logseqSummarizerProfiles = summarizerProfiles;
       logseqEscalatedProfiles = escalatedProfiles;
@@ -130,7 +132,7 @@
   };
 
   servers = m.options.programs.opencode.mcpContainers.servers.default;
-  settings = m.config.programs.opencode.settings;
+  inherit (m.config.programs.opencode) settings;
   mcpServers = m.config.programs.mcp.servers;
 
   # Backward compatibility: with logseqSrc = null the module must keep the
@@ -149,7 +151,7 @@
     then true
     else builtins.abort "mcp-logseq FAIL: ${name}: ${msg}";
 
-  envGet = env: k: if env ? ${k} then env.${k} else null;
+  envGet = env: k: env.${k} or null;
   splitCsv = s: builtins.filter (x: x != "") (builtins.split "," s);
 
   pinned = "aa5550e64d8486ee8329ee9320fc82452e4eb0c2";
@@ -159,9 +161,12 @@
   logseqServerNames = attrNames logseqServers;
 
   expectedNames = sort lessThan [
-    # Knowledge-role instances.
+    # Knowledge-role instances, one per knowledge profile. Includes the
+    # `darkGreen-inner-conv-plat-prov` harness provisioner (see
+    # [ADR 0007](../../docs/adr/0007-agent-harness-iteration-and-merge-gates.md)).
     "logseq-analyst"
     "logseq-architect"
+    "logseq-darkGreen-inner-conv-plat-prov"
     "logseq-kbn"
     "logseq-kbn-escalated"
     "logseq-nix-analyst"
@@ -170,9 +175,12 @@
     "logseq-researcher"
     "logseq-strategist"
     "logseq-tactician"
-    # Dedicated <parent>-kbn summarizer instances.
+    # Dedicated `<parent>-kbn` summarizer instances, one per producing parent;
+    # includes the counterpart for `darkGreen-inner-conv-plat-prov` (see
+    # [ADR 0007](../../docs/adr/0007-agent-harness-iteration-and-merge-gates.md)).
     "logseq-summ-analyst"
     "logseq-summ-architect"
+    "logseq-summ-darkGreen-inner-conv-plat-prov"
     "logseq-summ-nix-analyst"
     "logseq-summ-reporter"
     "logseq-summ-researcher"
@@ -213,6 +221,11 @@
     "analyst"
     "nix-analyst"
     "reporter"
+    # The `darkGreen-inner-conv-plat-prov` harness provisioner journals to its
+    # own tree and gets a `darkGreen-inner-conv-plat-prov-kbn` summarizer
+    # counterpart (see
+    # [ADR 0007](../../docs/adr/0007-agent-harness-iteration-and-merge-gates.md)).
+    "darkGreen-inner-conv-plat-prov"
   ];
   counterparts = map (p: "${p}-kbn") producingParents;
 
@@ -236,19 +249,19 @@
     "logseq-orchestrator" = {
       hostPort = 18113;
       write = "ai-orc Orchestrator_system,${shared}";
-      include = "${discovery},${architecture},ai-anl Analyst_system,ai-arc Architect_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-str Strategist_system,ai-tcn Tactician_system";
+      include = "${discovery},${architecture},ai-anl Analyst_system,ai-arc Architect_system,ai-ihp InnerHarnessProvisioning_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-str Strategist_system,ai-tcn Tactician_system";
       exclude = null;
     };
     "logseq-strategist" = {
       hostPort = 18108;
       write = "ai-str Strategist_system,${shared},${discovery}";
       include = "personal,${architecture}";
-      exclude = "ai-anl Analyst_system,ai-arc Architect_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-orc Orchestrator_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-tcn Tactician_system,ai-s-bld shared-Builder_system,ai-bld Builder_system,ai-nxb NixBuilder_system,ai-nxp NixPlanner_system,ai-pln Planner_system,ai-s-pln shared-Planner_system";
+      exclude = "ai-anl Analyst_system,ai-arc Architect_system,ai-ihp InnerHarnessProvisioning_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-orc Orchestrator_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-tcn Tactician_system,ai-s-bld shared-Builder_system,ai-bld Builder_system,ai-nxb NixBuilder_system,ai-nxp NixPlanner_system,ai-pln Planner_system,ai-s-pln shared-Planner_system";
     };
     "logseq-tactician" = {
       hostPort = 18109;
       write = "ai-tcn Tactician_system,${shared}";
-      include = "${discovery},${architecture},ai-anl Analyst_system,ai-arc Architect_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-orc Orchestrator_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-str Strategist_system";
+      include = "${discovery},${architecture},ai-anl Analyst_system,ai-arc Architect_system,ai-ihp InnerHarnessProvisioning_system,ai-kbn KnowledgeBaseNoter_system,ai-nxl NixAnalyst_system,ai-orc Orchestrator_system,ai-rpt Reporter_system,ai-rsh Researcher_system,ai-str Strategist_system";
       exclude = null;
     };
     "logseq-architect" = {
@@ -278,6 +291,16 @@
     "logseq-reporter" = {
       hostPort = 18115;
       write = "ai-rpt Reporter_system,${shared},ai-bld Builder_system,ai-nxb NixBuilder_system,ai-s-bld shared-Builder_system";
+      include = "${discovery},${architecture}";
+      exclude = null;
+    };
+    # `darkGreen-inner-conv-plat-prov`: own tree
+    # `ai-ihp InnerHarnessProvisioning_system`, reads the shared
+    # discovery/architecture trees; derived from the nix-build shape (see
+    # [ADR 0007](../../docs/adr/0007-agent-harness-iteration-and-merge-gates.md)).
+    "logseq-darkGreen-inner-conv-plat-prov" = {
+      hostPort = 18124;
+      write = "ai-ihp InnerHarnessProvisioning_system,${shared}";
       include = "${discovery},${architecture}";
       exclude = null;
     };
@@ -342,6 +365,14 @@
       include = "ai-rpt Reporter_system";
       exclude = null;
     };
+    # Dedicated summarizer counterpart for `darkGreen-inner-conv-plat-prov`
+    # (see [ADR 0007](../../docs/adr/0007-agent-harness-iteration-and-merge-gates.md)).
+    "logseq-summ-darkGreen-inner-conv-plat-prov" = {
+      hostPort = 18125;
+      write = "ai-ihp InnerHarnessProvisioning_system/_journals,${shared}";
+      include = "ai-ihp InnerHarnessProvisioning_system";
+      exclude = null;
+    };
   };
 
   # Validate one server against the oracle + common invariants.
@@ -391,18 +422,18 @@
       ((svc.volumes or []) == [])
       "without logseqSrc there must be no src volume") expectedNames;
 
-  assertNamedServers = check "exactly the 17 expected logseq servers"
+  assertNamedServers = check "exactly the 19 expected logseq servers"
     (logseqServerNames == expectedNames)
     "expected [${concatStringsSep "," expectedNames}] got [${concatStringsSep "," logseqServerNames}]";
 
   assertToolsGlobOff = check "settings.tools.logseq* == false"
-    (settings.tools."logseq*" == false)
+    (!settings.tools."logseq*")
     "settings.tools.logseq* must be false";
 
   assertNoGenericMcpoInSettings = check "logseq-mcpo registered but DISABLED in opencode"
     (mcpServers ? logseq-mcpo
       && settings.mcp ? "logseq-mcpo"
-      && settings.mcp."logseq-mcpo".enabled == false)
+      && !settings.mcp."logseq-mcpo".enabled)
     "logseq-mcpo must stay registered (other consumers) but be disabled in OpenCode";
 
   # ---------------------------------------------------------------------------
@@ -451,7 +482,7 @@
       (if isGlobal then i != null && builtins.elem "personal" (splitCsv i) else true)
       "readAllNamespaces profile must carry the personal marker in include";
 
-  assertPersonalPair = all (name: checkPersonalPair name) logseqServerNames;
+  assertPersonalPair = all checkPersonalPair logseqServerNames;
 
   # ---------------------------------------------------------------------------
   # Invariant 5: strict profiles carry no `personal` and no exclude.
@@ -473,7 +504,7 @@
   # OTHER profile's own tree.
   # ---------------------------------------------------------------------------
   readAllOwnsIncludes = name: let
-    o = (builtins.filter (p: p != name) (sort lessThan (attrNames profiles)));
+    o = builtins.filter (p: p != name) (sort lessThan (attrNames profiles));
   in
     (concatStringsSep "," [
       discovery
@@ -548,7 +579,7 @@
   # ---------------------------------------------------------------------------
   assertDelegation = all (name: let
     task = (settings.agent.${name}.permission or {}).task or {};
-    wantKeys = sort lessThan ["*-kbn" "${name}-kbn"];
+    wantKeys = sort lessThan ["*-kbn" "${name}-kbn" "harness-conv-plat-prov"];
   in
     check "parent/${name} task blocks other counterparts"
       (attrNames task == wantKeys)
@@ -567,7 +598,7 @@
   in
     check "counterpart/${name} mode" (agent.mode == "subagent")
       "counterpart must be mode: subagent"
-    && check "counterpart/${name} hidden" (agent.hidden == true)
+    && check "counterpart/${name} hidden" agent.hidden
       "counterpart must be hidden: true"
     && check "counterpart/${name} bash denied"
       ((agent.permission or {}) ? bash && agent.permission.bash == "deny")
@@ -650,6 +681,16 @@
       readSets = [];
       readAllAgentOwns = false;
       readAllNamespaces = true;
+      writeAllNamespaces = false;
+    };
+    # `darkGreen-inner-conv-plat-prov` harness provisioner (see
+    # [ADR 0007](../../docs/adr/0007-agent-harness-iteration-and-merge-gates.md)).
+    "darkGreen-inner-conv-plat-prov" = {
+      own = "ai-ihp InnerHarnessProvisioning_system";
+      writeSets = [];
+      readSets = ["discovery" "architecture"];
+      readAllAgentOwns = false;
+      readAllNamespaces = false;
       writeAllNamespaces = false;
     };
   };

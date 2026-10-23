@@ -68,6 +68,43 @@ in {
   */
   networking.hostName = "darkGreen-tangerineDream-green";
 
+  # Volumes mounted by docker compose live in the per-system namespace below.
+  # The container runs `/init` as root and docker pre-creates missing mount-point
+  # dirs as root:root; the bind mounts themselves appear root-owned (fuse
+  # user_id=0), so mode bits are the only access control that works for the
+  # unprivileged user. Runs before home-manager, so symlinks can be created into
+  # these dirs during user activation. Additive chmod never removes permissions.
+  #
+  # Ported from the `ai-/darkGreen-/tangerineDream-green` copypaste (ADR 0006
+  # Phase 0 / ADR 0007) before that copy is replaced by the mergeable child repo.
+  # WARN: Breaks container activation: it seems to create a certain delay after /init and before bash become available.
+  # Because of that we can't start container in our scripts automatically,
+  # container has to be polled. Overall, seems like a hack that should be
+  # implemented via runtime-home-bridge.
+  # system.activationScripts.fixDockerMountPermissions = lib.stringAfter [
+  #   "users"
+  #   "groups"
+  # ] ''
+  #   ns=/usr/local/darkGreen-/tangerineDream-green
+
+  #   # Namespace dirs + every mount-point parent: traversable and writable by all.
+  #   for d in \
+  #     "$ns" "$ns/_configs" "$ns/_scripts" "$ns/Projects" "$ns/Projects/--personal" \
+  #     "$ns/_state" "$ns/_state/opencode" "$ns/_share" "$ns/_share/opencode"; do
+  #     mkdir -p "$d"
+  #     chmod 0777 "$d"
+  #   done
+
+  #   # Mounted configs/scripts: add world read/write so the user can read files
+  #   # regardless of the FUSE root-mapping. Skip mounts that aren't present.
+  #   chmod -R a+rwX "$ns/_configs/Unix_dotfiles" "$ns/_scripts" 2>/dev/null || true
+
+  #   # Docker-created intermediate dirs under the home (ephemeral container layer)
+  #   # must be writable so home-manager can create symlinks into them.
+  #   chmod 0777 /home/tangerineDream-green/Projects \
+  #              /home/tangerineDream-green/Projects/--personal 2>/dev/null || true
+  # '';
+
   # programs.ssh.startAgent = true;
   users.users.tangerineDream-green = {
     isNormalUser = true;

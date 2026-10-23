@@ -397,9 +397,10 @@ at `checks/mcp-logseq/debug.nix`. Both evaluate the real `mcp.nix` module
 is that host's per-host data) and require no switch.
 
 `make mcp-logseq-check` builds the Snowfall `checks.<system>.mcp-logseq`
-derivation, asserting every invariant and the full oracle env (the **17-server
-env**: 9 knowledge-role + the `kbn-escalated` write-everywhere instance +
-7 `logseq-summ-<parent>` instances); it aborts loudly (build fails) on any
+derivation, asserting every invariant and the full oracle env (the **19-server
+env**: 10 knowledge-role incl. the T1 `darkGreen-inner-conv-plat-prov` harness
+provisioner + the `kbn-escalated` write-everywhere instance +
+8 `logseq-summ-<parent>` instances); it aborts loudly (build fails) on any
 mismatch:
 
 ```sh

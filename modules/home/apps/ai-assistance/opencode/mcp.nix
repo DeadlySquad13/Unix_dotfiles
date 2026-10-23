@@ -15,6 +15,80 @@
   mcpoBaseUrl = "http://localhost:8001";
   mcpoUrl = serverName: mcpoBaseUrl + "/" + serverName;
 
+  # T1 inner harness provisioner (ADR 0007 D1): namespace-generated
+  # `<spiceNamespace>-inner-conv-plat-prov`, derived from the outer system's
+  # `common.spiceNamespace` (falls back to the green default when the home-side
+  # config — or the static check — does not carry `common`).
+  common = config.lib.ds-omega.common or {};
+  spiceNamespace = common.spiceNamespace or "darkGreen";
+  systemBaseName = common.systemBaseName or ((config.home or {}).username or "tangerineDream");
+  innerProvisionerAgent = "${spiceNamespace}-inner-conv-plat-prov";
+
+  # Path-scoped no-ask (ADR 0007 D3): the ONE real permission change. The repo
+  # lives outside the workspace, so the per-edit prompts come from the
+  # `external_directory` guard. The sandbox path is DERIVED from the same
+  # `common.{spiceNamespace,systemBaseName}` values the deployment uses (never
+  # a hardcoded green path); the bookmarks symlink is the stable second copy.
+  # Scope: the Unix_dotfiles repo subtree only (parent + child copy) — never
+  # `~`. Carried by BOTH provisioners.
+  repoSubtreeAllow = {
+    "/usr/local/${spiceNamespace}-/${systemBaseName}/_configs/Unix_dotfiles/**" = "allow";
+    "~/.bookmarks/shared-configs/Unix_dotfiles/**" = "allow";
+  };
+
+  # Fail-closed read-only bash allowlist shared by both provisioners. The `*`
+  # catch-all comes first (attrsets are key-sorted) and every allowed command
+  # is spelled out after it, so anything not listed is denied.
+  readOnlyBash = {
+    "*" = "deny";
+    "cat*" = "allow";
+    "command -v*" = "allow";
+    "echo*" = "allow";
+    "fd*" = "allow";
+    "file*" = "allow";
+    "find*" = "allow";
+    "git diff*" = "allow";
+    "git log*" = "allow";
+    "git rev-parse*" = "allow";
+    "git show*" = "allow";
+    "git status*" = "allow";
+    "grep*" = "allow";
+    "head*" = "allow";
+    "ls*" = "allow";
+    "pwd*" = "allow";
+    "rg*" = "allow";
+    "stat*" = "allow";
+    "tail*" = "allow";
+    "tree*" = "allow";
+    "wc*" = "allow";
+  };
+
+  # T1 may additionally run the verification commands in ADR 0007 D7, but not
+  # `switch`, image rebuilds, pushes, or arbitrary network commands.
+  provisionerBash =
+    readOnlyBash
+    // {
+      "home-manager build*" = "allow";
+      "make mcp-logseq-check*" = "allow";
+      "make oc-agents*" = "allow";
+      "make oc-skills*" = "allow";
+      "nix build*" = "allow";
+      "nix eval*" = "allow";
+      "nix flake check*" = "allow";
+      "nix-instantiate*" = "allow";
+      "nixos-rebuild build*" = "allow";
+    };
+
+  # T2 may inspect/evaluate the tree and run the static flake check, but not
+  # builds or deploys (those are T1/human or Verifier work).
+  harnessBash =
+    readOnlyBash
+    // {
+      "nix eval*" = "allow";
+      "nix flake check*" = "allow";
+      "nix-instantiate --parse*" = "allow";
+    };
+
   # The legacy `mcpo` (Model Context Protocol Orchestrator) gateway stays
   # registered for NON-opencode consumers of the shared MCP stack: everything
   # `logseq-mcpo` here is registered but DISABLED in OPENCODE ONLY (see
@@ -102,6 +176,9 @@
     summ-analyst = 18120;
     summ-nix-analyst = 18121;
     summ-reporter = 18122;
+    # T1 inner harness provisioner (ADR 0007 D1) instance + its summarizer.
+    "${innerProvisionerAgent}" = 18124;
+    "summ-${innerProvisionerAgent}" = 18125;
   };
 
   allAgentOwns = lib.mapAttrs (_: profile: profile.own) cfg.logseqAgentProfiles;
@@ -716,6 +793,8 @@ in {
               task = {
                 "*-kbn" = "deny";
                 "${parent}-kbn" = "allow";
+                # T2 is callable by every delegating agent (ADR 0007 D2).
+                "harness-conv-plat-prov" = "allow";
               };
               skill = authoringSkills;
             };
@@ -724,7 +803,10 @@ in {
           # --- Knowledge roles (each granted its own logseq instance) ---
           orchestrator = {
             tools = knowledge // (logseqGrant "orchestrator").tools;
-            permission.skill = authoringSkills;
+            permission = {
+              skill = authoringSkills;
+              task."harness-conv-plat-prov" = "allow";
+            };
           };
           strategist = {
             tools = knowledge // (logseqGrant "strategist").tools;
@@ -764,24 +846,59 @@ in {
             permission = {
               "logseq-kbn-escalated_*" = "ask";
               skill = authoringSkillsSuite;
+              task."harness-conv-plat-prov" = "allow";
             };
           };
 
           # --- Delivery agents: NO Logseq at all (banks only) ---
           plan = {
             tools = delivery;
+            permission.task."harness-conv-plat-prov" = "allow";
           };
           nix-plan = {
             tools = deliveryNix;
+            permission.task."harness-conv-plat-prov" = "allow";
           };
           build = {
             tools = delivery;
+            permission.task."harness-conv-plat-prov" = "allow";
           };
           nix-build = {
             tools = deliveryNix;
+            permission.task."harness-conv-plat-prov" = "allow";
           };
           verifier = {
             tools = delivery;
+            permission.task."harness-conv-plat-prov" = "allow";
+          };
+
+          # --- T1 inner harness provisioner (primary, Logseq-producing) ---
+          # Persona lives in `agents/<name>.md`; here we only grant the
+          # deliveryNix bank + its own `logseq-<name>*` instance, delegate
+          # journaling to its `<name>-kbn` counterpart, and carry the
+          # path-scoped no-ask for the Unix_dotfiles repo subtree.
+          "${innerProvisionerAgent}" = {
+            tools = deliveryNix // (logseqGrant innerProvisionerAgent).tools;
+            permission = {
+              task = {
+                "*-kbn" = "deny";
+                "${innerProvisionerAgent}-kbn" = "allow";
+                "harness-conv-plat-prov" = "allow";
+              };
+              skill = authoringSkills;
+              bash = provisionerBash;
+              external_directory = repoSubtreeAllow;
+            };
+          };
+
+          # --- T2 harness provisioner (subagent, no Logseq, no port) ---
+          # The SINGLE DOOR for harness edits; bash is a fail-closed allowlist.
+          # Persona lives in `agents/harness-conv-plat-prov.md`.
+          "harness-conv-plat-prov" = {
+            permission = {
+              bash = harnessBash;
+              external_directory = repoSubtreeAllow;
+            };
           };
 
           # --- Hidden summarizer subagents (mode: subagent, hidden: true)
@@ -794,6 +911,8 @@ in {
           "analyst-kbn" = mkKbnCounterpart "analyst";
           "nix-analyst-kbn" = mkKbnCounterpart "nix-analyst";
           "reporter-kbn" = mkKbnCounterpart "reporter";
+          # T1 counterpart (ADR 0007 D1).
+          "${innerProvisionerAgent}-kbn" = mkKbnCounterpart innerProvisionerAgent;
         };
       };
       mcp = {

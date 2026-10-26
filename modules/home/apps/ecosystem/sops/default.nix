@@ -23,6 +23,8 @@
     age
   ];
 
+  # Base SOPS settings only. Domain secrets/templates live in `sops-opencode`
+  # and `sops-npmjs`. See docs/adr/0008-sops-secrets-layer.md.
   sops = {
     # This is using an age key that is expected to already be in the filesystem
     age.keyFile = lib.mkDefault "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!
@@ -39,35 +41,6 @@
       };
       yandex_disk_username = {};
       yandex_disk_password = {};
-      codexapi_api_key = {};
-      opencode_go_api_key = {};
-      cheap_vibe_code_api_key = {};
-    };
-    templates."opencode-auth.json" = {
-      content =
-        /*
-        json
-        */
-        ''
-          {
-            "opencode-go": {
-                "type": "api",
-                "key": "${config.sops.placeholder.opencode_go_api_key}"
-            },
-            "cheapvibecode": {
-              "type": "api",
-              "key": "${config.sops.placeholder.cheap_vibe_code_api_key}"
-            }
-          }
-        '';
-        # ''
-        #   {
-        #     "openai": {
-        #       "type": "api",
-        #       "key": "${config.sops.placeholder.codexapi_api_key}"
-        #     }
-        #   }
-        # '';
     };
   };
 }

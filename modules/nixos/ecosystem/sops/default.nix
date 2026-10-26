@@ -11,6 +11,8 @@ lib.${namespace}.mkIfEnabled
   name = "sops";
 }
 {
+  # Base SOPS settings only. Domain secrets/templates live in `sops-opencode`
+  # and `sops-npmjs`. See docs/adr/0008-sops-secrets-layer.md.
   sops = {
     # # REFACTOR: Targeting root of Unix_dotfiles.
     # Read while deploying (on a system we deploy from).

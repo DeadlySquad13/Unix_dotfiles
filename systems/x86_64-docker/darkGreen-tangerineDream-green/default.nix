@@ -21,6 +21,7 @@
 in {
   # REFACTOR: Implement auto-import via Snowfall-lib utils.
   imports = [
+    ./apps/ecosystem/sops-npmjs/default.nix
     ./apps/ecosystem/sops-opencode/default.nix
     ./services/runtime-home-bridge/default.nix
   ];
@@ -151,6 +152,7 @@ in {
         nix = disabled;
         sops = enabled;
         sops-opencode = enabled;
+        sops-npmjs = enabled;
       };
       development = {
         enable = true;

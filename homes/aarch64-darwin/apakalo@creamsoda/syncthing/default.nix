@@ -66,6 +66,15 @@ in
           path = "${homeDirectory}/Projects";
           id = shared.folderIds.rut-Projects;
           devices = ["@salt"];
+          # Project-local raw artifacts (mirrored into the centralized
+          # `.artifact`). Must not be scanned by the bidirectional rut-Projects
+          # folder — carried only by the simplex pair. `.local-artifacts` is
+          # unanchored (project-anchored, any depth); `.artifacts--processed`
+          # is root-anchored.
+          ignorePatterns = [
+            ".local-artifacts"
+            "/.artifacts--processed"
+          ];
         };
         "rut-Projects_artifacts" = {
           path = "${homeDirectory}/Projects/.artifact";
@@ -73,10 +82,40 @@ in
           devices = ["@salt"];
           type = "sendonly";
         };
+        "rut-Projects_artifacts_processed" = {
+          # Return direction @salt -> @creamsoda (processed review results).
+          path = "${homeDirectory}/Projects/.artifacts--processed";
+          id = shared.folderIds.rut-Projects_artifacts_processed;
+          devices = ["@salt"];
+          type = "receiveonly";
+        };
         "rut-Documents" = {
           path = "${homeDirectory}/Documents";
-          id = shared.folderIds.rutDocuments;
+          id = shared.folderIds.rut-Documents;
           devices = ["@salt"];
+          # Project-local raw artifacts (mirrored into the centralized
+          # `.artifacts`). Must not be scanned by the bidirectional rut-Documents
+          # folder — carried only by the simplex pair. `.local-artifacts` is
+          # unanchored (project-anchored, any depth); `.artifacts--processed`
+          # is root-anchored.
+          ignorePatterns = [
+            ".local-artifacts"
+            "/.artifacts--processed"
+          ];
+        };
+        "rut-Documents_artifacts" = {
+          # Raw direction @creamsoda -> @salt.
+          path = "${homeDirectory}/Documents/.artifacts";
+          id = shared.folderIds.rut-Documents_artifacts;
+          devices = ["@salt"];
+          type = "sendonly";
+        };
+        "rut-Documents_artifacts_processed" = {
+          # Return direction @salt -> @creamsoda (processed artifacts).
+          path = "${homeDirectory}/Documents/.artifacts--processed";
+          id = shared.folderIds.rut-Documents_artifacts_processed;
+          devices = ["@salt"];
+          type = "receiveonly";
         };
       };
     };

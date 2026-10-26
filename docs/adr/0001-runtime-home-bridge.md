@@ -47,7 +47,7 @@ and only a symlink to the bridge's source is the accepted steady state. Because
 non-symlink targets; an already-correct symlink is accepted idempotently. In
 particular, a Home Manager `home.file` child under a canonical directory would
 materialise that directory and is therefore not allowed (see
-`sops-opencode.md`).
+`0009-sops-opencode.md`).
 
 ## Consequences
 

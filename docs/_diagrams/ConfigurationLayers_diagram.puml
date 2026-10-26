@@ -21,7 +21,9 @@ programs, services, and home.
 end note
 
 note bottom of modules
+Generic SOPS contract:
+docs/adr/0008-sops-secrets-layer.md
 Concrete SOPS/OpenCode example:
-docs/adr/sops-opencode.md
+docs/adr/0009-sops-opencode.md
 end note
 @enduml

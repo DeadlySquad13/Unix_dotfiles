@@ -25,6 +25,7 @@
 in {
   imports = [
     ./apps/ecosystem/sops-opencode/default.nix
+    ./apps/ecosystem/sops-npmjs/default.nix
   ];
 
   home = {
@@ -102,6 +103,10 @@ in {
       };
       ecosystem = {
         enable = false;
+
+        # Opt in to the system-rendered npm credential path (see
+        # ./apps/ecosystem/sops-npmjs/default.nix).
+        sops-npmjs = enabled;
       };
       general = {
         enable = false;

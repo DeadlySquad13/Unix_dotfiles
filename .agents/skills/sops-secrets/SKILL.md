@@ -7,9 +7,11 @@ description: This skill should be used when adding, wiring, reviewing, or troubl
 
 Use this skill when an application or service needs a secret, an environment
 file, a generated configuration file, or a reusable module interface for one.
-Read [`docs/adr/sops-opencode.md`](../../../docs/adr/sops-opencode.md) as a
-repository example, but apply the pattern to any application or service rather
-than coupling it to a particular client.
+Read [`docs/adr/0008-sops-secrets-layer.md`](../../../docs/adr/0008-sops-secrets-layer.md)
+as the generic repository contract, and
+[`docs/adr/0009-sops-opencode.md`](../../../docs/adr/0009-sops-opencode.md) as
+one concrete application. Apply the pattern to any application or service
+rather than coupling it to a particular client.
 
 ## Preserve layered ownership
 

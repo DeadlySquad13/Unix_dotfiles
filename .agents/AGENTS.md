@@ -30,7 +30,8 @@ appropriate local values to the namespace options at the layer that owns them.
 
 Do not make processed configuration provide the input used to construct it, and
 do not hide host/user-specific wiring in a reusable module. See
-`docs/adr/sops-opencode.md` for the concrete SOPS/OpenCode example and its
+`docs/adr/0008-sops-secrets-layer.md` for the generic SOPS contract and
+`docs/adr/0009-sops-opencode.md` for the concrete SOPS/OpenCode example and its
 implementation lessons.
 
 See .[Configuration Layers diagram](./docs/_diagrams/ConfigurationLayers_diagram.puml).
@@ -93,4 +94,4 @@ modules and checks; it is distinct from `config.lib.<namespace>.*` options.
 - Keep agent guidance concise and generic; put domain-specific rationale and
   examples in the relevant ADR or guide.
 - Use standalone repository-relative paths such as
-  `docs/adr/sops-opencode.md`, and keep references valid after edits.
+  `docs/adr/0008-sops-secrets-layer.md`, and keep references valid after edits.

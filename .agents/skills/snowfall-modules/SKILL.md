@@ -120,8 +120,9 @@ lib.${namespace}.mkIfEnabled
   user-specific values in local glue below `systems/...` or `homes/...`.
 - Consume namespace inputs to form processed program/service configuration.
 - Do not use processed configuration as an input required to construct that
-  configuration. See `docs/adr/sops-opencode.md` for the secret-template
-  example.
+  configuration. See `docs/adr/0008-sops-secrets-layer.md` for the generic
+  secret-template example (OpenCode application:
+  `docs/adr/0009-sops-opencode.md`).
 
 ## Respect evaluation boundaries
 

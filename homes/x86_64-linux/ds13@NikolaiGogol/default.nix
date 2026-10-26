@@ -107,6 +107,7 @@ in {
         telegram-desktop = disabled;
         zathura = disabled;
 
+        musescore = disabled;
         wireguard-tools = disabled;
         unzip = disabled;
         keychain = disabled;

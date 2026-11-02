@@ -26,6 +26,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Symlinks macOS applications into the Nix store so Home Manager can manage
+    # them. Provides both a darwin module and a home-manager module.
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # In order to build system images and artifacts supported by nixos-generators.
     # INFO: It's archived in favor of nixpkgs but new version still doesn't have docker
     # version.

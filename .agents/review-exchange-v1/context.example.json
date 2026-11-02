@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "messageId": "context-001",
+  "reviewId": "review-reservations-42",
+  "createdAt": "2026-10-22T13:00:00+03:00",
+  "producer": "laptop",
+  "kind": "context_snapshot",
+  "payload": {
+    "repository": {
+      "id": "orders-service",
+      "displayName": "Orders service"
+    },
+    "comparison": {
+      "selection": "branch",
+      "baseOid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "headOid": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "baseLabel": "merge-base(origin/main, feature/reservations)",
+      "headLabel": "feature/reservations"
+    },
+    "capturedAt": "2026-10-22T13:00:00+03:00",
+    "mergeRequest": {
+      "instanceUrl": "https://gitlab.example.com",
+      "projectPath": "team/orders",
+      "iid": 42,
+      "webUrl": "https://gitlab.example.com/team/orders/-/merge_requests/42",
+      "title": "Create reservations",
+      "description": {
+        "format": "markdown",
+        "text": "Create one reservation per order, including concurrent requests."
+      },
+      "sourceBranch": "feature/reservations",
+      "targetBranch": "main",
+      "diffRefs": {
+        "baseSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "startSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "headSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    "discussionCapture": {
+      "complete": true
+    },
+    "discussions": [
+      {
+        "id": "discussion-900",
+        "resolved": false,
+        "notes": [
+          {
+            "id": "note-901",
+            "author": "developer",
+            "createdAt": "2026-10-22T12:00:00+03:00",
+            "updatedAt": "2026-10-22T12:00:00+03:00",
+            "system": false,
+            "body": {
+              "format": "markdown",
+              "text": "The endpoint can receive simultaneous requests."
+            }
+          }
+        ]
+      }
+    ],
+    "locations": [],
+    "projectContext": [
+      {
+        "format": "markdown",
+        "text": "Contract: a single order must have at most one reservation."
+      }
+    ]
+  },
+  "artifacts": []
+}

@@ -1,0 +1,64 @@
+@startuml review-flow-forensics
+!theme plain
+title Review-exchange end-to-end — filesystem forensics\n(@creamsoda → @salt → @darkGreen-tangerineDream-green)
+
+' ============ Hop 1 — producer laptop ============
+package "@creamsoda — laptop (macOS) — PRODUCER" as Laptop {
+  actor "@creamsoda" as Producer
+  folder "worktree cwd\n/Users/apakalo/Projects/<project>/" as Worktree
+  folder "project-local\n.local-artifacts\n(SYMLINK → mirror)" as LocalSymlink
+  folder "mirror real dir\n/Users/apakalo/Projects/.artifact/\n<project>/.local-artifacts/" as MirrorReal
+}
+
+' ============ Hop 2 — Syncthing transport ============
+package "Syncthing — rut-Projects_artifacts\n(sendonly → receiveonly)" as Transport {
+  database "sendonly\n/Users/apakalo/Projects/.artifact" as SendOnly
+  database "receiveonly\n/zsalt/shared-/@creamsoda/Projects/.artifact" as RecvOnly
+}
+
+' ============ Hop 3 — @salt filesystem ============
+package "@salt — PC filesystem (shared with sandbox)" as SaltHost {
+  folder "/zsalt/shared-/@creamsoda/Projects/.artifact/\n<project>/.local-artifacts/review/<reviewId>/<messageId>/\n(message.json + assets/)" as SaltLanding
+}
+
+' ============ Hop 4 — consumer sandbox ============
+package "@darkGreen-tangerineDream-green — sandbox — CONSUMER" as Sandbox {
+  actor "@darkGreen-tangerineDream-green" as Consumer
+  folder "synced tree via docker shared volume\n(mount namespace\n/usr/local/darkGreen-/tangerineDream-green/...)" as SandboxTree
+  folder "state dir (volume mount)\n/usr/local/darkGreen-/tangerineDream-green/\n_state/review/" as StateDir
+  database "imported/\n(dedup/supersession index)" as Imported
+  folder "materialized/<messageId>/\n(diff.patch, diffstat.txt, commits.txt)" as Materialized
+}
+
+' ============ flows ============
+Producer --> Worktree : invoke review-exchange capture\nassemble context_snapshot
+Worktree --> LocalSymlink : writes package into\n.local-artifacts/review/<reviewId>/<messageId>/
+LocalSymlink ..> MirrorReal : symlink (absolute target)
+MirrorReal --> SendOnly : Syncthing (sendonly)
+SendOnly --> RecvOnly : rut-Projects_artifacts\ntransport
+RecvOnly --> SaltLanding : message lands here\n(receiveonly)
+SaltLanding --> SandboxTree : shared filesystem\n(docker shared volume)
+SandboxTree --> Consumer : /review\nlocate → validate → materialize
+Consumer --> StateDir : state root\n↔ /zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state/review
+StateDir --> Imported : index entries\n<messageId>.json
+StateDir --> Materialized : per-review diff output
+
+note bottom of Sandbox
+  @creamsoda is not necessarily the only producer. A producer can be any agent —
+  even one running on the same computer as @salt and @darkGreen-tangerineDream-green —
+  as long as it has gitlab/github credentials and git fetch permissions.
+end note
+
+note bottom of SaltLanding
+  Transport-mount facts (plan v3 §1 facts 10–13 / §2.1): the runtime-home-bridge confirms
+  the _state mount (opencodeBase: _state/opencode → .local/state/opencode under namespaceRoot)
+  and @salt's OWN projects (darkGreen-tangerineDream baseForSwitch: shared-/@salt/Projects →
+  Projects, switch-time only). It does NOT expose @creamsoda's synced transport
+  (/zsalt/shared-/@creamsoda/Projects/.artifact — rut-Projects_artifacts, receiveonly): that
+  mount is docker-compose-only (docker-compose.darkGreen-tangerineDream-base.yml,
+  @tangerineDream repo) and external to the bridge. Shown here as
+  /usr/local/darkGreen-/tangerineDream-green/... — VERIFY the exact @creamsoda-transport mount
+  path against that compose file.
+end note
+
+@enduml

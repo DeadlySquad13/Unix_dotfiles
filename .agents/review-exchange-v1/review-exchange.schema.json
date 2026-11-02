@@ -1,0 +1,741 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Review exchange v1",
+  "description": "Immutable JSON messages exchanged by laptop and review PC. No credentials or publication authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "messageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "producer": {
+      "enum": [
+        "laptop",
+        "review_pc"
+      ]
+    },
+    "kind": {
+      "enum": [
+        "context_snapshot",
+        "review_result",
+        "investigation_request"
+      ]
+    },
+    "supersedesMessageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {},
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "messageId",
+    "reviewId",
+    "createdAt",
+    "producer",
+    "kind",
+    "payload",
+    "artifacts"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "context_snapshot"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "producer": {
+            "const": "laptop"
+          },
+          "payload": {
+            "$ref": "#/$defs/context"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "review_result"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "producer": {
+            "const": "review_pc"
+          },
+          "payload": {
+            "$ref": "#/$defs/result"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "investigation_request"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "producer": {
+            "const": "laptop"
+          },
+          "payload": {
+            "$ref": "#/$defs/request"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "oid": {
+      "type": "string",
+      "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)[^\\u0000]+$"
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "enum": [
+            "org",
+            "markdown",
+            "plain"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "format",
+        "text"
+      ]
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "displayName"
+      ]
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "baseOid": {
+          "$ref": "#/$defs/oid"
+        },
+        "headOid": {
+          "$ref": "#/$defs/oid"
+        },
+        "selection": {
+          "enum": [
+            "branch",
+            "range"
+          ]
+        },
+        "baseLabel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headLabel": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "baseOid",
+        "headOid",
+        "selection"
+      ]
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "side": {
+          "enum": [
+            "base",
+            "head"
+          ]
+        },
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "startLine": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "endLine": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "snippet": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "side",
+        "path",
+        "startLine",
+        "endLine"
+      ]
+    },
+    "mr": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "instanceUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "projectPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "iid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "webUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "$ref": "#/$defs/document"
+        },
+        "sourceBranch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetBranch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "diffRefs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "baseSha": {
+              "$ref": "#/$defs/oid"
+            },
+            "startSha": {
+              "$ref": "#/$defs/oid"
+            },
+            "headSha": {
+              "$ref": "#/$defs/oid"
+            }
+          },
+          "required": [
+            "baseSha",
+            "startSha",
+            "headSha"
+          ]
+        }
+      },
+      "required": [
+        "instanceUrl",
+        "projectPath",
+        "iid",
+        "webUrl",
+        "title",
+        "description",
+        "sourceBranch",
+        "targetBranch",
+        "diffRefs"
+      ]
+    },
+    "note": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "createdAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "body": {
+          "$ref": "#/$defs/document"
+        },
+        "system": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "author",
+        "createdAt",
+        "updatedAt",
+        "body",
+        "system"
+      ]
+    },
+    "discussion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolved": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/note"
+          }
+        },
+        "locationId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "resolved",
+        "notes"
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "state": {
+          "enum": [
+            "not_inspected",
+            "partial",
+            "inspected",
+            "excluded"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "path",
+        "state"
+      ]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "mediaType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "mediaType",
+        "sha256",
+        "sizeBytes"
+      ]
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "$ref": "#/$defs/repository"
+        },
+        "comparison": {
+          "$ref": "#/$defs/comparison"
+        },
+        "capturedAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "mergeRequest": {
+          "$ref": "#/$defs/mr"
+        },
+        "discussionCapture": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "complete": {
+              "type": "boolean"
+            },
+            "omissionReason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "complete"
+          ]
+        },
+        "discussions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/discussion"
+          }
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/location"
+          }
+        },
+        "projectContext": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/document"
+          }
+        }
+      },
+      "required": [
+        "repository",
+        "comparison",
+        "capturedAt",
+        "discussionCapture",
+        "discussions",
+        "locations",
+        "projectContext"
+      ]
+    },
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "operator",
+            "ai"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ]
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "enum": [
+            "concern",
+            "question",
+            "improvement"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "unspecified"
+          ]
+        },
+        "origin": {
+          "$ref": "#/$defs/origin"
+        },
+        "reportAnchor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locationIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "artifactIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "classification",
+        "severity",
+        "origin",
+        "reportAnchor",
+        "locationIds",
+        "artifactIds"
+      ]
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "inline"
+            },
+            "locationId": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "locationId"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "reply"
+            },
+            "discussionId": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "discussionId"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "general"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "findingIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "body": {
+          "$ref": "#/$defs/document"
+        }
+      },
+      "required": [
+        "id",
+        "findingIds",
+        "target",
+        "body"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contextMessageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report": {
+          "$ref": "#/$defs/document"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/location"
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          }
+        },
+        "coverage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/coverage"
+          }
+        },
+        "commentProposals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/proposal"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "contextMessageId",
+        "report",
+        "locations",
+        "findings",
+        "coverage",
+        "commentProposals",
+        "limitations"
+      ]
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contextMessageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resultMessageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "findingIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "question": {
+          "$ref": "#/$defs/document"
+        }
+      },
+      "required": [
+        "contextMessageId",
+        "resultMessageId",
+        "findingIds",
+        "question"
+      ]
+    }
+  }
+}

@@ -1,0 +1,50 @@
+@startuml review-process
+!theme plain
+title Review-exchange process — phases and when commands are sent
+
+' Logical actors (host-independent roles per D5)
+participant "Producer agent" as Producer
+participant "Transport\n(Syncthing rut-Projects_artifacts /\nshared filesystem)" as Transport
+participant "Consumer agent\n(runs /review)" as Consumer
+participant "review-agent" as ReviewAgent
+
+== Phase 0 — capture (EXPLICIT) ==
+Producer -> Producer : invoke review-exchange capture\nassemble context_snapshot
+Producer -> Transport : write package\n.local-artifacts/review/<reviewId>/<messageId>/
+note right of Producer
+  artifacts first, message.json last
+  (JSON presence = readiness signal)
+end note
+
+== Phase 1 — transfer (AUTOMATIC) ==
+Transport -> Transport : moves package
+note right of Transport
+  remote: Syncthing rut-Projects_artifacts
+  local:  same filesystem (no sync)
+end note
+
+== Phase 2 — open / investigate (EXPLICIT) ==
+Consumer -> Consumer : /review   (explicit command)
+Consumer -> Transport : locate\nnewest complete context_snapshot
+Consumer -> Consumer : validate\nschema / integrity / dedup /\nsupersession / containment / identity
+Consumer -> Consumer : materialize\nverify OIDs (cat-file -e) +\nwrite diff into materialized/<messageId>/
+
+== Phase 3 — review (runs after materialize) ==
+Consumer -> ReviewAgent : hand off materialized diff\n+ validated context
+ReviewAgent -> ReviewAgent : produce findings
+
+== Phase 4 — return (EXPLICIT, later — OUT OF SCOPE) ==
+note over Consumer, ReviewAgent
+  review_result / investigation_request
+  via Projects/.artifacts--processed/review
+  (folder RESERVED only; producers/consumers = later work)
+end note
+
+legend right
+  When commands are sent:
+  | capture (Phase 0)       | explicit  |
+  | transfer (Phase 1)      | automatic |
+  | open/investigate (Ph 2) | explicit  |
+  | return (Phase 4)        | explicit (later) |
+endlegend
+@enduml

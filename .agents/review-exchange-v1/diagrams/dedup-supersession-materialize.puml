@@ -1,0 +1,47 @@
+@startuml dedup-supersession-materialize
+!theme plain
+title Dedup/supersession + materialize — data flow (logical parts, not functions)
+
+component "Producer" as Producer
+folder "Transport\n.local-artifacts/review/" as Transport
+component "Consumer validate" as Validate
+database "Dedup/supersession index\nimported/" as Index
+component "Consumer materialize" as Materialize
+folder "materialized output\nmaterialized/<messageId>/" as Output
+component "git checkout\n(cwd)" as Git
+actor "review-agent" as ReviewAgent
+
+' --- Publish side ---
+Producer --> Transport : publish A1 (context_snapshot)
+Producer --> Transport : publish A2\n(supersedesMessageId = A1)
+
+' --- Validate side ---
+Transport --> Validate : message.json\n(A1, then A2)
+
+Validate --> Index : write <messageId>.json (sha256)\nimported/A1.json\nimported/A2.json
+Validate --> Index : A2: follow supersession chain\n(missing parent / cycle /\nconcurrent successor)
+
+' --- Materialize side ---
+Validate --> Materialize : validated context\n(baseOid, headOid, ...)
+Materialize --> Git : run git in cwd\nverify OIDs (cat-file -e)\ngit diff base..head
+Git --> Materialize : base..head diff
+
+Materialize --> Output : diff.patch\ndiffstat.txt\ncommits.txt
+
+' --- Review side ---
+Output --> ReviewAgent : read materialized diff\n+ validated context
+ReviewAgent --> ReviewAgent : produce findings
+
+note bottom of Index
+  Index writes are ATOMIC (temp + rename)
+  so supersession_check's glob never
+  reads a half-written file.
+end note
+
+note bottom of Output
+  Output is PER-REVIEW:
+  materialized/<messageId>/ (not a
+  single fixed dir) — concurrent agents
+  on one home do not collide.
+end note
+@enduml

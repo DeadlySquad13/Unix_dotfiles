@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "messageId": "result-001",
+  "reviewId": "review-reservations-42",
+  "createdAt": "2026-10-22T13:30:00+03:00",
+  "producer": "review_pc",
+  "kind": "review_result",
+  "payload": {
+    "contextMessageId": "context-001",
+    "report": {
+      "format": "org",
+      "text": "#+TITLE: Reservation review\n* TODO Investigate reservation concurrency\n:PROPERTIES:\n:CUSTOM_ID: finding-017\n:END:\nTwo overlapping requests may both pass [[review:review-reservations-42/loc-check][the existence check]].\nThe following insert appears to run without serialization.\n\n** Evidence\nThe observed path checks existence before inserting. No reproduction has been run.\n\n** Uncertainty\nAn upstream queue or a database constraint may prevent duplicate reservations.\nInspect those before confirming the concern.\n\n** Operator conclusion\nPending.\n"
+    },
+    "locations": [
+      {
+        "id": "loc-check",
+        "side": "head",
+        "path": "src/reservations/service.ts",
+        "startLine": 81,
+        "endLine": 86,
+        "snippet": "const existing = await repository.findByOrderId(orderId);"
+      }
+    ],
+    "findings": [
+      {
+        "id": "finding-017",
+        "title": "Investigate concurrent reservation creation",
+        "classification": "concern",
+        "severity": "medium",
+        "origin": {
+          "kind": "ai",
+          "name": "reviewer",
+          "model": "configured-review-model",
+          "sessionId": "agent-session-123"
+        },
+        "reportAnchor": "finding-017",
+        "locationIds": [
+          "loc-check"
+        ],
+        "artifactIds": []
+      }
+    ],
+    "coverage": [
+      {
+        "path": "src/reservations/service.ts",
+        "state": "partial",
+        "reason": "Inspected check/insert path; schema and upstream callers remain uninspected."
+      }
+    ],
+    "commentProposals": [
+      {
+        "id": "proposal-001",
+        "findingIds": [
+          "finding-017"
+        ],
+        "target": {
+          "kind": "inline",
+          "locationId": "loc-check"
+        },
+        "body": {
+          "format": "markdown",
+          "text": "Can these requests overlap? Both appear able to pass this check before insertion. Is uniqueness enforced elsewhere?"
+        }
+      }
+    ],
+    "limitations": [
+      "Static inspection only; this is a proposed concern, not a confirmed defect."
+    ]
+  },
+  "artifacts": []
+}

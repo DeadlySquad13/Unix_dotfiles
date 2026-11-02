@@ -7,7 +7,7 @@
 }: let
   # Integration check for the Home Manager side of the SOPS npm domain split
   # and the nodejs `~/.npmrc` consumer. It evaluates the REAL home `sops`,
-  # `sops-npmjs`, and nodejs modules through Home Manager, then asserts
+  # `sops.npmjs`, and nodejs modules through Home Manager, then asserts
   # ownership, enable gating, template correctness, permissions, and the
   # `home.file.".npmrc"` precedence/fallback contract.
   #
@@ -16,8 +16,8 @@
 
   repo = ../..;
   baseHomeSops = repo + "/modules/home/apps/ecosystem/sops/default.nix";
-  homeSopsNpmjs = repo + "/modules/home/apps/ecosystem/sops-npmjs/default.nix";
-  homeSopsOpencode = repo + "/modules/home/apps/ecosystem/sops-opencode/default.nix";
+  homeSopsNpmjs = repo + "/modules/home/apps/ecosystem/sops/npmjs/default.nix";
+  homeSopsOpencode = repo + "/modules/home/apps/ecosystem/sops/opencode/default.nix";
   nodejs = repo + "/modules/home/apps/development/nodejs/default.nix";
 
   modulesLib = import (repo + "/lib/modules") {
@@ -57,16 +57,18 @@
             home.homeDirectory = "/home/alice";
             home.stateVersion = "24.11";
             lib.${namespace}.modules = {
-              ecosystem.sops.enable = true;
-              ecosystem.sops-npmjs.enable = npmEnabled;
-              ecosystem.sops-opencode.enable = opencodeEnabled;
+              ecosystem.sops = {
+                enable = true;
+                npmjs.enable = npmEnabled;
+                opencode.enable = opencodeEnabled;
+              };
               development.nodejs.enable = nodeEnabled;
             };
           }
         ]
         ++ lib.optionals (includeNpmModule && systemRuntimePath != null) [
           {
-            ${namespace}.ecosystem.sops-npmjs.systemRuntimePath = systemRuntimePath;
+            ${namespace}.ecosystem.sops.npmjs.systemRuntimePath = systemRuntimePath;
           }
         ]
         ++ lib.optionals (explicitNpmrcSource != null) [
@@ -90,7 +92,7 @@
         ];
     }).config;
 
-  # Base home SOPS alone (sops-npmjs module absent from the graph).
+  # Base home SOPS alone (sops.npmjs module absent from the graph).
   baseOnly = mkHome {
     includeNpmModule = false;
     npmEnabled = false;
@@ -162,20 +164,20 @@ in
   assert check "base-sops/does-not-enable-npm"
   (!(hasNpmSecret baseOnly) && !(hasNpmTemplate baseOnly))
   "enabling base home sops alone must not enable npm artifacts";
-  assert check "sops-opencode/no-npm-secret" (!(hasNpmSecret opencodeNoNpm))
-  "home sops-opencode must not declare npmjs_auth_token";
-  assert check "sops-opencode/no-npm-template" (!(hasNpmTemplate opencodeNoNpm))
-  "home sops-opencode must not declare the npmrc template";
-  assert check "sops-opencode/owns-opencode-template"
+  assert check "sops.opencode/no-npm-secret" (!(hasNpmSecret opencodeNoNpm))
+  "home sops.opencode must not declare npmjs_auth_token";
+  assert check "sops.opencode/no-npm-template" (!(hasNpmTemplate opencodeNoNpm))
+  "home sops.opencode must not declare the npmrc template";
+  assert check "sops.opencode/owns-opencode-template"
   (opencodeNoNpm.sops.templates ? "opencode-auth.json")
-  "home sops-opencode must still own its OpenCode template";
-  assert check "sops-npmjs/disabled-absent"
+  "home sops.opencode must still own its OpenCode template";
+  assert check "sops.npmjs/disabled-absent"
   (!(hasNpmSecret npmOff) && !(hasNpmTemplate npmOff))
-  "home sops-npmjs with enable = false must not declare any npm artifact";
-  assert check "sops-npmjs/enabled-secret" (hasNpmSecret npmOn)
-  "home sops-npmjs with enable = true must declare npmjs_auth_token";
-  assert check "sops-npmjs/enabled-template" (hasNpmTemplate npmOn)
-  "home sops-npmjs with enable = true must declare the npmrc template";
+  "home sops.npmjs with enable = false must not declare any npm artifact";
+  assert check "sops.npmjs/enabled-secret" (hasNpmSecret npmOn)
+  "home sops.npmjs with enable = true must declare npmjs_auth_token";
+  assert check "sops.npmjs/enabled-template" (hasNpmTemplate npmOn)
+  "home sops.npmjs with enable = true must declare the npmrc template";
   assert check "template/registry-line"
   (lib.hasInfix "registry=https://registry.yarnpkg.com" npmContent)
   "home npmrc template must set the Yarn registry";
@@ -201,7 +203,7 @@ in
   "home npmrc template must not be world-readable";
   assert check "source/no-readfile-home-npmjs"
   (!(lib.hasInfix "builtins.readFile" homeSopsNpmjsSource))
-  "home sops-npmjs must not read the secret at build time";
+  "home sops.npmjs must not read the secret at build time";
   assert check "source/no-readfile-nodejs"
   (!(lib.hasInfix "builtins.readFile" nodejsSource))
   "nodejs consumer must not read the secret at build time";
@@ -238,12 +240,12 @@ in
   assert check "home-file/system-path-no-home-artifacts"
   (!(hasNpmSecret npmSystem) && !(hasNpmTemplate npmSystem))
   "systemRuntimePath must avoid declaring home SOPS npm artifacts";
-  assert check "sops-npmjs/system-path-wiring"
+  assert check "sops.npmjs/system-path-wiring"
   (npmSystem.${namespace}.development.nodejs.npmrcSource == "/run/secrets/rendered/npmrc")
   "systemRuntimePath must wire nodejs.npmrcSource to the system runtime path";
-  assert check "sops-npmjs/home-template-wiring"
+  assert check "sops.npmjs/home-template-wiring"
   (npmOn.${namespace}.development.nodejs.npmrcSource == npmOn.sops.templates."npmrc".path)
-  "the home sops-npmjs module must wire nodejs.npmrcSource to its template";
+  "the home sops.npmjs module must wire nodejs.npmrcSource to its template";
   pkgs.runCommand "sops-npmjs-home" {} ''
-    echo "home sops-npmjs ownership/gating/template/npmrc checks OK" > "$out"
+    echo "home sops.npmjs ownership/gating/template/npmrc checks OK" > "$out"
   ''

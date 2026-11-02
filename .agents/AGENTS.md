@@ -34,7 +34,7 @@ do not hide host/user-specific wiring in a reusable module. See
 `docs/adr/0009-sops-opencode.md` for the concrete SOPS/OpenCode example and its
 implementation lessons.
 
-See .[Configuration Layers diagram](./docs/_diagrams/ConfigurationLayers_diagram.puml).
+See [Configuration Layers diagram](../docs/_diagrams/ConfigurationLayers_diagram.puml).
 
 ## Secrets and safety
 
@@ -77,6 +77,9 @@ share options or `config`:
   a child module with an explicit `enable` overrides a disabled category
   (e.g. `cli-utility.enable = false` but `bash.enable = true` still enables
   bash). See `checks/mkIfEnabled` for the unit tests.
+- Nested categories (`category = "development.nix"` or `"ecosystem.sops"`) map
+  dots to directories and make the owning category the default gate for its
+  children. See `docs/guides/nested-module-categories.md`.
 
 ## Snowfall module-arg `lib` is flat-merged
 Each `lib/<name>/default.nix` exports an attrset, and Snowfall merges every

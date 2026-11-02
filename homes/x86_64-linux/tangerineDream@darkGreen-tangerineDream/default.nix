@@ -112,8 +112,10 @@ in {
         enable = false;
 
         # Opt in to the system-rendered npm credential path (see
-        # ./apps/ecosystem/sops-npmjs/default.nix).
-        sops-npmjs = enabled;
+        # ./apps/ecosystem/sops-npmjs/default.nix). The npm child lives under
+        # the nested `ecosystem.sops` category; the base module stays off in
+        # this home because it consumes system-rendered SOPS.
+        sops.npmjs = enabled;
       };
       general = {
         enable = false;

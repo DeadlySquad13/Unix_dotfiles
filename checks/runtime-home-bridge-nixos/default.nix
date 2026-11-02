@@ -26,6 +26,7 @@
     specialArgs = { lib = libWithNamespace; };
     modules = [
       ../../modules/nixos/services/runtime-home-bridge
+      { system.stateVersion = "24.11"; }
       {
         services.runtime-home-bridge = {
           user = "bridge-test";

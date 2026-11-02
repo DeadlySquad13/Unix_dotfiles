@@ -11,21 +11,28 @@
   out-of-store symlinks, cross-layer consumption, and Snowfall module
   boundaries.
 
-This ADR records the generic layered-SOPS contract and the `sops-npmjs` domain
-module. It is the home for base SOPS ownership and for the npm/`~/.npmrc`
-domain. The OpenCode-specific application is
-[ADR 0009](0009-sops-opencode.md). Apply this ADR to any application or service
-that needs a secret, an environment file, or a generated configuration file; do
-not couple the generic pattern to a particular client.
+This ADR records the generic layered-SOPS contract and the npm domain. It is
+the home for base SOPS ownership and for the npm/`~/.npmrc` domain. The
+OpenCode-specific application is [ADR 0009](0009-sops-opencode.md). Apply this
+ADR to any application or service that needs a secret, an environment file, or
+a generated configuration file; do not couple the generic pattern to a
+particular client.
 
 The accepted ownership split is:
 
 - base `sops` = base settings only (sops-nix import, vault, age key file);
-- `sops-opencode` = OpenCode-specific secrets and templates;
-- `sops-npmjs` = npm secrets and the rendered `npmrc` template.
+- OpenCode domain = OpenCode-specific secrets and templates;
+- npm domain = npm secrets and the rendered `npmrc` template.
+
+The domain names depend on the module kind. Home Manager nests both domains
+under the base module's category: `ecosystem.sops.opencode` and
+`ecosystem.sops.npmjs`, in `modules/home/apps/ecosystem/sops/<name>/`. NixOS
+keeps the separate flat modules `sops-opencode` and `sops-npmjs` in
+`modules/nixos/ecosystem/<name>/`; that tree was intentionally not moved.
 
 Enabling a domain module enables only that domain's secrets. Enabling base
-`sops` must not declare npm or OpenCode secrets.
+`sops` must not declare npm or OpenCode secrets. The generic nested-category
+pattern is described in `docs/guides/nested-module-categories.md`.
 
 ## TDLR
 
@@ -46,12 +53,19 @@ Generic layered structure:
        or template `owner`/`group`/`mode` and runtime paths in the system tree.
 3. Home Manager
     1. Define base Home Manager SOPS behavior:
-       `modules/home/apps/ecosystem/sops/default.nix`.
-    2. Declare npm secrets and templates in
-       `modules/home/apps/ecosystem/sops-npmjs/default.nix`.
+       `modules/home/apps/ecosystem/sops/default.nix` (`category = "ecosystem";`
+       `name = "sops";`).
+    2. Declare npm secrets and templates in the nested child
+       `modules/home/apps/ecosystem/sops/npmjs/default.nix`
+       (`category = "ecosystem.sops"; name = "npmjs";`).
     3. Consume a nullable runtime path from the program module. The narrower
        level has priority; an explicit per-host override wins over an implicit
        same-layer template.
+
+The base module's `ecosystem.sops.enable` is also the category gate for the
+child domains. A home that sets `sops = disabled;` disables base SOPS and both
+children when they have no explicit `enable`; a child can still opt back in
+with its own `enable = true`.
 
 ## Context
 
@@ -88,20 +102,25 @@ overlay owns deployment facts.
 
 `modules/nixos/ecosystem/sops-opencode/default.nix` is not an npm owner.
 npm credentials such as `npmjs_auth_token` and the `npmrc` template belong to
-the `sops-npmjs` domain module at the same layer, because OpenCode neither
-declares nor consumes them. The base `sops` module must not declare either:
-it owns only base settings.
+the npm domain module at the same layer, because OpenCode neither declares nor
+consumes them. The base `sops` module must not declare either: it owns only
+base settings.
 
 Domain modules are intentionally separate:
 
-| Module | Owns |
-| --- | --- |
-| `modules/{nixos,home}/.../sops` | base settings only |
-| `modules/{nixos,home}/.../sops-opencode` | OpenCode secrets/templates |
-| `modules/{nixos,home}/.../sops-npmjs` | npm secret and `npmrc` template |
+| Kind | Module | Owns |
+| --- | --- | --- |
+| NixOS | `modules/nixos/ecosystem/sops` | base settings only |
+| NixOS | `modules/nixos/ecosystem/sops-opencode` | OpenCode secrets/templates |
+| NixOS | `modules/nixos/ecosystem/sops-npmjs` | npm secret and `npmrc` template |
+| Home Manager | `modules/home/apps/ecosystem/sops` | base settings only |
+| Home Manager | `modules/home/apps/ecosystem/sops/opencode` | OpenCode secrets/templates |
+| Home Manager | `modules/home/apps/ecosystem/sops/npmjs` | npm secret and `npmrc` template |
 
 A host enables the domain module it needs. Enabling base `sops` alone creates
-no domain secrets; enabling `sops-npmjs` enables only npm.
+no domain secrets. In Home Manager the nested children inherit the
+`ecosystem.sops.enable` gate; in NixOS enabling `sops-npmjs` enables only npm
+and enabling `sops-opencode` enables only OpenCode.
 
 ### Secrets, templates, and placeholders
 
@@ -207,9 +226,10 @@ npmrcSource =
   else null;
 ```
 
-The `sops-npmjs` home module sets `nodejs.npmrcSource` explicitly to either
-`config.sops.templates."npmrc".path` (home owns SOPS) or the system-rendered
-`systemRuntimePath` (container home). The explicit value therefore wins over
+The `ecosystem.sops.npmjs` home module sets `nodejs.npmrcSource` explicitly to
+either `config.sops.templates."npmrc".path` (home owns SOPS) or the
+system-rendered `systemRuntimePath` (container home). The explicit value
+therefore wins over
 the implicit `homeNpmrcTemplate` lookup. Do not auto-wire a token into every
 Node-enabled home: the domain module or its host glue is the opt-in.
 
@@ -232,13 +252,46 @@ Node-enabled home: the domain module or its host glue is the opt-in.
   external value used to build it.
 - Prefer narrow per-host overrides over broad duplication.
 
+### Nested category and enablement inheritance
+
+Home Manager expresses the base/domain split with a dotted category, so the
+directory tree and the enable gate match:
+
+```text
+modules/home/apps/ecosystem/sops/default.nix            category="ecosystem",      name="sops"
+modules/home/apps/ecosystem/sops/opencode/default.nix   category="ecosystem.sops", name="opencode"
+modules/home/apps/ecosystem/sops/npmjs/default.nix      category="ecosystem.sops", name="npmjs"
+```
+
+`mkIfEnabled` splits the category on `.` and traverses the host's
+`lib.<namespace>.modules` tree. The owning category gates its children by
+default; an explicit child `enable` overrides the gate. For SOPS this means:
+
+- `lib.ds-omega.modules.ecosystem.sops.enable = false` disables both child
+  domains when they have no explicit `enable`;
+- `lib.ds-omega.modules.ecosystem.sops.opencode.enable = true` opts one child
+  back in;
+- an explicit child `enable = false` keeps it off even when the category is on.
+
+The base module's `ecosystem` / `sops` pair is what makes `ecosystem.sops`
+both its own enable switch and the parent node of the two children. Only that
+owning category node is consulted; a switch higher up, such as
+`ecosystem.enable`, does not override a deeper `ecosystem.sops` setting (see
+the TODO in `lib/modules/default.nix`).
+
+Deployment facts follow the same nesting. The Home Manager npm option is
+`ds-omega.ecosystem.sops.npmjs.systemRuntimePath`. The NixOS tree did not move,
+so its module and option remain `sops-npmjs` and
+`ds-omega.ecosystem.sops-npmjs.runtimePath`.
+
 ### Generic consumer example: npm and `~/.npmrc`
 
 npm credentials are a Node/npm concern, not an OpenCode concern.
-`npmjs_auth_token` and the `npmrc` template are owned by the `sops-npmjs`
-domain module at the layer that materialises them. The system-level template
-exists because container homes do not evaluate Home Manager SOPS and instead
-point `~/.npmrc` at the system-rendered runtime file.
+`npmjs_auth_token` and the `npmrc` template are owned by the npm domain module
+at the layer that materialises them (`ecosystem.sops.npmjs` in Home Manager,
+`sops-npmjs` in NixOS). The system-level template exists because container
+homes do not evaluate Home Manager SOPS and instead point `~/.npmrc` at the
+system-rendered runtime file.
 
 Implemented system declaration
 (`modules/nixos/ecosystem/sops-npmjs/default.nix`, options simplified):
@@ -263,12 +316,13 @@ sops.templates."npmrc" = {
 ```
 
 Home Manager's sops-nix template module has no `owner`/`group` options, so the
-home `sops-npmjs` module sets `mode = "0400"` and relies on activation running
-as the home user.
+home `ecosystem.sops.npmjs` module sets `mode = "0400"` and relies on
+activation running as the home user.
 
-The system-to-home mapping is a literal runtime path: system glue sets
-`ds-omega.ecosystem.sops-npmjs.runtimePath`, and the darkGreen home glue sets
-`ds-omega.ecosystem.sops-npmjs.systemRuntimePath` to the same
+The system-to-home mapping is a literal runtime path: system glue sets the
+NixOS option `ds-omega.ecosystem.sops-npmjs.runtimePath`, and the darkGreen
+home glue sets the nested Home Manager option
+`ds-omega.ecosystem.sops.npmjs.systemRuntimePath` to the same
 `/run/secrets/rendered/npmrc`, because Home Manager is a separate module graph.
 
 The consuming Home Manager module keeps the runtime path configurable and
@@ -293,15 +347,17 @@ ordered multi-registry fallback.
 
 The former `npmjs_auth_token` and `npmrc` declarations in
 `modules/nixos/ecosystem/sops-opencode/default.nix` were a boundary violation.
-OpenCode does not consume them. They now live in the `sops-npmjs` domain
-module; the base `sops` modules do not declare either.
+OpenCode does not consume them. They now live in the npm domain module
+(`sops-npmjs` in NixOS, `ecosystem.sops.npmjs` in Home Manager); the base
+`sops` modules do not declare either.
 
 ### Dependency flow
 
 The generic flow is the same at each layer:
 
 ```text
-domain SOPS module (`sops-npmjs`, `sops-opencode`) declares
+domain SOPS module (NixOS `sops-npmjs` / `sops-opencode`; Home Manager
+`ecosystem.sops.npmjs` / `ecosystem.sops.opencode`) declares
 sops.secrets / sops.templates
   -> config.sops.templates."<name>".path or config.sops.secrets."<name>".path
   -> per-home or per-system namespace glue, or the consumer's nullable option
@@ -314,16 +370,21 @@ program/service configuration are output. The latter must never provide the
 former.
 
 The OpenCode-specific instance of this flow is recorded in
-[ADR 0009](0009-sops-opencode.md); the npm instance is `sops-npmjs`.
+[ADR 0009](0009-sops-opencode.md); the npm instance is the npm domain module
+(`sops-npmjs` in NixOS, `ecosystem.sops.npmjs` in Home Manager).
 
 ## Implementation rules
 
 - Keep base SOPS modules limited to import, vault, key-file, and common policy;
   do not hide consumer secrets in them when the concern has its own owner.
 - Put domain secrets in their domain module: base `sops` = base settings,
-  `sops-opencode` = OpenCode, `sops-npmjs` = npm.
+  OpenCode domain = OpenCode, npm domain = npm. In Home Manager the domains
+  are `ecosystem.sops.opencode` / `ecosystem.sops.npmjs`; in NixOS they are
+  `sops-opencode` / `sops-npmjs`.
 - Enabling a domain module enables only that domain's secrets; enabling base
-  `sops` must not declare npm or OpenCode secrets.
+  `sops` must not declare npm or OpenCode secrets. A disabled
+  `ecosystem.sops` gate disables Home Manager children that have no explicit
+  `enable`.
 - Keep the SOPS definition enabled at the same layer as the glue that reads its
   template or secret path.
 - Keep per-home values in the home tree and per-system values in the system
@@ -335,8 +396,10 @@ The OpenCode-specific instance of this flow is recorded in
 - Set least-privilege permissions and verify them as the runtime user.
 - Let an explicit narrow runtime-path override win over an implicit same-layer
   template.
-- Do not declare a credential in the wrong module: do not put npm in
-  `sops-opencode` or base `sops`, and do not put OpenCode keys in `sops-npmjs`.
+- Do not declare a credential in the wrong module: do not put npm in the
+  OpenCode module or base `sops`, and do not put OpenCode keys in the npm
+  module. In Home Manager that means `ecosystem.sops.opencode` vs
+  `ecosystem.sops.npmjs`; in NixOS, `sops-opencode` vs `sops-npmjs`.
 
 ## Troubleshooting
 
@@ -381,26 +444,35 @@ build does not contain secret text before publishing or committing it.
 
 ## Migration / follow-up
 
-Status: implemented on 2026-10-26. The migration steps were:
+Status: implemented on 2026-10-26; nested-category move implemented on
+2026-11-02. The migration steps were:
 
 1. Move `npmjs_auth_token` and the system `npmrc` template out of
    `modules/nixos/ecosystem/sops-opencode/default.nix` into the new system
    `sops-npmjs` domain module
    (`modules/nixos/ecosystem/sops-npmjs/default.nix`).
 2. Move `npmjs_auth_token` and `npmrc` out of the base home SOPS module into
-   `modules/home/apps/ecosystem/sops-npmjs/default.nix`; keep OpenCode-specific
-   keys and `opencode-auth.json` in the home `sops-opencode` module.
+   `modules/home/apps/ecosystem/sops/npmjs/default.nix`; keep OpenCode-specific
+   keys and `opencode-auth.json` in the home OpenCode module.
 3. Make explicit `npmrcSource` win over the implicit home template in
    `modules/home/apps/development/nodejs/default.nix`.
 4. Set least-privilege permissions: system secret/template
    `owner`/`group`/`mode` are options; the home template uses `mode = "0400"`
    because Home Manager's sops-nix template module has no owner/group options.
 5. Rewrite comments that called npm the "system-level counterpart" of the
-   OpenCode module, and remove npm from `sops-opencode`.
+   OpenCode module, and remove npm from the OpenCode module.
+6. Move the Home Manager domains under the base category:
+   `modules/home/apps/ecosystem/sops/<name>/` with
+   `category = "ecosystem.sops"`, `name = "opencode" | "npmjs"`. Rename the
+   home option `ds-omega.ecosystem.sops-npmjs.systemRuntimePath` to
+   `ds-omega.ecosystem.sops.npmjs.systemRuntimePath`. The NixOS modules stayed
+   flat.
 
 Host glue now owns deployment facts: system glue under
 `systems/.../apps/ecosystem/sops-npmjs/` sets `username`/`group`/`mode`/
-`runtimePath`; darkGreen home glue sets `systemRuntimePath` to the same literal
+`runtimePath`; darkGreen home glue (still at
+`homes/.../apps/ecosystem/sops-npmjs/`) sets the nested
+`ds-omega.ecosystem.sops.npmjs.systemRuntimePath` to the same literal
 `/run/secrets/rendered/npmrc`. The base `sops` modules declare no npm artifacts.
 
 ## Synchronization
@@ -409,4 +481,6 @@ Update this ADR when changing SOPS layering, secret/template ownership, the
 runtime-path contract, permission policy, or cross-layer consumption. Keep
 `AGENTS.md` limited to the generic rules and link here. OpenCode-specific
 changes belong in [ADR 0009](0009-sops-opencode.md); npm changes belong to the
-`sops-npmjs` domain module described here.
+npm domain module described here (`ecosystem.sops.npmjs` in Home Manager,
+`sops-npmjs` in NixOS). Nested-category mechanics are in
+`docs/guides/nested-module-categories.md`.

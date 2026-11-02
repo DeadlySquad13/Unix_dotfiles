@@ -25,13 +25,14 @@ caveats from this document were carried into one of those two ADRs.
 | `## Implementation rules` | ADR 0008 (generic) and ADR 0009 (OpenCode) |
 | `## Troubleshooting` | ADR 0008 (generic); ADR 0009 (OpenCode specifics) |
 | `## Synchronization` | ADR 0008 and ADR 0009 |
-| npm credential ownership (`npmjs_auth_token`, `npmrc`) | ADR 0008 (`sops-npmjs` domain module) |
+| npm credential ownership (`npmjs_auth_token`, `npmrc`) | ADR 0008 (npm domain module) |
 
-The later `sops-npmjs` domain split (still 2026-10-26) moved npm credentials
-out of base `sops` and `sops-opencode` into
-`modules/{nixos,home}/.../sops-npmjs`. That domain split is documented in
-ADR 0008; it is not an OpenCode concern and is intentionally absent from
-ADR 0009.
+The later npm domain split (still 2026-10-26) moved npm credentials out of
+base `sops` and the OpenCode module. In NixOS the npm domain is `sops-npmjs`;
+in Home Manager it is the nested `ecosystem.sops.npmjs`. That split is
+documented in ADR 0008; it is not an OpenCode concern and is intentionally
+absent from ADR 0009.
 
-Use ADR 0008 for any SOPS consumer and for the `sops-npmjs` domain; use ADR
-0009 for `sops-opencode`.
+Use ADR 0008 for any SOPS consumer and for the npm domain; use ADR 0009 for
+the OpenCode domain (`sops-opencode` in NixOS, `ecosystem.sops.opencode` in
+Home Manager).

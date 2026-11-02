@@ -7,8 +7,8 @@
 lib.${namespace}.mkIfEnabled
 {
   inherit config;
-  category = "ecosystem";
-  name = "sops-opencode";
+  category = "ecosystem.sops";
+  name = "opencode";
 }
 {
   ${namespace}.ai-assistance.opencode.mcp = {

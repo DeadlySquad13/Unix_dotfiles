@@ -33,7 +33,7 @@
       specialArgs = {
         lib = libWithNamespace;
       };
-      modules = [ module extraModule ];
+      modules = [ module extraModule { system.stateVersion = "24.11"; } ];
     };
 
   validSystem = mkSystem {

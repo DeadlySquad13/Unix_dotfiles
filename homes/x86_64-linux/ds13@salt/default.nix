@@ -99,6 +99,11 @@ in {
         enable = true;
 
         ansible = disabled; # Pipx issues as ansible has it's own python interpreter.
+
+        # Nested SOPS domain: base SOPS is on via `ecosystem.enable`, and the
+        # OpenCode child opts in explicitly. See
+        # apps/ecosystem/sops-opencode/default.nix.
+        sops.opencode = enabled;
       };
       general = {
         enable = true;

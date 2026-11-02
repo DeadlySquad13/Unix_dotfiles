@@ -86,9 +86,9 @@
       inherit namespace;
       lib = libForGlue;
       config = {
-        lib.${namespace}.modules.ecosystem.sops-npmjs.enable = true;
+        lib.${namespace}.modules.ecosystem.sops.npmjs.enable = true;
       };
-    }).config.${namespace}.ecosystem.sops-npmjs;
+    }).config.${namespace}.ecosystem.sops.npmjs;
 
   darkGreen = loadSystemGlue systemGlue "tangerineDream";
   darkGreenGreen = loadSystemGlue systemGlueGreen "tangerineDream-green";
@@ -104,7 +104,8 @@
   hasImport = host: suffix:
     lib.any (p: lib.hasSuffix suffix (toString p)) host.imports;
 
-  enabled = host: host.lib.${namespace}.modules.ecosystem.sops-npmjs.enable or false;
+  systemEnabled = host: host.lib.${namespace}.modules.ecosystem.sops-npmjs.enable or false;
+  homeEnabled = host: host.lib.${namespace}.modules.ecosystem.sops.npmjs.enable or false;
 
   listNix = dir:
     lib.filter
@@ -154,22 +155,22 @@ in
   assert check "host/system-darkGreen/import"
   (hasImport darkGreenHost expectedNpmjsImport)
   "darkGreen system host must import the sops-npmjs glue";
-  assert check "host/system-darkGreen/enable" (enabled darkGreenHost)
+  assert check "host/system-darkGreen/enable" (systemEnabled darkGreenHost)
   "darkGreen system host must enable sops-npmjs";
   assert check "host/system-green/import"
   (hasImport darkGreenGreenHost expectedNpmjsImport)
   "darkGreen-green system host must import the sops-npmjs glue";
-  assert check "host/system-green/enable" (enabled darkGreenGreenHost)
+  assert check "host/system-green/enable" (systemEnabled darkGreenGreenHost)
   "darkGreen-green system host must enable sops-npmjs";
   assert check "host/home-darkGreen/import"
   (hasImport darkGreenHomeHost expectedNpmjsImport)
   "darkGreen home host must import the sops-npmjs glue";
-  assert check "host/home-darkGreen/enable" (enabled darkGreenHomeHost)
+  assert check "host/home-darkGreen/enable" (homeEnabled darkGreenHomeHost)
   "darkGreen home host must enable sops-npmjs";
   assert check "host/home-green/import"
   (hasImport darkGreenGreenHomeHost expectedNpmjsImport)
   "darkGreen-green home host must import the sops-npmjs glue";
-  assert check "host/home-green/enable" (enabled darkGreenGreenHomeHost)
+  assert check "host/home-green/enable" (homeEnabled darkGreenGreenHomeHost)
   "darkGreen-green home host must enable sops-npmjs";
   assert check "host/no-stale-sops-import"
   (!(hasImport darkGreenHost expectedStaleSopsImport)

@@ -23,8 +23,9 @@
     age
   ];
 
-  # Base SOPS settings only. Domain secrets/templates live in `sops-opencode`
-  # and `sops-npmjs`. See docs/adr/0008-sops-secrets-layer.md.
+  # Base SOPS settings only. Domain secrets/templates live in the nested
+  # `ecosystem.sops.opencode` and `ecosystem.sops.npmjs` children. See
+  # docs/adr/0008-sops-secrets-layer.md.
   sops = {
     # This is using an age key that is expected to already be in the filesystem
     age.keyFile = lib.mkDefault "${config.home.homeDirectory}/.config/sops/age/keys.txt"; # must have no password!

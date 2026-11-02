@@ -33,6 +33,19 @@ Run all discovered checks with:
 nix flake check
 ```
 
+Expected warnings from `nix flake check` and deploys are catalogued in
+[benign-warnings.md](benign-warnings.md); check that list before treating a
+warning as a regression.
+
+## NVIDIA/GL package prerequisite
+
+The `packages.x86_64-linux.gl-*` wrappers (and the `olivier` system that
+consumes them) use `nixGLNvidia` and may require a valid
+`impure-nvidia-version-file` on the evaluating machine. Full checks are
+therefore environment-dependent there: evaluate or build those outputs on a
+host with a working NVIDIA setup, and treat failures on other machines as
+environmental rather than module regressions.
+
 ## Paths and bookmarks checks
 
 Coverage for the `paths`/`resolveRuntimePaths` machinery and the bookmark pipeline:

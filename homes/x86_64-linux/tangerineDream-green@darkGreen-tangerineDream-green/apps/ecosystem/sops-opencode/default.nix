@@ -6,8 +6,8 @@
 lib.ds-omega.mkIfEnabled
 {
   inherit config;
-  category = "ecosystem";
-  name = "sops-opencode";
+  category = "ecosystem.sops";
+  name = "opencode";
 }
 {
   # Created by the NixOS sops-opencode module. This Home Manager profile only

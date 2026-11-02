@@ -4,14 +4,14 @@
   namespace,
   ...
 }: let
-  cfg = config.${namespace}.ecosystem.sops-npmjs;
+  cfg = config.${namespace}.ecosystem.sops.npmjs;
 in
   lib.recursiveUpdate
   (lib.${namespace}.mkIfEnabled
     {
       inherit config;
-      category = "ecosystem";
-      name = "sops-npmjs";
+      category = "ecosystem.sops";
+      name = "npmjs";
     }
     {
       # Home SOPS owns the npm token only when this home evaluates SOPS. A
@@ -43,7 +43,7 @@ in
         else config.sops.templates."npmrc".path;
     })
   {
-    options.${namespace}.ecosystem.sops-npmjs = {
+    options.${namespace}.ecosystem.sops.npmjs = {
       systemRuntimePath = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;

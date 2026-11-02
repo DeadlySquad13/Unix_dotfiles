@@ -7,14 +7,14 @@
 lib.${namespace}.mkIfEnabled
 {
   inherit config;
-  category = "ecosystem";
-  name = "sops-opencode";
+  category = "ecosystem.sops";
+  name = "opencode";
 }
 {
   sops = {
     # OpenCode-specific credentials. Generic credentials (for example
-    # `npmjs_auth_token`) belong to the `sops-npmjs` domain module, not the
-    # base SOPS module or `sops-opencode`. See
+    # `npmjs_auth_token`) belong to the `ecosystem.sops.npmjs` domain module,
+    # not the base SOPS module or `ecosystem.sops.opencode`. See
     # docs/adr/0008-sops-secrets-layer.md and docs/adr/0009-sops-opencode.md.
     secrets = {
       logseq_api_token = {};

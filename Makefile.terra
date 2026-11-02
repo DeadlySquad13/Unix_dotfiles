@@ -1,0 +1,27 @@
+# # Terra (non-NixOS Ubuntu) standalone Home Manager — validation targets.
+#
+# Deployment itself reuses the main Makefile targets, e.g.:
+#   make deploy-dry NODE=terra                       # canonical address "terra"
+#   make deploy-dry NODE=terra DEPLOY_HOST=terra-local   # LAN address
+TERRA_NIX_FLAGS = --impure --extra-experimental-features 'nix-command flakes' --show-trace
+TERRA_HOME ?= terra@terra
+
+.PHONY: terra-eval terra-drv terra-build terra-modules terra-validate
+
+# Evaluate the Home Manager generation without building it.
+terra-eval:
+	nix eval $(TERRA_NIX_FLAGS) '.#homeConfigurations."$(TERRA_HOME)"'.activationPackage.drvPath
+
+# Raw drv path (handy for diffing generations).
+terra-drv:
+	nix eval $(TERRA_NIX_FLAGS) --raw '.#homeConfigurations."$(TERRA_HOME)"'.activationPackage.drvPath
+
+# Build the generation locally.
+terra-build:
+	nix build $(TERRA_NIX_FLAGS) '.#homeConfigurations."$(TERRA_HOME)"'.activationPackage
+
+# Reuse the module-enable introspection target.
+terra-modules:
+	$(MAKE) modules-home HOST=$(TERRA_HOME)
+
+terra-validate: terra-eval terra-build terra-modules

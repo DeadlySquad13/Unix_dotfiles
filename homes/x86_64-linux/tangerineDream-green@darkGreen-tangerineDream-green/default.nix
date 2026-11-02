@@ -100,6 +100,8 @@ in {
         nodejs = enabled;
         direnv = enabled;
         nix = enabled;
+        # INFO: Already has installed via system means.
+        gnumake = disabled;
       };
       ecosystem = {
         enable = false;

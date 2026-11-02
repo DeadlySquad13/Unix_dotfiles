@@ -89,6 +89,8 @@ in {
         pixi = disabled;
         gh = enabled;
         nix = enabled;
+        # INFO: Already has installed via system means.
+        gnumake = disabled;
       };
       ecosystem = {
         enable = false;

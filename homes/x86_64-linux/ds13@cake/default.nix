@@ -84,6 +84,8 @@ in {
 
         # FIX: Has to be enabled explicitly.
         nix = enabled;
+        # INFO: Already has installed via system means.
+        gnumake = disabled;
         # TODO: Requires sops.
         glab = disabled;
       };

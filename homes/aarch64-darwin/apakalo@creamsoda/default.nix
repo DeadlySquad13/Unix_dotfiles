@@ -201,4 +201,16 @@ in {
     rootless = false;
     enableAlias = true;
   };
+
+  # Review-exchange role = "producer" (laptop): no OpenCode `/review` tool —
+  # the producer runs the `_scripts` invoke tasks directly. Explicitly disabled
+  # so the producer never carries the consumer `/review` path.
+  ds-omega.ai-assistance.opencode.customTools.review-exchange = false;
+
+  # Review-exchange machine-local state (§2). The schema copy must stay
+  # byte-identical to the contract at `.agents/review-exchange-v1/`.
+  home.file = {
+    ".config/review-exchange/review-exchange.schema.json".source =
+      ../../../.agents/review-exchange-v1/review-exchange.schema.json;
+  };
 }

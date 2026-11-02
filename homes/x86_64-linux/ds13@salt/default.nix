@@ -202,5 +202,22 @@ in {
     development.docker = {
       enableAlias = true;
     };
+
+    # Review-exchange role = "consumer" (PC): `/review` + the `review-agent` +
+    # thin TS tool run here. The producer (@creamsoda) explicitly disables it.
+    ai-assistance.opencode.customTools.review-exchange = true;
+  };
+
+  # Review-exchange machine-local state (§2). The schema copy must stay
+  # byte-identical to the contract at `.agents/review-exchange-v1/`.
+  home.file = {
+    ".config/review-exchange/review-exchange.schema.json".source =
+      ../../../.agents/review-exchange-v1/review-exchange.schema.json;
+  };
+
+  # Review-exchange consumer state root (D7): host-specific, read by the Python
+  # via REVIEW_EXCHANGE_STATE_DIR (it `mkdir -p`s everything below).
+  home.sessionVariables = {
+    REVIEW_EXCHANGE_STATE_DIR = "/zsalt/var-/ds13@salt/state/review";
   };
 }

@@ -154,11 +154,32 @@ in {
       pizza = false;
       zotero = false;
       taskwarrior = false;
+      # Review-exchange role = "consumer" (sandbox): the OpenCode review agents
+      # run here. Explicit so the consumer path is obvious next to the other
+      # disabled tools.
+      review-exchange = true;
     };
     # @ts: IOpenCodeSkillOptions
     enabledSkills = {
       # TODO: Requires workaround like an extra volume to kbn.
       logseq-db-queries = false;
     };
+  };
+
+  # Review-exchange machine-local state (§2). The schema copy must stay
+  # byte-identical to the contract at `.agents/review-exchange-v1/`.
+  home.file = {
+    ".config/review-exchange/review-exchange.schema.json".source =
+      ../../../.agents/review-exchange-v1/review-exchange.schema.json;
+  };
+
+  # Review-exchange consumer state root (D7): host-specific, read by the Python
+  # via REVIEW_EXCHANGE_STATE_DIR (it `mkdir -p`s everything below).
+  # NOTE: the mount is external to this repo. `/usr/local/darkGreen-/tangerineDream-green/_state`
+  # is a shared volume (per-system bind mount) declared in the green sandbox's
+  # base compose in the `@tangerineDream` repository; the salt-side source
+  # `/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state` must exist.
+  home.sessionVariables = {
+    REVIEW_EXCHANGE_STATE_DIR = "/usr/local/darkGreen-/tangerineDream-green/_state/review";
   };
 }

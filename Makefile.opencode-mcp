@@ -29,7 +29,7 @@ mcp-logs:
 #       (checks.<system>.mcp-logseq). It imports the REAL mcp.nix module and
 #       sources the global namespace values from
 #       modules/home/apps/ai-assistance/opencode/logseq-profiles.nix, then
-#       asserts every ACL invariant (7-server oracle, isolation, counterpart
+#       asserts every ACL invariant (19-server oracle, isolation, counterpart
 #       delegation/personas) — any mismatch aborts loudly so the build fails.
 #       Note: the flake only sees git-tracked files, so these check files must
 #       be tracked (a bare `git add` / `git add -N` suffices) for Snowfall to

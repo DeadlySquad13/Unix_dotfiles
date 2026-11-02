@@ -5,11 +5,18 @@
 #   darkGreen-tangerineDream-green  tangerineDream-green
 NIX_FLAGS = --impure --extra-experimental-features 'nix-command flakes' --show-trace
 
+# Canonical content-addressable tag derivation, shared with @NikolaiGogol and the
+# Ansible deploy so local testing matches the remote image tag. Rule: sha256[:12]
+# of the built rootfs tarball. See `make image-tag-<machine>`.
+SHARED_SCRIPTS ?= $(HOME)/.bookmarks/shared-scripts
+CONTENT_TAG ?= invoke --search-root=$(SHARED_SCRIPTS) conv-plat-prov.content-tag
+TARBALL_NAME ?= nixos-system-x86_64-linux.tar.xz
+
 # Generates the docker machine targets below.
 #   $(1) machine name (also the dockerConfiguration name)
 #   $(2) home-manager user
 define docker-targets
-.PHONY: build-$(1)-hm switch-$(1)-system build-$(1)-system build-$(1)
+.PHONY: build-$(1)-hm switch-$(1)-system build-$(1)-system build-$(1) image-tag-$(1) tarball-$(1)
 build-$(1)-hm:
 	home-manager build --flake .#$(2)@$(1) $(NIX_FLAGS)
 
@@ -21,6 +28,16 @@ build-$(1)-system:
 
 build-$(1):
 	nix build --out-link result-$(1) .#dockerConfigurations.$(1) $(NIX_FLAGS)
+
+# Path of the rootfs tarball produced by `build-$(1)`.
+tarball-$(1):
+	@printf '%s\n' "result-$(1)/tarball/$(TARBALL_NAME)"
+
+# Content-addressable image tag (sha256[:12]) of the built rootfs. The same rule
+# and command are used by @NikolaiGogol (`make import-nixos`) and the Ansible
+# deploy, so local and remote image tags agree.
+image-tag-$(1):
+	@$(CONTENT_TAG) "result-$(1)/tarball/$(TARBALL_NAME)"
 endef
 
 $(eval $(call docker-targets,NikolaiGogol,ds13))

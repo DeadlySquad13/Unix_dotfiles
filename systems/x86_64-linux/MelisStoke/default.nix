@@ -18,15 +18,36 @@
   ...
 }: let
   inherit (lib.${namespace}) disabled enabled;
+  # These are build-time inputs: the config is decrypted by
+  # `make decrypt-build-time-secrets NODE=MelisStoke` and the public keys live
+  # on the deploying machine. They are absent on a fresh checkout / CI host, so
+  # only import the xray modules when every file they read at evaluation time
+  # actually exists.
+  xrayConfigPath = ~/.bookmarks/Unix_dotfiles/secrets/tmp/MelisStoke/xray-config.json;
+  xrayRootKeysPath = ~/.ssh/Lent__MelisStoke.pub;
+  xrayUserKeysPath = ~/.ssh/Lent__MelisStoke.pub;
+  hasXrayConfig =
+    builtins.pathExists xrayConfigPath
+    && builtins.pathExists xrayRootKeysPath
+    && builtins.pathExists xrayUserKeysPath;
 in {
   imports = [
     "${toString <nixpkgs>}/nixos/modules/profiles/qemu-guest.nix"
     "${toString <nixpkgs>}/nixos/modules/installer/scan/not-detected.nix"
     "${builtins.fetchTarball "https://github.com/nix-community/disko/archive/master.tar.gz"}/module.nix"
     inputs.xray-config.nixosModules.xray-disko
+  ] ++ lib.optionals hasXrayConfig [
     inputs.xray-config.nixosModules.system-module
     inputs.xray-config.nixosModules.xray-module
   ];
+
+  warnings = lib.optional (!hasXrayConfig) ''
+    MelisStoke: xray is omitted because its build-time configuration and/or
+    SSH public keys are not present. Decrypt
+    secrets/buildTime-/MelisStoke/xray-config.json with
+    `make decrypt-build-time-secrets NODE=MelisStoke` and ensure the
+    Lent__MelisStoke SSH public key exists, then re-evaluate.
+  '';
 
   networking.hostName = lib.mkForce "MelisStoke";
 
@@ -49,13 +70,6 @@ in {
   #   stateVersion = "24.11";
   # };
 
-  xray = {
-    # It's actually at secrets/MelisStoke/buildTime-/xray-config.json, just encrypted.
-    # See `decrypt-build-time-secrets` target at `Makefile`.
-    configFile = ~/.bookmarks/Unix_dotfiles/secrets/tmp/MelisStoke/xray-config.json;
-    rootAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
-    userAuthorizedKeysFile = ~/.ssh/Lent__MelisStoke.pub;
-  };
   services.dbus.implementation = lib.mkForce "broker";
   environment.systemPackages = with pkgs; [
     cowsay
@@ -101,5 +115,14 @@ in {
         };
       };
     };
+  };
+}
+// lib.optionalAttrs hasXrayConfig {
+  xray = {
+    # It's actually at secrets/MelisStoke/buildTime-/xray-config.json, just encrypted.
+    # See `decrypt-build-time-secrets` target at `Makefile`.
+    configFile = xrayConfigPath;
+    rootAuthorizedKeysFile = xrayRootKeysPath;
+    userAuthorizedKeysFile = xrayUserKeysPath;
   };
 }

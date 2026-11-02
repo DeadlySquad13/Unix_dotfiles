@@ -20,32 +20,57 @@ build:
 
 NODE ?= cake
 
+# Optional hostname override for the selected node (deploy-rs `--hostname`).
+# Kept separate from the `HOST` variable used by Makefile.modules-debug and
+# Makefile.opencode (both of which default it), which would otherwise leak
+# their values into every deploy.
+DEPLOY_HOST ?=
+DEPLOY_HOST_FLAG = $(if $(DEPLOY_HOST),--hostname $(DEPLOY_HOST),)
+
+# 0 (default): deploy-rs runs flake-wide `nix flake check`.
+# 1/true/yes: skip flake-wide checks, but first evaluate only $(NODE)'s
+# deploy profiles (the same activation paths deploy-rs will build).
+SKIP_UNRELATED_CHECKS ?= 0
+DEPLOY_SKIP_CHECKS_FLAG = $(if $(filter 1 true yes,$(SKIP_UNRELATED_CHECKS)),--skip-checks,)
+DEPLOY_PREFLIGHT_DEP = $(if $(filter 1 true yes,$(SKIP_UNRELATED_CHECKS)),deploy-node-preflight,)
+
+.PHONY: deploy-node-preflight
+deploy-node-preflight:
+	@echo "Preflight: evaluating deploy profiles for $(NODE) only"
+	@nix eval --impure --extra-experimental-features 'nix-command flakes' --raw \
+	  '.#deploy.nodes.$(NODE).profiles' \
+	  --apply 'ps: builtins.concatStringsSep "\n" (map (p: p.path.drvPath) (builtins.attrValues ps))'
+
 # Usage:
 # - make deploy-dry # default NODE
 # - make deploy-dry NODE=MelisStoke
-deploy-dry: decrypt-build-time-secrets
-	nix run github:serokell/deploy-rs -- .#$(NODE) --dry-activate -- --keep-going --impure --extra-experimental-features 'nix-command flakes' --show-trace
+# - make deploy-dry NODE=terra DEPLOY_HOST=terra-local
+# - make deploy-dry NODE=terra DEPLOY_HOST=terra-local SKIP_UNRELATED_CHECKS=1
+# `deploy-rs` is resolved through `--inputs-from .` so it follows the rev
+# pinned in `flake.lock` instead of tracking upstream HEAD.
+deploy-dry: decrypt-build-time-secrets $(DEPLOY_PREFLIGHT_DEP)
+	nix run --inputs-from . deploy-rs -- .#$(NODE) --dry-activate $(DEPLOY_SKIP_CHECKS_FLAG) $(DEPLOY_HOST_FLAG) -- --keep-going --impure --extra-experimental-features 'nix-command flakes' --show-trace
 	rm -rf ./secrets/tmp
 
-deploy-with-activate: decrypt-build-time-secrets
+deploy-with-activate: decrypt-build-time-secrets $(DEPLOY_PREFLIGHT_DEP)
 	mkdir -p ./logs
-	nix run github:serokell/deploy-rs -- .#$(NODE) --log-dir ./logs -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run --inputs-from . deploy-rs -- .#$(NODE) --log-dir ./logs $(DEPLOY_SKIP_CHECKS_FLAG) $(DEPLOY_HOST_FLAG) -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
 	rm -rf ./secrets/tmp
 
 # Just skips checks. It's impossible to pass them because architecture is not
 # amtching.
 deploy-dry-non-matching: decrypt-build-time-secrets
-	nix run github:serokell/deploy-rs -- .#$(NODE) --skip-checks --dry-activate -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run --inputs-from . deploy-rs -- .#$(NODE) --skip-checks --dry-activate $(DEPLOY_HOST_FLAG) -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
 	rm -rf ./secrets/tmp
 
 # Just skips checks. It's impossible to pass them because architecture is not
 # amtching.
 deploy-with-activate-non-matching: decrypt-build-time-secrets
 	mkdir -p ./logs
-	nix run github:serokell/deploy-rs -- .#$(NODE) --skip-checks --log-dir ./logs -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
+	nix run --inputs-from . deploy-rs -- .#$(NODE) --skip-checks --log-dir ./logs $(DEPLOY_HOST_FLAG) -- --impure --extra-experimental-features 'nix-command flakes' --show-trace
 	rm -rf ./secrets/tmp
 
-deploy: deploy-dry deploy-activate
+deploy: deploy-dry deploy-with-activate
 
 switch-system:
 	sudo nixos-rebuild switch --flake .#olivier --impure
@@ -70,6 +95,8 @@ include Makefile.bookmarks-debug
 include Makefile.modules-debug
 include Makefile.packages-debug
 include Makefile.opencode
+include Makefile.harness
+include Makefile.terra
 
 # TODO: Doesn't work when using Makefile, only manually.
 hm-rollback:

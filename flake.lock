@@ -189,17 +189,17 @@
     "mcp-logseq": {
       "flake": false,
       "locked": {
-        "lastModified": 1788699882,
-        "narHash": "sha256-SbvmT2XRqKZYTE7aeQMle8G13P39OXWTPIeoqqlIyTk=",
+        "lastModified": 1792848604,
+        "narHash": "sha256-4nATNtRTNidI1qDZvMHl3lKEPkySHAga93SQYcyK+DA=",
         "owner": "dsOmega-StratoFrame",
         "repo": "Mcp__Logseq",
-        "rev": "aa5550e64d8486ee8329ee9320fc82452e4eb0c2",
+        "rev": "b8dc2c4618402292ac5d7a4c8e050e8785f8eba8",
         "type": "github"
       },
       "original": {
         "owner": "dsOmega-StratoFrame",
         "repo": "Mcp__Logseq",
-        "rev": "aa5550e64d8486ee8329ee9320fc82452e4eb0c2",
+        "rev": "b8dc2c4618402292ac5d7a4c8e050e8785f8eba8",
         "type": "github"
       }
     },

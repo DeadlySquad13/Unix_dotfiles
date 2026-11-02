@@ -67,7 +67,7 @@
     # `git+https://…@rev` package spec fails). Bump the pin by changing the
     # revision in this URL; the lockfile records its sha256.
     mcp-logseq = {
-      url = "github:dsOmega-StratoFrame/Mcp__Logseq/aa5550e64d8486ee8329ee9320fc82452e4eb0c2";
+      url = "github:dsOmega-StratoFrame/Mcp__Logseq/b8dc2c4618402292ac5d7a4c8e050e8785f8eba8";
       flake = false;
     };
 

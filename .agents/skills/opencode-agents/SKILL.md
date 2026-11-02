@@ -92,6 +92,31 @@ Which roles get which surface:
   server and never enable `logseq-mcpo` in OpenCode (it stays registered but
   disabled for non-opencode consumers).
 
+## Plugin-provided delivery agents (no mcp.nix)
+
+Not every agent lives in `mcp.nix` `settings.agent` — that path is for agents
+granted MCP tool banks. An agent whose tools come from an **OpenCode plugin**
+is authored as a markdown persona inside the plugin's module directory and
+wired through the Home Manager `programs.opencode.agents` attrset, while
+`mcp.nix`, `logseq-profiles.nix`, and `checks/mcp-logseq/` stay untouched:
+
+- Persona file: `modules/home/apps/ai-assistance/opencode/<plugin>/agent/<name>.md`
+  (frontmatter `mode: subagent`, low temperature, description; copy the
+  conventions of the sibling delivery personas — e.g. the dedicated
+  `verifier`/nix personas — rather than the JSON blocks in `mcp.nix`; tools
+  are provided by the plugin itself, do not grant banks).
+- Like every DELIVERY agent it carries no Logseq at all: no `logseq-*`
+  grants, no profile, no port.
+- This pairs with plugin skills wired via `programs.opencode.skills`; see the
+  `opencode-plugins` and `opencode-skills` skills.
+
+Difficulties observed while first doing this (they may trip you too): the
+"How to add a new agent" flow below reads as the single authoritative path,
+but it covers only the `mcp.nix`/MCP route — for a plugin-scoped delivery
+agent, stop at the module-level wiring and the persona file; and no
+user-facing skill existed at that time for plugin/agent entities, so
+conventions were inferred from sibling modules each time.
+
 ## How to add a new agent
 
 1. **Classify.** DELIVERY agent → add it to `mcp.nix` `settings.agent` with
@@ -124,7 +149,7 @@ Which roles get which surface:
    - The role is a coordinator (orchestrator): own instance only, no
      counterpart, no `delegateTo`.
 6. If a NEW subagent/counterpart/server is introduced, extend
-   `checks/mcp-logseq/default.nix` (expected 17 servers, delegations, personas,
+   `checks/mcp-logseq/default.nix` (expected 19 servers, delegations, personas,
    glob isolation) so the change is asserted statically.
 
 ## After changing agent wiring

@@ -266,6 +266,32 @@
               # };
             };
           };
+
+          # Non-NixOS Ubuntu host: standalone Home Manager profile only.
+          terra = {
+            # Darwin can't build x86_64-linux closures (incl. deploy-rs's
+            # activate-rs binaries); build on the target. From a matching
+            # Linux host, build locally and push instead.
+            remoteBuild = isCurrentSystemDarwin;
+
+            # Canonical/main address. Override at invocation time for the LAN
+            # (or any other route) with `--hostname terra-local`, e.g.
+            # `make deploy-dry NODE=terra DEPLOY_HOST=terra-local`.
+            hostname = "terra";
+
+            profiles.home-manager = {
+              sshUser = "terra";
+              # Owner of the profile; == sshUser, so no sudo is injected.
+              user = "terra";
+              interactiveSudo = false;
+
+              # Matches home-manager's own standalone generation profile.
+              profilePath = "/home/terra/.local/state/nix/profiles/home-manager";
+
+              path = inputs.deploy-rs.lib.x86_64-linux.activate.home-manager
+                inputs.self.homeConfigurations."terra@terra";
+            };
+          };
         };
       };
 

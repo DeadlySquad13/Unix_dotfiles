@@ -120,9 +120,12 @@
     };
   };
 
-  outputs =
-    inputs:
-    inputs.snowfall-lib.mkFlake rec {
+  outputs = inputs: let
+    # The flake body. Snowfall Lib already exports `lib`, `nixosModules`,
+    # `homeModules`, `darwinModules`, `overlays` and `packages`; the explicit
+    # `public` attrset below turns the agent-facing surface into an intentional
+    # contract (see ADR 0006 §1 and ADR 0007).
+    f = inputs.snowfall-lib.mkFlake rec {
       # You must provide our flake inputs to Snowfall Lib.
       inherit inputs;
 
@@ -188,7 +191,7 @@
         home-manager.nixosModules.home-manager
       ];
 
-      system.modules.darwin = with inputs; [
+      systems.modules.darwin = with inputs; [
         # Enable system modules.
         mac-app-util.darwinModules.default
 
@@ -199,6 +202,7 @@
             pkgs,
             config,
             inputs,
+            ...
           }:
           {
             home-manager.sharedModules = [
@@ -314,15 +318,25 @@
         # We didn't even need to use `channel.nixpkgs`.
         # TODO: Disable for specific systems: currently it won't work if at
         # least one doesn't match.
+        # Use `optionalAttrs` (not `mkIf`) so Snowfall's check merge only sees
+        # real derivations; `mkIf` would leak `_type`/`condition`/`content`
+        # into the final `checks` output.
         checks =
-          let
-            inherit (inputs.nixpkgs.lib) mkIf;
-          in
-          mkIf (deploySystemsMatch systemToDeploy) (
+          inputs.nixpkgs.lib.optionalAttrs (deploySystemsMatch systemToDeploy) (
             builtins.mapAttrs (
               system: deployLib: deployLib.deployChecks inputs.self.deploy
             ) inputs.deploy-rs.lib
           );
+      };
+    };
+  in
+    f
+    // {
+      # Explicit inheritance surface for agent child flakes (ADR 0006 §1,
+      # ADR 0007). Child flakes consume ONLY this attrset, never incidental
+      # passthrough attributes.
+      public = {
+        inherit (f) lib nixosModules homeModules darwinModules overlays packages;
       };
     };
 }

@@ -184,8 +184,10 @@ in
     inherit config;
     category = "services";
     name = "runtime-home-bridge";
+    extraPredicate = { module-cfg, ... }: module-cfg ? enable;
   }
   {
+    services.runtime-home-bridge.enable = true;
     services.runtime-home-bridge.package = bridge;
 
     assertions = [

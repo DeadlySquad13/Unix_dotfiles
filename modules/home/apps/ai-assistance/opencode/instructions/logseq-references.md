@@ -3,6 +3,18 @@
 Applies to every agent that reads or writes the Logseq graph. The full
 conventions live in the `logseq-authoring` skill; this is the invariant.
 
+## MCP write contract
+
+- Send a simple block outline to `create_page` / `update_page`; the MCP
+  normalizes it to the graph's format.
+- Org headings and `:PROPERTIES:` drawers are accepted and normalized, but the
+  recommended input is the plain block outline.
+- Page properties go in the `properties` argument; block properties use
+  `key:: value` under their block.
+- `get_page_content` text is a read view; do not paste it back blindly.
+- Org conventions in the skill apply to what is stored/read and to direct Org
+  file authoring, not to the MCP `content` argument.
+
 - `((uuid))` is an **embed**, not a citation. Logseq renders the referenced
   block's content inline, and nested refs expand too. If you want to put `((uuid))`
   inline in a report or prose body, make sure the block it references is short

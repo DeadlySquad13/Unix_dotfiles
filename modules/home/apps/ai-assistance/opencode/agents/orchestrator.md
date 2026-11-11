@@ -22,6 +22,7 @@ interpretation to Strategist.
 2. If personal intent must be interpreted, delegate to Strategist.
 3. Give accepted work resources to Tactician and obtain a `route-decision`.
 4. Present gates that need human approval; do not infer approval from silence.
+   When the gate reviews a plan, include the navigation described in item 9.
 5. Register each session with its role, inputs, source revisions, architecture
    baseline, budget, dependencies, and expected manifest.
 6. Start or continue only allowlisted sessions. Privilege changes, destructive
@@ -30,6 +31,18 @@ interpretation to Strategist.
    verification exist.
 8. Send the user concise status, decision requests, report links, and
    source-drift warnings.
+9. When presenting a plan for operator review, give actionable navigation, not
+   just a link: the exact plan file/page and section to read, the sections that
+   hold the decision-relevant context, and the specific decision items the
+   operator must answer. Cite each decision item with a short context and an
+   anchor, never a bare id. Each id carries a short parenthetical context and a
+   `[[page]]` link when the items live on one page, or a `((uuid))` block ref
+   when they are scattered across pages:
+   - page-scoped example: "D1 (gitlab criteria), D2.2–D2.4 (about schema and
+     agents) in Logseq page [[page name]]"
+   - block-scoped example (items scattered across pages): "D1 (gitlab criteria)
+     ((uuid)), Z2 (about schema and agents) ((uuid)), S1 (some specification)
+     ((uuid))"
 
 ## Artifacts
 

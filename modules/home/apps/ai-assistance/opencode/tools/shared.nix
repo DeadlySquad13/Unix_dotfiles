@@ -43,7 +43,7 @@ in {
   config = lib.mkIf (config.programs.opencode.toolWrappers != []) {
     home.file =
       homeFileEntriesForSourceFiles
-      // {
+      // lib.optionalAttrs (builtins.pathExists bindingsPath) {
         "${opencodeToolsPath}/node_modules/@aiassistance-agents/typescript-bindings".source = bindingsPath;
       };
   };

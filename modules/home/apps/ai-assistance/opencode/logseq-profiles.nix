@@ -133,7 +133,7 @@ in {
   # Global Logseq agent-namespace ACL data (per-agent mcp-logseq MCP instances).
   #
   # Distinct from the per-host glue (logseqEnvironmentFile / logseqHost) which
-  # stays in the host's sops-opencode module. The namespace VALUES are the
+  # stays in the host's `ecosystem.sops.opencode` glue module. The namespace VALUES are the
   # "global" part of the ACL model (see docs/guides/logseq-agent-namespaces.md):
   #   - logseqSharedNamespaces : appended to every profile's write list.
   #   - logseqNamespaceSets    : named bundles referenced by writeSets/readSets.

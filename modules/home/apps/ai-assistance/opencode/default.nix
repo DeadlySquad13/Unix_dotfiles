@@ -24,6 +24,7 @@ in
       ./tools/pizza.nix
       ./tools/taskwarrior.nix
       ./tools/zotero.nix
+      ./tools/review-exchange.nix
       ./skills/logseq-db-queries.nix
       ./skills/logseq-authoring.nix
       ./skills/logseq-authoring-suite.nix
@@ -98,6 +99,10 @@ in
 
       inherit (cfg) enabledSkills customTools;
 
+      commands = {
+        review = ./commands/review.md;
+      };
+
       agents = {
         prompt-designer = ./agents/prompt-designer.md;
         coding = ./agents/coding.md;
@@ -115,6 +120,7 @@ in
         nix-build = ./agents/nix-build.md;
         verifier = ./agents/verifier.md;
         kbn = ./agents/kbn.md;
+        review-agent = ./agents/review-agent.md;
         # T1 inner harness provisioner (primary, Logseq-producing) — the name is
         # namespace-generated (`<spiceNamespace>-inner-conv-plat-prov`).
         "${innerProvisionerAgent}" = ./agents/darkGreen-inner-conv-plat-prov.md;
@@ -189,6 +195,7 @@ in
           "pizza"
           "taskwarrior"
           "zotero"
+          "review-exchange"
         ]
         (
           name:

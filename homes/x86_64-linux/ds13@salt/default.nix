@@ -138,6 +138,10 @@ in {
       };
       gui-utility = {
         enable = true;
+
+        # `inode/directory` / xdg-open -> ranger in wezterm. Does not touch
+        # in-app (portal) file pickers; see `system-services.termfilechooser`.
+        ranger-default-opener = enabled;
       };
       productivity = {
         enable = true;
@@ -195,6 +199,11 @@ in {
           stage = false;
           prod = false;
         };
+
+        # In-app `org.freedesktop.portal.FileChooser` -> ranger inside wezterm.
+        # NOTE: After switching, re-login X and run
+        # `systemctl --user restart xdg-desktop-portal.service`.
+        termfilechooser = enabled;
       };
     };
 

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Minimal `ss` stand-in used by the applier health probe.
+set -euo pipefail
+printf 'LISTEN 0 4096 0.0.0.0:22 0.0.0.0:*\n'

@@ -64,8 +64,12 @@ in {
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  services.manilov-network.libvirt.enable = true;
+
   lib.ds-omega = {
     modules = {
+      services.manilov-network.enable = true;
+
       ecosystem = {
         enable = false;
 

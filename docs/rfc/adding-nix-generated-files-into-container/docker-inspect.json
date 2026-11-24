@@ -1,0 +1,625 @@
+[
+    {
+        "Id": "8a5e49bbe975d30e413da5bf393776e104291e0184598d091cc28bb99ae835bb",
+        "Created": "2026-11-17T08:06:01.813478831Z",
+        "Path": "/init",
+        "Args": [],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 31251,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-11-17T08:06:01.843895936Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:60baba49fdd64f3046132f7118a2bd3808081666a39b6924b09d3f3c33d34a66",
+        "ResolvConfPath": "/zsalt/var-/lib/docker/containers/8a5e49bbe975d30e413da5bf393776e104291e0184598d091cc28bb99ae835bb/resolv.conf",
+        "HostnamePath": "/zsalt/var-/lib/docker/containers/8a5e49bbe975d30e413da5bf393776e104291e0184598d091cc28bb99ae835bb/hostname",
+        "HostsPath": "/zsalt/var-/lib/docker/containers/8a5e49bbe975d30e413da5bf393776e104291e0184598d091cc28bb99ae835bb/hosts",
+        "LogPath": "/zsalt/var-/lib/docker/containers/8a5e49bbe975d30e413da5bf393776e104291e0184598d091cc28bb99ae835bb/8a5e49bbe975d30e413da5bf393776e104291e0184598d091cc28bb99ae835bb-json.log",
+        "Name": "/AiAssistance__darkGreen-tangerineDream-green__Opencode-NeoVim-currenttask1",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": [
+            "17137ab795285ff42452bd5ddd17a7ae844961d9762729fa49b8e23a35e20f1f",
+            "d6dbbb7bd63e01f95b9202e8f7dac2d51fc51dfc942b578d5d26abd55b129433",
+            "9793db5cc8805ae1dd4460df54f8215507cfcd30544cde19ea7786d0466511f0"
+        ],
+        "HostConfig": {
+            "Binds": [
+                "/zsalt/shared-/@creamsoda/Projects/auto-hub/CurrentTask1:/app:rw",
+                "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/share/opencode:/usr/local/shared-/var-/share/opencode:rw",
+                "/nix/store/mb3hnwcxc1jgqfzilcr4dm2dv0lmz4hb-nix-shell-env:/nix/store/mb3hnwcxc1jgqfzilcr4dm2dv0lmz4hb-nix-shell-env:ro",
+                "/nix/store/kamdfm9ls7bg54cirvphk3wa15rc60w2-source:/nix/store/kamdfm9ls7bg54cirvphk3wa15rc60w2-source:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Release.yml:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Release.yml:ro",
+                "/nix/store/yj1wxm9hh8610iyzqnz75kvs6xl8j3my-source:/nix/store/yj1wxm9hh8610iyzqnz75kvs6xl8j3my-source:ro",
+                "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state/review:/usr/local/darkGreen-/tangerineDream-green/_state/review:rw",
+                "/zsalt/shared-/@creamsoda/Projects/.artifact:/zsalt/shared-/@creamsoda/Projects/.artifact:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/CurrentTask1/.envrc:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/CurrentTask1/.envrc:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/AutoHub.git/.git/info/exclude:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/AutoHub.git/.git/info/exclude:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask.yml:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask.yml:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask1.yml:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask1.yml:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Review.yml:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Review.yml:ro",
+                "/nix/store/01x5k4nlxcpyd85nnr0b9gm89rm8ff4x-source:/nix/store/01x5k4nlxcpyd85nnr0b9gm89rm8ff4x-source:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Main.yml:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Main.yml:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Nix:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Nix:ro",
+                "/nix/store/zi6b8an1m9hn3acw3jfr77v3c5vpjfk1-source:/nix/store/zi6b8an1m9hn3acw3jfr77v3c5vpjfk1-source:ro",
+                "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Epic.yml:/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Epic.yml:ro",
+                "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state/opencode:/usr/local/shared-/var-/state/opencode:rw"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "host",
+            "PortBindings": {
+                "61664/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "61664"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": true,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": [
+                "CAP_NET_ADMIN"
+            ],
+            "CapDrop": null,
+            "CgroupnsMode": "host",
+            "Dns": null,
+            "DnsOptions": null,
+            "DnsSearch": null,
+            "ExtraHosts": [],
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": true,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": [
+                "seccomp=unconfined",
+                "label=disable"
+            ],
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "docker.slice",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "Mounts": [
+                {
+                    "Type": "bind",
+                    "Source": "/home/ds13/.bookmarks/projects/--personal/AiAssistance__",
+                    "Target": "/ztangerineDream-green/shared-/@salt/Projects/--personal/AiAssistance__",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/AutoHub.git",
+                    "Target": "/AutoHub.git",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/_configs",
+                    "Target": "/_configs",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/cache/opencode",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_cache/opencode",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/share/opencode",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_share/opencode",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/_utils",
+                    "Target": "/_utils",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/KnowledgeBase__",
+                    "Target": "/KnowledgeBase__",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/home/ds13/.bookmarks/shared-configs/Unix_dotfiles/ai-/darkGreen-/tangerineDream-green",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_configs/Unix_dotfiles",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/_http",
+                    "Target": "/_http",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/AutoHub.git/.git",
+                    "Target": "/AutoHub.git/.git",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/share/runtime-home-bridge",
+                    "Target": "/ztangerineDream-green/share/runtime-home-bridge",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/cache/opencode__node_modules",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_cache/opencode__node_modules",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/home/ds13/.bookmarks/shared-configs/Unix_dotfiles",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_configs/Unix_dotfiles_parent",
+                    "ReadOnly": true,
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/shared/soft-projects-/ds13/Projects/ChronoIndex/2026/@tangerineDream/configs/runtime-home-bridge/green.json",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_runtime/home-bridge.json",
+                    "ReadOnly": true,
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state/opencode",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_state/opencode",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/home/ds13/.bookmarks/shared-scripts/ai-/darkGreen-/tangerineDream-green",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_scripts",
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/shared/archive-resources-/Archive/YandexDisk/Nix__Sops-secrets/tangerineDream-green@darkGreen-tangerineDream-green.txt",
+                    "Target": "/usr/local/darkGreen-/tangerineDream-green/_configs/sops/age/keys.txt",
+                    "ReadOnly": true,
+                    "BindOptions": {}
+                },
+                {
+                    "Type": "bind",
+                    "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/CurrentTask1",
+                    "Target": "/CurrentTask1",
+                    "BindOptions": {}
+                }
+            ],
+            "MaskedPaths": null,
+            "ReadonlyPaths": null
+        },
+        "GraphDriver": {
+            "Data": {
+                "ID": "8a5e49bbe975d30e413da5bf393776e104291e0184598d091cc28bb99ae835bb",
+                "LowerDir": "/zsalt/var-/lib/docker/overlay2/a2ddd357ee97b65507d88504373cadf017fdaaa87bc5e4201de073fd9309a3b1-init/diff:/zsalt/var-/lib/docker/overlay2/f118442238eaf1f018502c49e1869f9e185e7307629b3263c61c2c272e637894/diff",
+                "MergedDir": "/zsalt/var-/lib/docker/overlay2/a2ddd357ee97b65507d88504373cadf017fdaaa87bc5e4201de073fd9309a3b1/merged",
+                "UpperDir": "/zsalt/var-/lib/docker/overlay2/a2ddd357ee97b65507d88504373cadf017fdaaa87bc5e4201de073fd9309a3b1/diff",
+                "WorkDir": "/zsalt/var-/lib/docker/overlay2/a2ddd357ee97b65507d88504373cadf017fdaaa87bc5e4201de073fd9309a3b1/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask1.yml",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask1.yml",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Main.yml",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Main.yml",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state/opencode",
+                "Destination": "/usr/local/shared-/var-/state/opencode",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/share/opencode",
+                "Destination": "/usr/local/shared-/var-/share/opencode",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/cache/opencode__node_modules",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_cache/opencode__node_modules",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/ds13/.bookmarks/shared-scripts/ai-/darkGreen-/tangerineDream-green",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_scripts",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/kamdfm9ls7bg54cirvphk3wa15rc60w2-source",
+                "Destination": "/nix/store/kamdfm9ls7bg54cirvphk3wa15rc60w2-source",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/CurrentTask1/.envrc",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/CurrentTask1/.envrc",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Epic.yml",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Epic.yml",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/cache/opencode",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_cache/opencode",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/ds13/.bookmarks/shared-configs/Unix_dotfiles",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_configs/Unix_dotfiles_parent",
+                "Mode": "",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/shared/soft-projects-/ds13/Projects/ChronoIndex/2026/@tangerineDream/configs/runtime-home-bridge/green.json",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_runtime/home-bridge.json",
+                "Mode": "",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/mb3hnwcxc1jgqfzilcr4dm2dv0lmz4hb-nix-shell-env",
+                "Destination": "/nix/store/mb3hnwcxc1jgqfzilcr4dm2dv0lmz4hb-nix-shell-env",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Release.yml",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Release.yml",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/.artifact",
+                "Destination": "/zsalt/shared-/@creamsoda/Projects/.artifact",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/AutoHub.git/.git/info/exclude",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/AutoHub.git/.git/info/exclude",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask.yml",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/CurrentTask.yml",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/ds13/.bookmarks/shared-configs/Unix_dotfiles/ai-/darkGreen-/tangerineDream-green",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_configs/Unix_dotfiles",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/share/runtime-home-bridge",
+                "Destination": "/ztangerineDream-green/share/runtime-home-bridge",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/zi6b8an1m9hn3acw3jfr77v3c5vpjfk1-source",
+                "Destination": "/nix/store/zi6b8an1m9hn3acw3jfr77v3c5vpjfk1-source",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/ds13/.bookmarks/projects/--personal/AiAssistance__",
+                "Destination": "/ztangerineDream-green/shared-/@salt/Projects/--personal/AiAssistance__",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/AutoHub.git",
+                "Destination": "/AutoHub.git",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/share/opencode",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_share/opencode",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/CurrentTask1",
+                "Destination": "/app",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state/review",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_state/review",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/AutoHub.git/.git",
+                "Destination": "/AutoHub.git/.git",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/var-/tangerineDream-green@darkGreen-tangerineDream-green/state/opencode",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_state/opencode",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/_http",
+                "Destination": "/_http",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/yj1wxm9hh8610iyzqnz75kvs6xl8j3my-source",
+                "Destination": "/nix/store/yj1wxm9hh8610iyzqnz75kvs6xl8j3my-source",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Review.yml",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Review.yml",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Nix",
+                "Destination": "/nix/store/qzhv8lm1p6aaf2w2p56xni5lzxfy7fix-home-manager-files/Projects/--professional/Rutube__/AutoHub/_configs/Nix",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/_utils",
+                "Destination": "/_utils",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/shared/archive-resources-/Archive/YandexDisk/Nix__Sops-secrets/tangerineDream-green@darkGreen-tangerineDream-green.txt",
+                "Destination": "/usr/local/darkGreen-/tangerineDream-green/_configs/sops/age/keys.txt",
+                "Mode": "",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/nix/store/01x5k4nlxcpyd85nnr0b9gm89rm8ff4x-source",
+                "Destination": "/nix/store/01x5k4nlxcpyd85nnr0b9gm89rm8ff4x-source",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/_configs",
+                "Destination": "/_configs",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/KnowledgeBase__",
+                "Destination": "/KnowledgeBase__",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/zsalt/shared-/@creamsoda/Projects/auto-hub/CurrentTask1",
+                "Destination": "/CurrentTask1",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "salt",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": true,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "ExposedPorts": {
+                "61664/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": true,
+            "StdinOnce": true,
+            "Env": null,
+            "Cmd": [
+                "/init"
+            ],
+            "Image": "ds-omega/tangerine-dream-green:latest",
+            "Volumes": null,
+            "WorkingDir": "",
+            "Entrypoint": null,
+            "Labels": {
+                "com.docker.compose.config-hash": "cff55222c39a7e667bc8067e768869a2e2b5758577cfc13dcc19824033e18610",
+                "com.docker.compose.depends_on": "",
+                "com.docker.compose.image": "sha256:60baba49fdd64f3046132f7118a2bd3808081666a39b6924b09d3f3c33d34a66",
+                "com.docker.compose.oneoff": "True",
+                "com.docker.compose.project": "tangerinedream",
+                "com.docker.compose.project.config_files": "/shared/soft-projects-/ds13/Projects/ChronoIndex/2026/@tangerineDream/docker-compose.darkGreen-tangerineDream-green.yml,/zsalt/shared-/@creamsoda/Projects/auto-hub/.aiassist-run/docker-compose.agent.effective.yml",
+                "com.docker.compose.project.environment_file": "/shared/soft-projects-/ds13/Projects/ChronoIndex/2026/@tangerineDream/.env.darkGreen-tangerineDream-green",
+                "com.docker.compose.project.working_dir": "/shared/soft-projects-/ds13/Projects/ChronoIndex/2026/@tangerineDream",
+                "com.docker.compose.service": "auto-hub-project-shared-mounts",
+                "com.docker.compose.slug": "5b3938d83b7574b80dcbf952bd0d15c3ae1212b128da3e54e03194154140c51c",
+                "com.docker.compose.version": "5.0.2"
+            },
+            "StopSignal": "SIGRTMIN+3"
+        },
+        "NetworkSettings": {
+            "SandboxID": "7503c7644a9ffc761c4176cd2c263129d94494afd26b528e75b97d6878244227",
+            "SandboxKey": "/var/run/docker/netns/default",
+            "Ports": {},
+            "Networks": {
+                "host": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "c3a8fce629ab162943cb132c6da310a4d8e5607e8f9cea31254e9d8748175846",
+                    "EndpointID": "6a0de431feb4292098539a080ebb373e003624205fbe61f5b83b50c9c7e72c06",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        }
+    }
+]

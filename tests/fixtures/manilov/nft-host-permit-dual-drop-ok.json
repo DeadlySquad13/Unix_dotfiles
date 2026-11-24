@@ -1,0 +1,80 @@
+{
+  "nftables": [
+    {
+      "table": {
+        "family": "ip",
+        "name": "filter"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "FORWARD",
+        "type": "filter",
+        "hook": "forward",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "ip",
+        "table": "filter",
+        "name": "MANILOV_FORWARD"
+      }
+    },
+    {
+      "rule": {
+        "family": "ip",
+        "table": "filter",
+        "chain": "FORWARD",
+        "expr": [
+          {
+            "jump": {
+              "target": "MANILOV_FORWARD"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "table": {
+        "family": "inet",
+        "name": "filter"
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "filter",
+        "name": "FORWARD",
+        "type": "filter",
+        "hook": "forward",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "filter",
+        "name": "MANILOV_FORWARD"
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "filter",
+        "chain": "FORWARD",
+        "expr": [
+          {
+            "jump": {
+              "target": "MANILOV_FORWARD"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

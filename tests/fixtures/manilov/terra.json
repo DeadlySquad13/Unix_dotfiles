@@ -1,0 +1,38 @@
+{
+  "schema": "manilov.network.marker/v1",
+  "profile": "bridge",
+  "role": "owner",
+  "owner": {
+    "kind": "image",
+    "id": "nikolaigogol"
+  },
+  "selectorDigest": "sha256:a9211f72d9d7c3b19b0a4ef487d2a03da17802e03249832b76d14f82738ad527",
+  "params": {
+    "uplink": {
+      "name": "eth-test0",
+      "permanentMac": "02:00:00:00:00:02"
+    },
+    "management": {
+      "address": "198.51.100.10",
+      "prefix": 24,
+      "gateway": "198.51.100.1",
+      "dns": [
+        "198.51.100.53"
+      ]
+    },
+    "addressing": "static",
+    "datapath": {
+      "tap": "tap-test1"
+    },
+    "peer": {
+      "mac": "02:00:00:00:00:12",
+      "address": "198.51.100.0/24"
+    },
+    "peers": [
+      {
+        "mac": "02:00:00:00:00:13",
+        "address": "198.51.100.128/25"
+      }
+    ]
+  }
+}

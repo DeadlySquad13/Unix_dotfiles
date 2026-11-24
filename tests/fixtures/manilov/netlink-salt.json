@@ -1,0 +1,30 @@
+{
+  "links": [
+    {
+      "ifname": "wlan-test0",
+      "address": "02:00:00:00:00:01",
+      "operstate": "UP",
+      "carrier": true
+    },
+    {
+      "ifname": "tap-test0",
+      "address": "02:00:00:00:00:11",
+      "operstate": "UP",
+      "carrier": true
+    }
+  ],
+  "addresses": [
+    {
+      "ifname": "tap-test0",
+      "address": "192.0.2.10/24"
+    }
+  ],
+  "routes": [
+    {
+      "dst": "default",
+      "gateway": "192.0.2.1",
+      "dev": "tap-test0"
+    }
+  ],
+  "sshd": true
+}

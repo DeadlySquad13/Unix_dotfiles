@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Minimal `systemd-run` stand-in: pretend the transient dead-man timer armed.
+set -euo pipefail
+if [[ -n "${MANILOV_FAKE_LOG:-}" ]]; then
+  {
+    printf 'systemd-run'
+    printf ' %s' "$@"
+    printf '\n'
+  } >> "$MANILOV_FAKE_LOG"
+fi
+exit 0

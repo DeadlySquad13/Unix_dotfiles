@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Minimal `nft` stand-in for local applier smoke tests.
+#
+# `nft -j list ruleset` returns $MANILOV_FAKE_NFT_RULESET (or the checked-in
+# host-permit sample). Mutating invocations are only logged.
+set -euo pipefail
+
+here=$(cd "$(dirname "$0")/.." && pwd)
+log_file="${MANILOV_FAKE_LOG:-}"
+
+log() {
+  [[ -n "$log_file" ]] || return 0
+  {
+    printf 'nft'
+    printf ' %s' "$@"
+    printf '\n'
+  } >> "$log_file"
+}
+
+if [[ "${1:-}" == "-j" && "${2:-}" == "list" && "${3:-}" == "ruleset" ]]; then
+  cat "${MANILOV_FAKE_NFT_RULESET:-$here/nft-host-permit.json}"
+  exit 0
+fi
+
+log "$@"
+exit 0

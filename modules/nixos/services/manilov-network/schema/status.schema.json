@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ds-omega.invalid/manilov-network/status.schema.json",
+  "title": "Manilov network status",
+  "description": "Read-only status rendered by the applier for check/status consumers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["phase", "health"],
+  "properties": {
+    "phase": {
+      "enum": ["idle", "applying", "unconfirmed", "applied", "rolling-back", "rolled-back"]
+    },
+    "health": {
+      "enum": ["unknown", "pass", "degraded", "fail"]
+    },
+    "remainingSeconds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deadmanArmed": {
+      "type": "boolean"
+    },
+    "deadmanCancelled": {
+      "type": "boolean"
+    },
+    "lastFailingCheck": {
+      "type": ["string", "null"],
+      "minLength": 1
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "manilov.network.marker/v1",
+  "profile": "proxyarp",
+  "role": "owner",
+  "owner": {
+    "kind": "image",
+    "id": "nikolaigogol"
+  },
+  "selectorDigest": "sha256:2970ce9648832ef0c40d32b1fa48ea775e8cfe35cc7645480695e52f6635ee57",
+  "params": {
+    "uplink": {
+      "name": "wlan-test0",
+      "permanentMac": "02:00:00:00:00:01"
+    },
+    "management": {
+      "address": "192.0.2.10",
+      "prefix": 24,
+      "gateway": "192.0.2.1",
+      "dns": [
+        "192.0.2.53"
+      ]
+    },
+    "addressing": "static",
+    "datapath": {
+      "tap": "tap-test0"
+    },
+    "peer": {
+      "mac": "02:00:00:00:00:11",
+      "address": "192.0.2.0/24"
+    }
+  }
+}

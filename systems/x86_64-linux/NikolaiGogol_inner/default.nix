@@ -48,29 +48,9 @@ in {
   networking = {
     hostName = lib.mkDefault "NikolaiGogol";
 
-    # TAP device for VM networking (created declaratively by NixOS)
-    interfaces.tap0 = {
-      virtual = true;
-      virtualType = "tap";
-      ipv4.routes = [
-        { address = "192.168.31.200"; prefixLength = 32; }
-      ];
-      # Respond to ARP from VM for gateway 192.168.31.1
-      proxyARP = true;
-    };
-
-    # Proxy ARP on Wi-Fi interface — pseudo-bridge for WLAN
-    interfaces.wlan0.proxyARP = true;
-
-    # Firewall: allow forwarding between TAP and Wi-Fi (no NAT needed)
-    firewall = {
-      enable = true;
-      extraCommands = ''
-        iptables -A FORWARD -i tap0 -o wlan0 -j ACCEPT
-        iptables -A FORWARD -i wlan0 -o tap0 -j ACCEPT
-        iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
-      '';
-    };
+    # Firewall ownership: the manilov-network module does not set this, so the
+    # host keeps its own firewall switch.
+    firewall.enable = true;
   };
 
   # programs.ssh.startAgent = true;
@@ -93,17 +73,11 @@ in {
 
   boot = {
     isContainer = true;
-
-    # Load TUN/TAP kernel module for virtual networking
-    kernelModules = ["tun"];
-
-    # Enable IP forwarding (required for routing between interfaces)
-    kernel.sysctl = {
-      "net.ipv4.ip_forward" = 1;
-    };
   };
 
   services.sshd.enable = true;
+
+  services.manilov-network.libvirt.enable = true;
 
   nix.settings.experimental-features = [
     "nix-command"
@@ -112,6 +86,8 @@ in {
 
   lib.ds-omega = {
     modules = {
+      services.manilov-network.enable = true;
+
       ecosystem = {
         enable = false;
 
@@ -123,14 +99,7 @@ in {
     };
   };
 
-  virtualisation = {
-    libvirtd = {
-      enable = true;
-      # Used for UEFI boot of Home Assistant OS guest image
-      qemu = {
-        runAsRoot = true;
-      };
-      # qemuOvmf = true;
-    };
-  };
+  # libvirtd enablement and the root-owned QEMU state policy are owned by
+  # services.manilov-network.libvirt.enable; the module sets
+  # virtualisation.libvirtd.qemu.runAsRoot for root-owned qcow2 images.
 }

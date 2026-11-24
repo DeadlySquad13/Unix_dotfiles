@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Minimal `systemctl` stand-in for the dead-man best-effort cancel path.
+set -euo pipefail
+if [[ -n "${MANILOV_FAKE_LOG:-}" ]]; then
+  {
+    printf 'systemctl'
+    printf ' %s' "$@"
+    printf '\n'
+  } >> "$MANILOV_FAKE_LOG"
+fi
+exit 0

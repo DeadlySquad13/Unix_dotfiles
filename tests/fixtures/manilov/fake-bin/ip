@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Minimal `ip` stand-in for local applier smoke tests.
+#
+# Read queries are answered from $MANILOV_FAKE_NETLINK (the netlink-*.json
+# fixtures). Mutating invocations are only logged.
+set -euo pipefail
+
+log_file="${MANILOV_FAKE_LOG:-}"
+
+log() {
+  [[ -n "$log_file" ]] || return 0
+  {
+    printf 'ip'
+    printf ' %s' "$@"
+    printf '\n'
+  } >> "$log_file"
+}
+
+if [[ "${1:-}" == "-j" ]]; then
+  fixture="${MANILOV_FAKE_NETLINK:-}"
+  [[ -n "$fixture" && -f "$fixture" ]] || {
+    printf 'fake ip: MANILOV_FAKE_NETLINK is not set or missing\n' >&2
+    exit 2
+  }
+  case "${2:-}" in
+    link)
+      name="${5:-}"
+      out=$(jq -c --arg n "$name" '[.links[]? | select(.ifname == $n)]' "$fixture")
+      [[ "$out" != "[]" ]] || exit 1
+      printf '%s\n' "$out"
+      ;;
+    addr)
+      name="${5:-}"
+      jq -c --arg n "$name" \
+        '[.addresses[]? | select(.ifname == $n)
+          | {addr_info:[{local:(.address | split("/")[0]),
+                         prefixlen:((.address | split("/")[1] // "0") | tonumber)}]}]' \
+        "$fixture"
+      ;;
+    route)
+      jq -c '[.routes[]? | select(.dst == "default")]' "$fixture"
+      ;;
+    *)
+      printf 'fake ip: unsupported query: %s\n' "$*" >&2
+      exit 2
+      ;;
+  esac
+  exit 0
+fi
+
+log "$@"
+exit 0

@@ -1,0 +1,42 @@
+{
+  "nftables": [
+    {
+      "table": {
+        "family": "inet",
+        "name": "filter"
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "filter",
+        "name": "FORWARD",
+        "type": "filter",
+        "hook": "forward",
+        "prio": 0,
+        "policy": "drop"
+      }
+    },
+    {
+      "chain": {
+        "family": "inet",
+        "table": "filter",
+        "name": "MANILOV_FORWARD"
+      }
+    },
+    {
+      "rule": {
+        "family": "inet",
+        "table": "filter",
+        "chain": "FORWARD",
+        "expr": [
+          {
+            "jump": {
+              "target": "MANILOV_FORWARD"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

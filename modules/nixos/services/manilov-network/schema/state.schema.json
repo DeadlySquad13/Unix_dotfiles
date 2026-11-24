@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ds-omega.invalid/manilov-network/state.schema.json",
+  "title": "Manilov network durable state",
+  "description": "Durable owner state at /var/lib/manilov-network/state.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile",
+    "phase",
+    "planDigest",
+    "paramsDigest",
+    "appliedAt",
+    "confirmDeadline",
+    "confirmedAt",
+    "deadmanArmedAt",
+    "deadmanUnit",
+    "deadmanCancelled",
+    "health",
+    "healthChecks",
+    "extensions",
+    "handoff"
+  ],
+  "properties": {
+    "profile": {
+      "enum": ["proxyarp", "bridge"]
+    },
+    "phase": {
+      "$ref": "#/$defs/phase"
+    },
+    "planDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "paramsDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "appliedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "confirmDeadline": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "confirmedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "deadmanArmedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "deadmanUnit": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "deadmanCancelled": {
+      "type": "boolean"
+    },
+    "health": {
+      "enum": ["unknown", "pass", "degraded", "fail"]
+    },
+    "healthChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": ["unknown", "pass", "degraded", "fail"]
+          },
+          "detail": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["at", "from", "to"],
+        "properties": {
+          "at": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "from": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "handoff": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["to", "reason"],
+      "properties": {
+        "to": {
+          "enum": ["host", "image"]
+        },
+        "reason": {
+          "enum": ["health", "deadman", "manual", "auto"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "enum": ["idle", "applying", "unconfirmed", "applied", "rolling-back", "rolled-back"]
+    }
+  }
+}

@@ -69,7 +69,9 @@ in {
     };
   };
 
-  services.sshd.enable = true;
+  # TODO: Confilcts with main host because of shared network.
+  services.sshd.enable = false;
+  networking.firewall.enable = false;
 
   nix.settings.experimental-features = [
     "nix-command"

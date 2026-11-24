@@ -1,0 +1,30 @@
+{
+  "links": [
+    {
+      "ifname": "eth-test0",
+      "address": "02:00:00:00:00:02",
+      "operstate": "UP",
+      "carrier": true
+    },
+    {
+      "ifname": "br0",
+      "address": "02:00:00:00:00:02",
+      "operstate": "UP",
+      "carrier": true
+    }
+  ],
+  "addresses": [
+    {
+      "ifname": "br0",
+      "address": "198.51.100.10/24"
+    }
+  ],
+  "routes": [
+    {
+      "dst": "default",
+      "gateway": "198.51.100.1",
+      "dev": "br0"
+    }
+  ],
+  "sshd": true
+}

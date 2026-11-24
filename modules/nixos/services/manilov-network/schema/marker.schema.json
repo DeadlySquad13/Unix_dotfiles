@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ds-omega.invalid/manilov-network/marker.schema.json",
+  "title": "Manilov network marker",
+  "description": "Host-provisioned marker at /etc/manilov/marker.json. It selects the profile and carries the host-owned parameters; the image only reads it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "profile", "role", "owner", "selectorDigest", "params"],
+  "properties": {
+    "schema": {
+      "const": "manilov.network.marker/v1"
+    },
+    "profile": {
+      "enum": ["proxyarp", "bridge"]
+    },
+    "role": {
+      "enum": ["owner", "consumer"]
+    },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "selectorDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uplink", "management", "addressing", "datapath", "peer"],
+      "properties": {
+        "uplink": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "permanentMac"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "permanentMac": {
+              "type": "string",
+              "pattern": "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"
+            }
+          }
+        },
+        "management": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["address", "gateway"],
+          "properties": {
+            "address": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prefix": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 128
+            },
+            "gateway": {
+              "type": "string",
+              "minLength": 1
+            },
+            "dns": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "addressing": {
+          "enum": ["static", "dhcp"]
+        },
+        "datapath": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tap"],
+          "properties": {
+            "tap": {
+              "type": "string",
+              "minLength": 1
+            },
+            "bridge": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "peer": {
+          "$ref": "#/$defs/peer"
+        },
+        "peers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/peer"
+          }
+        },
+        "confirmDeadline": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "$defs": {
+    "peer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mac"],
+      "properties": {
+        "mac": {
+          "type": "string",
+          "pattern": "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

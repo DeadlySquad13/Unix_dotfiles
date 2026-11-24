@@ -122,6 +122,9 @@ in {
         browser-sync = disabled;
 
         google-cloud-sdk = disabled;
+
+        # Jira CLI, with per-space profiles configured below.
+        jira-cli = enabled;
       };
       ecosystem = {
         enable = true;
@@ -200,6 +203,40 @@ in {
     installDockerPackage = false; # Already installed by provider.
     rootless = false;
     enableAlias = true;
+  };
+
+  # Jira CLI spaces -> projects. A "space" owns the server/login/token; a
+  # "project" owns the default project key and metadata. Profile ids are
+  # `<space>-<project>` and become `jira-<space>-<project>` shell functions.
+  #
+  # TODO(@creamsoda): rename `rutube`/`AHUB` if needed. The work Jira is a
+  # Server/Data Center instance with an unscoped, URL-wide PAT, so one token
+  # per space covers every project listed under it.
+  ds-omega.development.jira-cli = {
+    # Exported as JIRA_CONFIG_FILE for a bare `jira`.
+    default = "rutube-AHUB";
+    spaces = {
+      rutube = {
+        # Work Jira Server/Data Center with an unscoped, URL-wide PAT.
+        # Private; add these keys to secrets/secrets.yaml:
+        #   jira_work_server
+        #   jira_work_login
+        #   jira_work_token
+        serverSecret = "jira_work_server";
+        loginSecret = "jira_work_login";
+        # One token per space (server/account), shared by its projects.
+        tokenSecret = "jira_work_token";
+        installation = "Local";
+        authType = "bearer";
+        # Optional `jira-rutube` space shortcut for this project.
+        defaultProject = "AHUB";
+        projects = {
+          AHUB = {
+            projectType = "classic";
+          };
+        };
+      };
+    };
   };
 
   # Review-exchange role = "producer" (laptop): no OpenCode `/review` tool —

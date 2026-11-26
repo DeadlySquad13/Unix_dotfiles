@@ -16,9 +16,11 @@
   # All other arguments come from the home home.
   config,
   ...
-}: let
+}:
+let
   inherit (lib.${namespace}) disabled enabled;
-in {
+in
+{
   # REFACTOR: Implement auto-import via Snowfall-lib utils.
   imports = [
     ./syncthing/default.nix
@@ -94,6 +96,9 @@ in {
         nix = enabled;
         # INFO: Already has installed via system means.
         gnumake = disabled;
+
+        # Jira CLI, with per-space profiles configured below.
+        jira-cli = enabled;
       };
       ecosystem = {
         enable = true;
@@ -185,6 +190,9 @@ in {
 
       bookmarks = {
         enable = true;
+        # Host-local project configs (RFC adding-nix-generated-files-into-container):
+        # explicit opt-in; @salt uses the activation writer below.
+        projects = enabled;
       };
 
       services = {
@@ -215,6 +223,74 @@ in {
   ${namespace} = {
     development.docker = {
       enableAlias = true;
+    };
+
+    # Project configs are host-local on @salt: the generation root and manifest
+    # are written by the activation generator, outside the synced tree. The
+    # generated project paths stay untouched until the Phase 3 ignore boundary
+    # is verified on the real host; flip `writeLinks` only after Phase 0/3
+    # (see docs/rfc/adding-nix-generated-files-into-container/plan.md).
+    bookmarks.projects = {
+      writeMode = "activation";
+      writeLinks = false;
+    };
+
+    # Jira CLI spaces -> projects. A "space" owns the server/login/token; a
+    # "project" owns the default project key and metadata. Profile ids are
+    # `<space>-<project>` and become `jira-<space>-<project>` shell functions.
+    #
+    # Personal Atlassian Cloud account. Organization `ds13` -> site `antiskuf`;
+    # the JPD space `AntiSkuf_discovery--roadmap-exploration` is backed by the
+    # Jira project key `ASDRE` (idea keys look like `ASDRE-49`). The same
+    # account has a second site in ds13, `finding-work`, with its own JPD
+    # space; it is a separate `spaces` entry.
+    #
+    # The token is scoped. Atlassian requires scoped tokens to call
+    # `https://api.atlassian.com/ex/jira/<cloudId>`, while `browse_server`
+    # keeps `jira open` on the site URL.
+    development.jira-cli = {
+      # Exported as JIRA_CONFIG_FILE for a bare `jira`.
+      default = "personal-ASDRE";
+
+      spaces.personal = {
+        serverSecret = "jira_antiskuf_personal_server";
+        loginSecret = "jira_personal_login";
+        installation = "Cloud";
+        authType = "basic";
+        cloudId = "0a71bd79-c53f-4219-9b44-889c0bf92253";
+        # Platform-scoped token used by jira-cli/MCP. The JPD-only token
+        # remains under jira_personal_ds13_product_discovery_token.
+        tokenSecret = "jira_personal_ds13_token";
+        # This site is reachable only through the user's proxychains config;
+        # work profiles stay direct.
+        useProxychains = true;
+        defaultProject = "ASDRE";
+        projects = {
+          # AntiSkuf_discovery--roadmap-exploration
+          ASDRE = {
+            # JPD spaces are team-managed.
+            projectType = "next-gen";
+          };
+        };
+      };
+
+      # FindingJob_discovery--roadmap-exploring lives on a different site in
+      # the same ds13 organization. The scoped token is account-level, so it is
+      # reused; only the site URL and Cloud ID differ.
+      spaces.finding-work = {
+        server = "https://finding-work.atlassian.net";
+        loginSecret = "jira_personal_login";
+        installation = "Cloud";
+        authType = "basic";
+        cloudId = "b51309ad-cdbd-4352-9f01-1949a65f2f22";
+        tokenSecret = "jira_personal_ds13_token";
+        useProxychains = true;
+        defaultProject = "FJDRE";
+        projects.FJDRE = {
+          # JPD spaces are team-managed.
+          projectType = "next-gen";
+        };
+      };
     };
 
     # Review-exchange role = "consumer" (PC): `/review` + the `review-agent` +

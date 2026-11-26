@@ -9,7 +9,7 @@
 
   cfg = config.${namespace}.development.jira-cli;
 
-  # Used for shell function names and file names, so keep it conservative.
+  # Used for generated executable names and file names, so keep it conservative.
   validId = name: builtins.match "[A-Za-z0-9_-]+" name != null;
 
   # Flatten `spaces.<space>.projects.<project>` into the cross-product that
@@ -36,9 +36,9 @@
   # (placeholder-bearing) template and therefore into the Nix store, so prefer
   # the `*Secret` options for anything private.
   secretNames = lib.concatMap (space:
-    lib.optional (space.serverSecret != null) space.serverSecret
-    ++ lib.optional (space.loginSecret != null) space.loginSecret
-    ++ lib.optional (space.tokenSecret != null) space.tokenSecret)
+    lib.optional ((space.serverSecret or null) != null) space.serverSecret
+    ++ lib.optional ((space.loginSecret or null) != null) space.loginSecret
+    ++ lib.optional ((space.tokenSecret or null) != null) space.tokenSecret)
   (builtins.attrValues cfg.spaces);
 
   # If a secret name is set, emit a sops-nix template placeholder; otherwise
@@ -63,8 +63,16 @@
       # from SOPS secrets, so this file is read-only; keep non-secret metadata
       # in `extraConfig` instead of editing it in place.
       installation: ${builtins.toJSON profile.space.installation}
-      server: ${yamlSecretOr profile.space.serverSecret profile.space.server}
-      login: ${yamlSecretOr profile.space.loginSecret profile.space.login}
+      server: ${
+        if (profile.space.cloudId or null) != null
+        then builtins.toJSON "https://api.atlassian.com/ex/jira/${profile.space.cloudId}"
+        else yamlSecretOr (profile.space.serverSecret or null) (profile.space.server or null)
+      }
+      # jira-cli uses `browse_server` for `jira open`; a scoped API token
+      # forces `server` onto the api.atlassian.com gateway, so keep the site
+      # URL here for browser links.
+      browse_server: ${yamlSecretOr (profile.space.serverSecret or null) (profile.space.server or null)}
+      login: ${yamlSecretOr (profile.space.loginSecret or null) (profile.space.login or null)}
       auth_type: ${builtins.toJSON profile.space.authType}
       project:
         key: ${builtins.toJSON profile.project.key}
@@ -73,48 +81,115 @@
         name: ${builtins.toJSON profile.project.epicName}
         link: ${builtins.toJSON profile.project.epicLink}
       board: ${builtins.toJSON profile.project.board}
-      insecure: ${lib.boolToString profile.space.insecure}
+      insecure: ${lib.boolToString (profile.space.insecure or false)}
     ''
     + lib.optionalString (profile.project.extraConfig != "") ''
       # --- profile-specific metadata (extraConfig) ---
       ${profile.project.extraConfig}
     '';
 
-  # Per-profile `case` branches for the `_jira_run` helper. Both the config and
-  # token paths are resolved through sops-nix, so they are stable on Linux and
-  # Darwin.
-  profileCases = lib.concatStrings (map (profile: ''
-      ${profile.id})
+  # One PATH executable per `<space>-<project>` profile. The sops-rendered
+  # config path is baked in; the token is read from its 0400 file at runtime so
+  # no secret value is placed in the Nix store or in an exported registry.
+  profileWrapper = profile:
+    pkgs.writeShellApplication {
+      name = "jira-${profile.id}";
+      runtimeInputs =
+        [cfg.package pkgs.coreutils]
+        ++ lib.optional (profile.space.useProxychains or false) pkgs.proxychains;
+      text = ''
         config_file=${lib.escapeShellArg config.sops.templates.${profile.templateName}.path}
         token_file=${
-        lib.escapeShellArg (
-          if profile.space.tokenSecret != null
-          then config.sops.secrets.${profile.space.tokenSecret}.path
-          else ""
-        )
-      }
+          lib.escapeShellArg (
+            if (profile.space.tokenSecret or null) != null
+            then config.sops.secrets.${profile.space.tokenSecret}.path
+            else ""
+          )
+        }
         auth_type=${lib.escapeShellArg profile.space.authType}
-        ;;
-    '')
-    profileList);
 
-  profileFunctions = lib.concatStrings (map (profile: ''
-      jira-${profile.id}() {
-        _jira_run ${lib.escapeShellArg profile.id} "$@"
-      }
-    '')
-    profileList);
+        if [[ -n "$token_file" && -r "$token_file" ]]; then
+          JIRA_API_TOKEN="$(cat "$token_file")"
+          export JIRA_API_TOKEN
+        fi
+        JIRA_CONFIG_FILE="$config_file"
+        JIRA_AUTH_TYPE="$auth_type"
+        export JIRA_CONFIG_FILE JIRA_AUTH_TYPE
+
+        exec ${lib.optionalString (profile.space.useProxychains or false) "proxychains4 "}jira "$@"
+      '';
+    };
+
+  # Profile id -> wrapper, reused by the `jira-<space>` shortcuts and the
+  # `jira-profile` dispatcher.
+  wrapperByName = lib.listToAttrs (map (profile:
+    lib.nameValuePair "jira-${profile.id}" (profileWrapper profile))
+  profileList);
 
   # Optional `jira-<space>` shortcut for the space's default project.
-  spaceFunctions = lib.concatStrings (lib.mapAttrsToList (spaceName: space:
-    lib.optionalString (space.defaultProject != null) ''
-      jira-${spaceName}() {
-        _jira_run ${lib.escapeShellArg "${spaceName}-${space.defaultProject}"} "$@"
+  spaceWrapperByName = lib.listToAttrs (lib.concatMap (
+    spaceName: let
+      space = cfg.spaces.${spaceName};
+    in
+      lib.optional (space.defaultProject != null) {
+        name = "jira-${spaceName}";
+        value = pkgs.writeShellApplication {
+          name = "jira-${spaceName}";
+          text = ''
+            exec ${wrapperByName."jira-${spaceName}-${space.defaultProject}"}/bin/jira-${spaceName}-${space.defaultProject} "$@"
+          '';
+        };
       }
-    '')
-  cfg.spaces);
+  ) (lib.attrNames cfg.spaces));
+
+  # `jira-profile <space>[-<project>] ...` dispatcher for scripts that need to
+  # choose a profile dynamically. It accepts both profile ids and space
+  # shortcuts.
+  profileDispatcher = pkgs.writeShellApplication {
+    name = "jira-profile";
+    runtimeInputs = [cfg.package];
+    text = ''
+      if (( $# < 1 )); then
+        printf 'usage: jira-profile <space>[-<project>] [jira args...]\n' >&2
+        exit 2
+      fi
+      profile="$1"
+      shift
+      case "$profile" in
+        ${lib.concatStrings (map (profile: ''
+          ${lib.escapeShellArg profile.id})
+            exec ${wrapperByName."jira-${profile.id}"}/bin/jira-${profile.id} "$@"
+            ;;
+        '')
+        profileList)}
+        ${lib.concatStrings (map (spaceName: ''
+          ${lib.escapeShellArg spaceName})
+            exec ${spaceWrapperByName."jira-${spaceName}"}/bin/jira-${spaceName} "$@"
+            ;;
+        '')
+        spaceIds)}
+        *)
+          printf 'jira: unknown profile %s\n' "$profile" >&2
+          printf 'available profiles: %s\n' ${lib.escapeShellArg (lib.concatStringsSep " " profileValues)} >&2
+          exit 2
+          ;;
+      esac
+    '';
+  };
 
   profileIds = map (profile: profile.id) profileList;
+
+  # `jira-<space>` shortcuts are also valid `--profile` values, so completion
+  # and validation cover `jira`, `jira-<space>` and `jira-<space>-<project>`.
+  spaceIds = lib.concatMap (
+    spaceName: let
+      space = cfg.spaces.${spaceName};
+    in
+      lib.optional (space.defaultProject != null) spaceName
+  ) (lib.attrNames cfg.spaces);
+
+  profileValues = lib.unique (profileIds ++ spaceIds);
+  executableNames = lib.unique (map (value: "jira-${value}") profileValues);
 
   defaultConfigExport = lib.optionalString (defaultProfile != null) ''
     export JIRA_CONFIG_FILE=${lib.escapeShellArg config.sops.templates.${defaultProfile.templateName}.path}
@@ -152,6 +227,17 @@ in
           message = "development.jira-cli has colliding `<space>-<project>` ids; choose names that stay unique when joined with `-`.";
         }
         {
+          assertion = let
+            raw = map (value: "jira-${value}") (profileIds ++ spaceIds);
+          in
+            builtins.length raw == builtins.length (lib.unique raw);
+          message = "development.jira-cli generated `jira-*` executable names collide; rename a space or project.";
+        }
+        {
+          assertion = !(builtins.elem "profile" profileValues);
+          message = "development.jira-cli: a profile named `profile` would collide with the jira-profile dispatcher.";
+        }
+        {
           assertion = lib.all (spaceName: let
             space = cfg.spaces.${spaceName};
           in
@@ -175,16 +261,40 @@ in
           (builtins.attrNames cfg.spaces);
           message = "development.jira-cli.<space>: set exactly one of `login` or `loginSecret`.";
         }
+        {
+          assertion = lib.all (spaceName: let
+            space = cfg.spaces.${spaceName};
+          in
+            space.cloudId == null
+            || (space.installation == "Cloud" && space.authType == "basic"))
+          (builtins.attrNames cfg.spaces);
+          message = "development.jira-cli.<space>.cloudId requires installation = \"Cloud\" and authType = \"basic\" (scoped API token gateway).";
+        }
       ];
 
-      home.packages = [cfg.package];
+      home.packages =
+        [cfg.package]
+        ++ lib.attrValues wrapperByName
+        ++ lib.attrValues spaceWrapperByName
+        ++ [profileDispatcher];
 
       # Expose the default profile to every shell/agent, not only Bash. The
       # token itself still comes from the secret path in `bashrcExtra`.
-      home.sessionVariables = lib.optionalAttrs (defaultProfile != null) {
-        JIRA_CONFIG_FILE = config.sops.templates.${defaultProfile.templateName}.path;
-        JIRA_AUTH_TYPE = defaultProfile.space.authType;
-      };
+      # `JIRA_PROFILES`/`JIRA_PROFILE_EXECUTABLES` carry ids/names only; they
+      # never contain token paths, token values or auth types.
+      home.sessionVariables =
+        lib.optionalAttrs (defaultProfile != null) {
+          JIRA_CONFIG_FILE = config.sops.templates.${defaultProfile.templateName}.path;
+          JIRA_AUTH_TYPE = defaultProfile.space.authType;
+          # jira.py uses the default profile's wrapper (and thus its
+          # proxychains setting) when no --profile is given.
+          JIRA_DEFAULT_PROFILE = cfg.default;
+        }
+        // lib.optionalAttrs (profileIds != []) {
+          JIRA_PROFILES = lib.concatStringsSep " " profileValues;
+          JIRA_PROFILE_EXECUTABLES =
+            lib.concatStringsSep " " executableNames;
+        };
 
       # Neither a secret value nor a literal `server`/`login` that was opted
       # into SOPS lands in the Nix store: the template only contains opaque
@@ -202,48 +312,48 @@ in
 
       programs.bash.bashrcExtra = ''
         # jira-cli: per-space/per-project config + token wiring.
-        # Built from `${namespace}.development.jira-cli.spaces`.
-        _jira_run() {
-          local profile="$1"
-          shift
+        # Profiles are PATH executables generated from
+        # `${namespace}.development.jira-cli.spaces`; this block only exports
+        # the default profile and shell-completion metadata.
 
-          local config_file=""
-          local token_file=""
-          local auth_type="basic"
-
-          case "$profile" in
-        ${profileCases}    *)
-              printf 'jira: unknown profile %s\n' "$profile" >&2
-              printf 'available profiles: %s\n' ${lib.escapeShellArg (lib.concatStringsSep " " profileIds)} >&2
-              return 2
-              ;;
-          esac
-
-          if [[ -n "$token_file" && -r "$token_file" ]]; then
-            JIRA_CONFIG_FILE="$config_file" \
-              JIRA_API_TOKEN="$(cat "$token_file")" \
-              JIRA_AUTH_TYPE="$auth_type" \
-              command jira "$@"
-          else
-            JIRA_CONFIG_FILE="$config_file" \
-              JIRA_AUTH_TYPE="$auth_type" \
-              command jira "$@"
-          fi
-        }
-
-        jira-profile() {
-          if (( $# < 1 )); then
-            printf 'usage: jira-profile <space>-<project> [jira args...]\n' >&2
-            return 2
-          fi
-          _jira_run "$@"
-        }
-
-        ${profileFunctions}
-        ${spaceFunctions}
         ${defaultConfigExport}
         ${defaultTokenExport}
         ${defaultAuthExport}
+
+        # Complete `--profile` from the Nix-generated registry (ids only; no
+        # PATH scan, no secrets).
+        _jira_search_complete() {
+          local cur prev
+          cur="''${COMP_WORDS[COMP_CWORD]}"
+          prev="''${COMP_WORDS[COMP_CWORD-1]}"
+
+          case "$prev" in
+            --profile)
+              COMPREPLY=( $(compgen -W "''${JIRA_PROFILES:-}" -- "$cur") )
+              return 0
+              ;;
+          esac
+
+          case "$cur" in
+            --profile=*)
+              local value="''${cur#--profile=}"
+              COMPREPLY=( $(compgen -W "''${JIRA_PROFILES:-}" -- "$value") )
+              COMPREPLY=( "''${COMPREPLY[@]/#/--profile=}" )
+              return 0
+              ;;
+            -*)
+              return 0
+              ;;
+          esac
+
+          if (( COMP_CWORD == 1 )); then
+            COMPREPLY=( $(compgen -W "search list view comments open edit copy profiles refresh" -- "$cur") )
+            return 0
+          fi
+
+          return 1
+        }
+        complete -F _jira_search_complete jira-search jira.py 2>/dev/null || true
       '';
     })
   {
@@ -331,10 +441,34 @@ in
               '';
             };
 
+            cloudId = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = ''
+                Atlassian Cloud ID (`<site>.atlassian.net/_edge/tenant_info`).
+                When set, API calls use the scoped-token gateway
+                `https://api.atlassian.com/ex/jira/<cloudId>` while
+                `browse_server` keeps the site URL from `server`/`serverSecret`.
+                Required for scoped API tokens: basic auth against the site URL
+                is rejected; the gateway is the documented endpoint.
+              '';
+            };
+
             insecure = mkOption {
               type = types.bool;
               default = false;
               description = "Skip TLS certificate verification.";
+            };
+
+            useProxychains = mkOption {
+              type = types.bool;
+              default = false;
+              description = ''
+                Run this space's `jira-<space>-<project>` wrappers through
+                `proxychains4` (from `pkgs.proxychains`). Use only for a site
+                that is reachable exclusively through the proxy; other spaces
+                keep a direct connection.
+              '';
             };
 
             tokenSecret = mkOption {

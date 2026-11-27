@@ -235,60 +235,56 @@ in
       writeLinks = false;
     };
 
-    # Jira CLI spaces -> projects. A "space" owns the server/login/token; a
-    # "project" owns the default project key and metadata. Profile ids are
-    # `<space>-<project>` and become `jira-<space>-<project>` shell functions.
+    # Jira CLI orgs/sites/spaces, mirroring Jira. An org owns the shared
+    # connection fields; a site owns its URL and Cloud ID; a space owns the
+    # Jira key and metadata. Profile ids mirror the path:
+    # `<org>-<site>-<space>` -> `jira-<org>-<site>-<space>` executables.
     #
-    # Personal Atlassian Cloud account. Organization `ds13` -> site `antiskuf`;
-    # the JPD space `AntiSkuf_discovery--roadmap-exploration` is backed by the
-    # Jira project key `ASDRE` (idea keys look like `ASDRE-49`). The same
-    # account has a second site in ds13, `finding-work`, with its own JPD
-    # space; it is a separate `spaces` entry.
+    # Personal Atlassian Cloud organization `ds13` has two sites: `antiskuf`
+    # (JPD space AntiSkuf_discovery--roadmap-exploration, key `ASDRE`) and
+    # `finding-work` (FindingJob_discovery--roadmap-exploring, key `FJDRE`).
+    # Both share the login, token and proxy settings; each site supplies only
+    # its URL, Cloud ID and spaces.
     #
     # The token is scoped. Atlassian requires scoped tokens to call
     # `https://api.atlassian.com/ex/jira/<cloudId>`, while `browse_server`
     # keeps `jira open` on the site URL.
     development.jira-cli = {
       # Exported as JIRA_CONFIG_FILE for a bare `jira`.
-      default = "personal-ASDRE";
+      default = "ds13-antiskuf-ASDRE";
 
-      spaces.personal = {
-        serverSecret = "jira_antiskuf_personal_server";
+      orgs.ds13 = {
         loginSecret = "jira_personal_login";
         installation = "Cloud";
-        authType = "basic";
-        cloudId = "0a71bd79-c53f-4219-9b44-889c0bf92253";
         # Platform-scoped token used by jira-cli/MCP. The JPD-only token
-        # remains under jira_personal_ds13_product_discovery_token.
-        tokenSecret = "jira_personal_ds13_token";
-        # This site is reachable only through the user's proxychains config;
-        # work profiles stay direct.
+        # remains under jira_personal_ds13_org_product_discovery_token.
+        tokenSecret = "jira_personal_ds13_org_token";
+        # Both personal sites are reachable only through the user's
+        # proxychains config; work profiles stay direct.
         useProxychains = true;
-        defaultProject = "ASDRE";
-        projects = {
-          # AntiSkuf_discovery--roadmap-exploration
-          ASDRE = {
+
+        sites.antiskuf = {
+          serverSecret = "jira_personal_antiskuf_site_server";
+          cloudId = "0a71bd79-c53f-4219-9b44-889c0bf92253";
+          # `jira-ds13-antiskuf` shortcut.
+          defaultSpace = "ASDRE";
+          spaces.ASDRE = {
             # JPD spaces are team-managed.
-            projectType = "next-gen";
+            spaceType = "next-gen";
           };
         };
-      };
 
-      # FindingJob_discovery--roadmap-exploring lives on a different site in
-      # the same ds13 organization. The scoped token is account-level, so it is
-      # reused; only the site URL and Cloud ID differ.
-      spaces.finding-work = {
-        server = "https://finding-work.atlassian.net";
-        loginSecret = "jira_personal_login";
-        installation = "Cloud";
-        authType = "basic";
-        cloudId = "b51309ad-cdbd-4352-9f01-1949a65f2f22";
-        tokenSecret = "jira_personal_ds13_token";
-        useProxychains = true;
-        defaultProject = "FJDRE";
-        projects.FJDRE = {
-          # JPD spaces are team-managed.
-          projectType = "next-gen";
+        # FindingJob_discovery--roadmap-exploring lives on a different site in
+        # the same ds13 organization. The scoped token is account-level, so it
+        # is inherited; only the site URL, Cloud ID and space differ.
+        sites.finding-work = {
+          serverSecret = "jira_personal_finding_job_site_server";
+          cloudId = "b51309ad-cdbd-4352-9f01-1949a65f2f22";
+          # `jira-ds13-finding-work` shortcut.
+          defaultSpace = "FJDRE";
+          spaces.FJDRE = {
+            # JPD spaces are team-managed.
+          };
         };
       };
     };

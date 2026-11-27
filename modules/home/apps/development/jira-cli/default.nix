@@ -12,96 +12,406 @@
   # Used for generated executable names and file names, so keep it conservative.
   validId = name: builtins.match "[A-Za-z0-9_-]+" name != null;
 
-  # Flatten `spaces.<space>.projects.<project>` into the cross-product that
-  # jira-cli consumes: one config per (space, project) pair. A "space" owns the
-  # server/login/token; a "project" owns the default project key and metadata.
-  profileList = lib.flatten (lib.mapAttrsToList (spaceName: space:
-    lib.mapAttrsToList (projectName: project: {
-      id = "${spaceName}-${projectName}";
-      inherit spaceName projectName space project;
-      templateName = "jira-${spaceName}-${projectName}.yml";
-    })
-    space.projects)
-  cfg.spaces);
+  # Connection fields shared by orgs, sites and spaces. They are nullable so a
+  # deeper node can tell "unset" (inherit) from an explicit value.
+  connectionOptions = {
+    server = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Plaintext Jira server URL. Prefer `serverSecret` to keep the URL out of
+        the Nix store. Exactly one of `server`/`serverSecret` must be set after
+        inheritance.
+      '';
+    };
 
+    serverSecret = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Name of the sops-nix secret holding the server URL. Exactly one of
+        `server`/`serverSecret` must be set after inheritance.
+      '';
+    };
+
+    login = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Plaintext Jira login (email for Cloud, username for Local). Prefer
+        `loginSecret`. Exactly one of `login`/`loginSecret` must be set after
+        inheritance.
+      '';
+    };
+
+    loginSecret = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Name of the sops-nix secret holding the Jira login. Exactly one of
+        `login`/`loginSecret` must be set after inheritance.
+      '';
+    };
+
+    installation = mkOption {
+      type = types.nullOr (types.enum ["Cloud" "Local"]);
+      default = null;
+      description = ''
+        Jira installation type. Resolves to `Cloud` when unset at every level.
+      '';
+    };
+
+    authType = mkOption {
+      type = types.nullOr (types.enum ["basic" "bearer" "mtls" "cf-access"]);
+      default = null;
+      description = ''
+        Authentication type. `basic` for a Cloud API token; `bearer` for a
+        Server/Data Center PAT. Resolves to `basic` when unset at every level.
+      '';
+    };
+
+    cloudId = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Atlassian Cloud ID. When set, API calls use
+        `https://api.atlassian.com/ex/jira/<cloudId>` while `browse_server`
+        keeps the site URL. Required for scoped API tokens.
+      '';
+    };
+
+    insecure = mkOption {
+      type = types.nullOr types.bool;
+      default = null;
+      description = "Skip TLS certificate verification. Resolves to `false` when unset.";
+    };
+
+    useProxychains = mkOption {
+      type = types.nullOr types.bool;
+      default = null;
+      description = ''
+        Run this profile through `proxychains4`. Resolves to `false` when
+        unset; set it once per org/site when every space is proxied.
+      '';
+    };
+
+    tokenSecret = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Name of the sops-nix secret holding `JIRA_API_TOKEN`. When null after
+        inheritance, no token is managed and it must come from `.netrc`, the
+        keyring, or the environment.
+      '';
+    };
+  };
+
+  # Metadata for one Jira space (or a legacy project). `name` is the attr name.
+  metadataOptions = name: typeName: {
+    key = mkOption {
+      type = types.str;
+      default = name;
+      description = "Jira key. Defaults to the attr name.";
+    };
+
+    ${typeName} = mkOption {
+      type = types.enum ["classic" "next-gen"];
+      default = "classic";
+      description = "Jira type (`project.type` in the jira-cli config).";
+    };
+
+    epicName = mkOption {
+      type = types.str;
+      default = "";
+      description = "Epic custom field name (`epic.name`), e.g. `Epic Link`.";
+    };
+
+    epicLink = mkOption {
+      type = types.str;
+      default = "";
+      description = "Epic custom field id (`epic.link`).";
+    };
+
+    board = mkOption {
+      type = types.str;
+      default = "";
+      description = "Default board name (`board`); empty means none.";
+    };
+
+    extraConfig = mkOption {
+      type = types.lines;
+      default = "";
+      description = ''
+        Raw YAML appended to the generated config, typically the
+        `issue.types`/`issue.fields.custom` metadata produced by `jira init`.
+      '';
+    };
+  };
+
+  # org -> site -> space, mirroring Jira. Each level inherits the connection
+  # fields of its parent.
+  spaceNode = types.submodule ({name, ...}: {
+    options = connectionOptions // metadataOptions name "spaceType";
+  });
+
+  siteNode = types.submodule ({name, ...}: {
+    options =
+      connectionOptions
+      // {
+        defaultSpace = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = ''
+            Space under this site to expose as `jira-<org>-<site>`. When null,
+            only the full `jira-<org>-<site>-<space>` executable is generated.
+          '';
+        };
+
+        spaces = mkOption {
+          type = types.attrsOf spaceNode;
+          default = {};
+          description = "Jira spaces on this site. The attr name is the space key unless `key` is set.";
+        };
+      };
+  });
+
+  orgNode = types.submodule ({name, ...}: {
+    options =
+      connectionOptions
+      // {
+        sites = mkOption {
+          type = types.attrsOf siteNode;
+          default = {};
+          description = "Jira sites in this organization.";
+        };
+      };
+  });
+
+  # Legacy direct-space shape for Server/Data Center and older jira-cli. Kept
+  # so existing `spaces.<space>.projects.<project>` configs keep working.
+  legacyProjectNode = types.submodule ({name, ...}: {
+    options = metadataOptions name "projectType";
+  });
+
+  legacySpaceNode = types.submodule ({name, ...}: {
+    options =
+      connectionOptions
+      // {
+        defaultProject = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = ''
+            Project under this space to expose as `jira-<space>`. When null,
+            only the full `jira-<space>-<project>` executable is generated.
+          '';
+        };
+
+        projects = mkOption {
+          type = types.attrsOf legacyProjectNode;
+          default = {};
+          description = "Projects under this legacy space. The attr name is the project key unless `key` is set.";
+        };
+      };
+  });
+
+  # Fields inherited down the org -> site -> space chain. Metadata is not
+  # inherited. The legacy chain additionally inherits `defaultProject`.
+  connectionFields = [
+    "server"
+    "serverSecret"
+    "login"
+    "loginSecret"
+    "installation"
+    "authType"
+    "cloudId"
+    "insecure"
+    "useProxychains"
+    "tokenSecret"
+  ];
+
+  legacyFields = connectionFields ++ ["defaultProject"];
+
+  # Drop nulls so an unset child does not override an inherited value.
+  setFields = fields: attrs:
+    lib.filterAttrs (name: value: builtins.elem name fields && value != null) attrs;
+
+  # Merge one node over its inherited fields. If a child switches where a
+  # credential comes from (plaintext <-> sops), drop the inherited counterpart
+  # so the "exactly one source" assertions stay meaningful.
+  mergeNode = fields: inherited: node: let
+    own = setFields fields node;
+    base = inherited // own;
+    afterServer =
+      if own ? server
+      then removeAttrs base ["serverSecret"]
+      else if own ? serverSecret
+      then removeAttrs base ["server"]
+      else base;
+  in
+    if own ? login
+    then removeAttrs afterServer ["loginSecret"]
+    else if own ? loginSecret
+    then removeAttrs afterServer ["login"]
+    else afterServer;
+
+  # Apply global defaults after inheritance.
+  finalize = merged: {
+    server = merged.server or null;
+    serverSecret = merged.serverSecret or null;
+    login = merged.login or null;
+    loginSecret = merged.loginSecret or null;
+    cloudId = merged.cloudId or null;
+    tokenSecret = merged.tokenSecret or null;
+    defaultProject = merged.defaultProject or null;
+    installation =
+      if (merged.installation or null) != null
+      then merged.installation
+      else "Cloud";
+    authType =
+      if (merged.authType or null) != null
+      then merged.authType
+      else "basic";
+    insecure =
+      if (merged.insecure or null) != null
+      then merged.insecure
+      else false;
+    useProxychains =
+      if (merged.useProxychains or null) != null
+      then merged.useProxychains
+      else false;
+  };
+
+  # org -> site -> space profiles. Profile id mirrors the path.
+  orgProfiles =
+    lib.concatMap (orgName: let
+      org = cfg.orgs.${orgName};
+      orgMerged = mergeNode connectionFields {} org;
+    in
+      lib.concatMap (siteName: let
+        site = org.sites.${siteName};
+        siteMerged = mergeNode connectionFields orgMerged site;
+      in
+        lib.mapAttrsToList (spaceName: space: let
+          spaceMerged = mergeNode connectionFields siteMerged space;
+          final = finalize spaceMerged;
+        in {
+          kind = "org";
+          id = "${orgName}-${siteName}-${spaceName}";
+          inherit orgName siteName spaceName;
+          space = final;
+          meta = {
+            key = space.key;
+            projectType = space.spaceType;
+            inherit (space) epicName epicLink board extraConfig;
+          };
+          templateName = "jira-${orgName}-${siteName}-${spaceName}.yml";
+        }) site.spaces)
+      (lib.attrNames org.sites))
+    (lib.attrNames cfg.orgs);
+
+  # Legacy space -> project profiles.
+  legacyProfiles =
+    lib.concatMap (spaceName: let
+      space = cfg.spaces.${spaceName};
+      final = finalize (mergeNode legacyFields {} space);
+    in
+      lib.mapAttrsToList (projectName: project: {
+        kind = "legacy";
+        id = "${spaceName}-${projectName}";
+        inherit spaceName projectName;
+        space = final;
+        meta = {
+          key = project.key;
+          projectType = project.projectType;
+          inherit (project) epicName epicLink board extraConfig;
+        };
+        templateName = "jira-${spaceName}-${projectName}.yml";
+      }) space.projects)
+    (lib.attrNames cfg.spaces);
+
+  profileList = orgProfiles ++ legacyProfiles;
   profiles = lib.listToAttrs (map (profile: lib.nameValuePair profile.id profile) profileList);
 
   defaultProfile =
     if cfg.default == null
     then null
-    else profiles.${cfg.default};
+    else profiles.${cfg.default} or null;
 
-  # Every secret referenced by any space. A space may keep server/login/token
-  # in SOPS; when a value is supplied literally instead, it is written into the
-  # (placeholder-bearing) template and therefore into the Nix store, so prefer
-  # the `*Secret` options for anything private.
-  secretNames = lib.concatMap (space:
-    lib.optional ((space.serverSecret or null) != null) space.serverSecret
-    ++ lib.optional ((space.loginSecret or null) != null) space.loginSecret
-    ++ lib.optional ((space.tokenSecret or null) != null) space.tokenSecret)
-  (builtins.attrValues cfg.spaces);
+  # Every secret referenced by any final profile.
+  secretNames = lib.unique (lib.concatMap (profile:
+    lib.optional (profile.space.serverSecret != null) profile.space.serverSecret
+    ++ lib.optional (profile.space.loginSecret != null) profile.space.loginSecret
+    ++ lib.optional (profile.space.tokenSecret != null) profile.space.tokenSecret)
+  profileList);
 
   # If a secret name is set, emit a sops-nix template placeholder; otherwise
-  # emit the literal as a JSON/YAML scalar. Exactly one source is enforced by
-  # an assertion, so a real value is never silently duplicated.
+  # emit the literal as a JSON/YAML scalar.
   yamlSecretOr = secret: literal:
     if secret != null
     then "\"${config.sops.placeholder.${secret}}\""
     else builtins.toJSON literal;
 
-  # jira-cli reads `project.key`/`project.type` and `epic.name`/`epic.link`.
-  # `extraConfig` is appended verbatim for metadata produced by `jira init`
-  # (issue types, custom fields, etc.).
-  renderConfig = profile:
-    ''
-      # Generated by Home Manager from `${namespace}.development.jira-cli`.
-      # Space: ${profile.spaceName}
-      # Project: ${profile.projectName} (key ${profile.project.key})
-      # Profile id: ${profile.id}
-      #
-      # Rendered by sops-nix at activation. `server`/`login` may be substituted
-      # from SOPS secrets, so this file is read-only; keep non-secret metadata
-      # in `extraConfig` instead of editing it in place.
-      installation: ${builtins.toJSON profile.space.installation}
-      server: ${
-        if (profile.space.cloudId or null) != null
-        then builtins.toJSON "https://api.atlassian.com/ex/jira/${profile.space.cloudId}"
-        else yamlSecretOr (profile.space.serverSecret or null) (profile.space.server or null)
-      }
-      # jira-cli uses `browse_server` for `jira open`; a scoped API token
-      # forces `server` onto the api.atlassian.com gateway, so keep the site
-      # URL here for browser links.
-      browse_server: ${yamlSecretOr (profile.space.serverSecret or null) (profile.space.server or null)}
-      login: ${yamlSecretOr (profile.space.loginSecret or null) (profile.space.login or null)}
-      auth_type: ${builtins.toJSON profile.space.authType}
-      project:
-        key: ${builtins.toJSON profile.project.key}
-        type: ${builtins.toJSON profile.project.projectType}
-      epic:
-        name: ${builtins.toJSON profile.project.epicName}
-        link: ${builtins.toJSON profile.project.epicLink}
-      board: ${builtins.toJSON profile.project.board}
-      insecure: ${lib.boolToString (profile.space.insecure or false)}
-    ''
-    + lib.optionalString (profile.project.extraConfig != "") ''
-      # --- profile-specific metadata (extraConfig) ---
-      ${profile.project.extraConfig}
-    '';
+  # jira-cli still spells the leaf `project:`. For both org spaces and legacy
+  # projects, `meta.projectType` maps to `project.type`.
+  renderConfig = profile: let
+    header =
+      if profile.kind == "org"
+      then ''
+        # Organization: ${profile.orgName}
+        # Site: ${profile.siteName}
+        # Space: ${profile.spaceName}
+      ''
+      else ''
+        # Space: ${profile.spaceName}
+        # Project: ${profile.projectName or ""}
+      '';
+  in ''
+    # Generated by Home Manager from `${namespace}.development.jira-cli`.
+    ${header}# Profile id: ${profile.id}
+    #
+    # Rendered by sops-nix at activation. `server`/`login` may be substituted
+    # from SOPS secrets, so this file is read-only; keep non-secret metadata
+    # in `extraConfig` instead of editing it in place.
+    installation: ${builtins.toJSON profile.space.installation}
+    server: ${
+      if profile.space.cloudId != null
+      then builtins.toJSON "https://api.atlassian.com/ex/jira/${profile.space.cloudId}"
+      else yamlSecretOr profile.space.serverSecret profile.space.server
+    }
+    # jira-cli uses `browse_server` for `jira open`; a scoped API token
+    # forces `server` onto the api.atlassian.com gateway, so keep the site
+    # URL here for browser links.
+    browse_server: ${yamlSecretOr profile.space.serverSecret profile.space.server}
+    login: ${yamlSecretOr profile.space.loginSecret profile.space.login}
+    auth_type: ${builtins.toJSON profile.space.authType}
+    project:
+      key: ${builtins.toJSON profile.meta.key}
+      type: ${builtins.toJSON profile.meta.projectType}
+    epic:
+      name: ${builtins.toJSON profile.meta.epicName}
+      link: ${builtins.toJSON profile.meta.epicLink}
+    board: ${builtins.toJSON profile.meta.board}
+    insecure: ${lib.boolToString profile.space.insecure}
+  ''
+  + lib.optionalString (profile.meta.extraConfig != "") ''
+    # --- profile-specific metadata (extraConfig) ---
+    ${profile.meta.extraConfig}
+  '';
 
-  # One PATH executable per `<space>-<project>` profile. The sops-rendered
-  # config path is baked in; the token is read from its 0400 file at runtime so
-  # no secret value is placed in the Nix store or in an exported registry.
+  # One PATH executable per profile. The sops-rendered config path is baked in;
+  # the token is read from its 0400 file at runtime so no secret value lands in
+  # the Nix store or in an exported registry.
   profileWrapper = profile:
     pkgs.writeShellApplication {
       name = "jira-${profile.id}";
       runtimeInputs =
         [cfg.package pkgs.coreutils]
-        ++ lib.optional (profile.space.useProxychains or false) pkgs.proxychains;
+        ++ lib.optional profile.space.useProxychains pkgs.proxychains;
       text = ''
         config_file=${lib.escapeShellArg config.sops.templates.${profile.templateName}.path}
         token_file=${
           lib.escapeShellArg (
-            if (profile.space.tokenSecret or null) != null
+            if profile.space.tokenSecret != null
             then config.sops.secrets.${profile.space.tokenSecret}.path
             else ""
           )
@@ -116,41 +426,56 @@
         JIRA_AUTH_TYPE="$auth_type"
         export JIRA_CONFIG_FILE JIRA_AUTH_TYPE
 
-        exec ${lib.optionalString (profile.space.useProxychains or false) "proxychains4 "}jira "$@"
+        exec ${lib.optionalString profile.space.useProxychains "proxychains4 "}jira "$@"
       '';
     };
 
-  # Profile id -> wrapper, reused by the `jira-<space>` shortcuts and the
-  # `jira-profile` dispatcher.
   wrapperByName = lib.listToAttrs (map (profile:
     lib.nameValuePair "jira-${profile.id}" (profileWrapper profile))
   profileList);
 
-  # Optional `jira-<space>` shortcut for the space's default project.
-  spaceWrapperByName = lib.listToAttrs (lib.concatMap (
-    spaceName: let
+  # `defaultSpace` on a site -> `jira-<org>-<site>` shortcut.
+  orgShortcuts =
+    lib.concatMap (orgName: let
+      org = cfg.orgs.${orgName};
+    in
+      lib.concatMap (siteName: let
+        site = org.sites.${siteName};
+      in
+        lib.optional (site.defaultSpace != null) {
+          id = "${orgName}-${siteName}";
+          targetId = "${orgName}-${siteName}-${site.defaultSpace}";
+        }) (lib.attrNames org.sites))
+    (lib.attrNames cfg.orgs);
+
+  # `defaultProject` on a legacy space -> `jira-<space>` shortcut.
+  legacyShortcuts =
+    lib.concatMap (spaceName: let
       space = cfg.spaces.${spaceName};
     in
       lib.optional (space.defaultProject != null) {
-        name = "jira-${spaceName}";
-        value = pkgs.writeShellApplication {
-          name = "jira-${spaceName}";
-          text = ''
-            exec ${wrapperByName."jira-${spaceName}-${space.defaultProject}"}/bin/jira-${spaceName}-${space.defaultProject} "$@"
-          '';
-        };
-      }
-  ) (lib.attrNames cfg.spaces));
+        id = spaceName;
+        targetId = "${spaceName}-${space.defaultProject}";
+      }) (lib.attrNames cfg.spaces);
 
-  # `jira-profile <space>[-<project>] ...` dispatcher for scripts that need to
-  # choose a profile dynamically. It accepts both profile ids and space
-  # shortcuts.
+  shortcutList = orgShortcuts ++ legacyShortcuts;
+
+  # Shortcut id -> wrapper. Targets a profile wrapper by its id.
+  shortcutWrapperByName = lib.listToAttrs (map (shortcut:
+    lib.nameValuePair "jira-${shortcut.id}" (pkgs.writeShellApplication {
+      name = "jira-${shortcut.id}";
+      text = ''
+        exec ${wrapperByName."jira-${shortcut.targetId}"}/bin/jira-${shortcut.targetId} "$@"
+      '';
+    })) shortcutList);
+
+  # Dynamic dispatcher for scripts. Accepts profile ids and shortcuts.
   profileDispatcher = pkgs.writeShellApplication {
     name = "jira-profile";
     runtimeInputs = [cfg.package];
     text = ''
       if (( $# < 1 )); then
-        printf 'usage: jira-profile <space>[-<project>] [jira args...]\n' >&2
+        printf 'usage: jira-profile <profile-id|shortcut> [jira args...]\n' >&2
         exit 2
       fi
       profile="$1"
@@ -162,12 +487,12 @@
             ;;
         '')
         profileList)}
-        ${lib.concatStrings (map (spaceName: ''
-          ${lib.escapeShellArg spaceName})
-            exec ${spaceWrapperByName."jira-${spaceName}"}/bin/jira-${spaceName} "$@"
+        ${lib.concatStrings (map (shortcut: ''
+          ${lib.escapeShellArg shortcut.id})
+            exec ${shortcutWrapperByName."jira-${shortcut.id}"}/bin/jira-${shortcut.id} "$@"
             ;;
         '')
-        spaceIds)}
+        shortcutList)}
         *)
           printf 'jira: unknown profile %s\n' "$profile" >&2
           printf 'available profiles: %s\n' ${lib.escapeShellArg (lib.concatStringsSep " " profileValues)} >&2
@@ -178,18 +503,9 @@
   };
 
   profileIds = map (profile: profile.id) profileList;
-
-  # `jira-<space>` shortcuts are also valid `--profile` values, so completion
-  # and validation cover `jira`, `jira-<space>` and `jira-<space>-<project>`.
-  spaceIds = lib.concatMap (
-    spaceName: let
-      space = cfg.spaces.${spaceName};
-    in
-      lib.optional (space.defaultProject != null) spaceName
-  ) (lib.attrNames cfg.spaces);
-
-  profileValues = lib.unique (profileIds ++ spaceIds);
-  executableNames = lib.unique (map (value: "jira-${value}") profileValues);
+  shortcutIds = map (shortcut: shortcut.id) shortcutList;
+  profileValues = lib.unique (profileIds ++ shortcutIds);
+  executableNames = map (value: "jira-${value}") profileValues;
 
   defaultConfigExport = lib.optionalString (defaultProfile != null) ''
     export JIRA_CONFIG_FILE=${lib.escapeShellArg config.sops.templates.${defaultProfile.templateName}.path}
@@ -216,84 +532,100 @@ in
       assertions = [
         {
           assertion = cfg.default == null || builtins.hasAttr cfg.default profiles;
-          message = "development.jira-cli.default must be `<space>-<project>` and name an existing space/project pair.";
+          message = "development.jira-cli.default must name an existing profile id.";
         }
         {
-          assertion = lib.all validId profileIds;
-          message = "development.jira-cli space and project names may only contain A-Z, a-z, 0-9, `_` and `-`.";
+          assertion = lib.all validId (profileIds ++ shortcutIds);
+          message = "development.jira-cli org, site, space and project names may only contain A-Z, a-z, 0-9, `_` and `-`.";
         }
         {
-          assertion = builtins.length profileIds == builtins.length (builtins.attrNames profiles);
-          message = "development.jira-cli has colliding `<space>-<project>` ids; choose names that stay unique when joined with `-`.";
+          assertion = builtins.length profileIds == builtins.length (lib.unique profileIds);
+          message = "development.jira-cli has colliding profile ids; space names must be unique within a site and legacy space names unique at top level.";
         }
         {
           assertion = let
-            raw = map (value: "jira-${value}") (profileIds ++ spaceIds);
+            raw = profileIds ++ shortcutIds;
           in
             builtins.length raw == builtins.length (lib.unique raw);
-          message = "development.jira-cli generated `jira-*` executable names collide; rename a space or project.";
+          message = "development.jira-cli generated `jira-*` executable names collide; rename an org, site, space or project.";
         }
         {
           assertion = !(builtins.elem "profile" profileValues);
           message = "development.jira-cli: a profile named `profile` would collide with the jira-profile dispatcher.";
         }
         {
+          assertion = lib.all (orgName: let
+            org = cfg.orgs.${orgName};
+          in
+            lib.all (siteName: let
+              site = org.sites.${siteName};
+            in
+              site.defaultSpace == null || builtins.hasAttr site.defaultSpace site.spaces)
+            (lib.attrNames org.sites))
+          (lib.attrNames cfg.orgs);
+          message = "development.jira-cli.<org>.<site>.defaultSpace must name one of that site's spaces.";
+        }
+        {
           assertion = lib.all (spaceName: let
             space = cfg.spaces.${spaceName};
           in
             space.defaultProject == null || builtins.hasAttr space.defaultProject space.projects)
-          (builtins.attrNames cfg.spaces);
+          (lib.attrNames cfg.spaces);
           message = "development.jira-cli.<space>.defaultProject must name one of that space's projects.";
         }
         {
-          assertion = lib.all (spaceName: let
-            space = cfg.spaces.${spaceName};
-          in
-            (space.server != null) != (space.serverSecret != null))
-          (builtins.attrNames cfg.spaces);
-          message = "development.jira-cli.<space>: set exactly one of `server` or `serverSecret`.";
+          assertion = lib.all (profile:
+            (profile.space.server != null) != (profile.space.serverSecret != null))
+          profileList;
+          message = "development.jira-cli: set exactly one of `server` or `serverSecret` per space (directly or inherited).";
         }
         {
-          assertion = lib.all (spaceName: let
-            space = cfg.spaces.${spaceName};
-          in
-            (space.login != null) != (space.loginSecret != null))
-          (builtins.attrNames cfg.spaces);
-          message = "development.jira-cli.<space>: set exactly one of `login` or `loginSecret`.";
+          assertion = lib.all (profile:
+            (profile.space.login != null) != (profile.space.loginSecret != null))
+          profileList;
+          message = "development.jira-cli: set exactly one of `login` or `loginSecret` per space (directly or inherited).";
         }
         {
-          assertion = lib.all (spaceName: let
-            space = cfg.spaces.${spaceName};
-          in
-            space.cloudId == null
-            || (space.installation == "Cloud" && space.authType == "basic"))
-          (builtins.attrNames cfg.spaces);
+          assertion = lib.all (profile:
+            profile.space.cloudId == null
+            || (profile.space.installation == "Cloud" && profile.space.authType == "basic"))
+          profileList;
           message = "development.jira-cli.<space>.cloudId requires installation = \"Cloud\" and authType = \"basic\" (scoped API token gateway).";
+        }
+        {
+          assertion = let
+            bad = lib.concatMap (orgName: let
+              org = cfg.orgs.${orgName};
+            in
+              lib.concatMap (siteName: let
+                site = org.sites.${siteName};
+              in
+                lib.optional (site.spaces == {} && site.defaultSpace != null) "${orgName}/${siteName}")
+              (lib.attrNames org.sites))
+            (lib.attrNames cfg.orgs);
+          in
+            bad == [];
+          message = "development.jira-cli: a site with `defaultSpace` must define at least one space.";
         }
       ];
 
       home.packages =
         [cfg.package]
         ++ lib.attrValues wrapperByName
-        ++ lib.attrValues spaceWrapperByName
+        ++ lib.attrValues shortcutWrapperByName
         ++ [profileDispatcher];
 
       # Expose the default profile to every shell/agent, not only Bash. The
       # token itself still comes from the secret path in `bashrcExtra`.
-      # `JIRA_PROFILES`/`JIRA_PROFILE_EXECUTABLES` carry ids/names only; they
-      # never contain token paths, token values or auth types.
       home.sessionVariables =
         lib.optionalAttrs (defaultProfile != null) {
           JIRA_CONFIG_FILE = config.sops.templates.${defaultProfile.templateName}.path;
           JIRA_AUTH_TYPE = defaultProfile.space.authType;
-          # jira.py uses the default profile's wrapper (and thus its
-          # proxychains setting) when no --profile is given.
           JIRA_DEFAULT_PROFILE = cfg.default;
         }
         // lib.optionalAttrs (profileIds != []) {
           JIRA_PROFILES = lib.concatStringsSep " " profileValues;
-          JIRA_PROFILE_EXECUTABLES =
-            lib.concatStringsSep " " executableNames;
+          JIRA_PROFILE_EXECUTABLES = lib.concatStringsSep " " executableNames;
         };
 
       # Neither a secret value nor a literal `server`/`login` that was opted
@@ -311,10 +643,10 @@ in
       profileList);
 
       programs.bash.bashrcExtra = ''
-        # jira-cli: per-space/per-project config + token wiring.
+        # jira-cli: per-profile config + token wiring.
         # Profiles are PATH executables generated from
-        # `${namespace}.development.jira-cli.spaces`; this block only exports
-        # the default profile and shell-completion metadata.
+        # `${namespace}.development.jira-cli`; this block only exports the
+        # default profile and shell-completion metadata.
 
         ${defaultConfigExport}
         ${defaultTokenExport}
@@ -369,182 +701,32 @@ in
         type = types.nullOr types.str;
         default = null;
         description = ''
-          `<space>-<project>` id exported as `JIRA_CONFIG_FILE` for a bare
-          `jira` invocation. When null, every profile must be selected
+          Profile id exported as `JIRA_CONFIG_FILE` for a bare `jira`
+          invocation: `<org>-<site>-<space>` for `orgs`, `<space>-<project>`
+          for legacy `spaces`. When null, every profile must be selected
           explicitly.
         '';
       };
 
-      spaces = mkOption {
-        type = types.attrsOf (types.submodule ({name, ...}: {
-          options = {
-            server = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = ''
-                Plaintext Jira server URL. Prefer `serverSecret` to keep the URL
-                out of the Nix store and this repository. Exactly one of
-                `server`/`serverSecret` must be set.
-              '';
-            };
-
-            serverSecret = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = ''
-                Name of the sops-nix secret holding this space's server URL.
-                Substituted into the rendered jira-cli config at activation.
-                Exactly one of `server`/`serverSecret` must be set.
-              '';
-            };
-
-            login = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = ''
-                Plaintext Jira login (email for Cloud, username for Local).
-                Prefer `loginSecret` to keep it out of the Nix store and this
-                repository. Exactly one of `login`/`loginSecret` must be set.
-              '';
-            };
-
-            loginSecret = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = ''
-                Name of the sops-nix secret holding this space's Jira login.
-                Substituted into the rendered jira-cli config at activation.
-                Exactly one of `login`/`loginSecret` must be set.
-              '';
-            };
-
-            installation = mkOption {
-              type = types.enum ["Cloud" "Local"];
-              default = "Cloud";
-              description = ''
-                Jira installation type. Use `Local` for Jira Server/Data Center
-                (v2 API, personal access tokens) and `Cloud` for Atlassian Cloud
-                (v3 API, email + API token).
-              '';
-            };
-
-            authType = mkOption {
-              type = types.enum ["basic" "bearer" "mtls" "cf-access"];
-              default = "basic";
-              description = ''
-                Authentication type. For a Jira Server/Data Center personal
-                access token (an unscoped, URL-wide PAT), use
-                `installation = "Local"` and `authType = "bearer"`; jira-cli
-                then sends `Authorization: Bearer <PAT>`. `basic` is a Cloud
-                API token (email + token) or a Local password. `mtls` and
-                `cf-access` are for client certificates and Cloudflare Access.
-              '';
-            };
-
-            cloudId = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = ''
-                Atlassian Cloud ID (`<site>.atlassian.net/_edge/tenant_info`).
-                When set, API calls use the scoped-token gateway
-                `https://api.atlassian.com/ex/jira/<cloudId>` while
-                `browse_server` keeps the site URL from `server`/`serverSecret`.
-                Required for scoped API tokens: basic auth against the site URL
-                is rejected; the gateway is the documented endpoint.
-              '';
-            };
-
-            insecure = mkOption {
-              type = types.bool;
-              default = false;
-              description = "Skip TLS certificate verification.";
-            };
-
-            useProxychains = mkOption {
-              type = types.bool;
-              default = false;
-              description = ''
-                Run this space's `jira-<space>-<project>` wrappers through
-                `proxychains4` (from `pkgs.proxychains`). Use only for a site
-                that is reachable exclusively through the proxy; other spaces
-                keep a direct connection.
-              '';
-            };
-
-            tokenSecret = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = ''
-                Name of the sops-nix secret holding this space's
-                `JIRA_API_TOKEN`. When null, no token is managed for the space
-                and the key must come from `.netrc`, the keyring, or the ambient
-                environment.
-              '';
-            };
-
-            defaultProject = mkOption {
-              type = types.nullOr types.str;
-              default = null;
-              description = ''
-                Project name under this space to expose as `jira-<space>`.
-                When null, only the full `jira-<space>-<project>` functions are
-                generated.
-              '';
-            };
-
-            projects = mkOption {
-              type = types.attrsOf (types.submodule ({name, ...}: {
-                options = {
-                  key = mkOption {
-                    type = types.str;
-                    default = name;
-                    description = "Jira project key. Defaults to the project attr name.";
-                  };
-
-                  projectType = mkOption {
-                    type = types.enum ["classic" "next-gen"];
-                    default = "classic";
-                    description = "Jira project type (`project.type` in the config).";
-                  };
-
-                  epicName = mkOption {
-                    type = types.str;
-                    default = "";
-                    description = "Epic custom field name (`epic.name`), e.g. `Epic Link`.";
-                  };
-
-                  epicLink = mkOption {
-                    type = types.str;
-                    default = "";
-                    description = "Epic custom field id (`epic.link`).";
-                  };
-
-                  board = mkOption {
-                    type = types.str;
-                    default = "";
-                    description = "Default board name (`board`); empty means none.";
-                  };
-
-                  extraConfig = mkOption {
-                    type = types.lines;
-                    default = "";
-                    description = ''
-                      Raw YAML appended to the generated config, typically the
-                      `issue.types`/`issue.fields.custom` metadata produced by
-                      `jira init`.
-                    '';
-                  };
-                };
-              }));
-              default = {};
-              description = "Projects under this space. The attr name is the project key unless `key` is set.";
-            };
-          };
-        }));
+      orgs = mkOption {
+        type = types.attrsOf orgNode;
         default = {};
         description = ''
-          Jira spaces (server/account/token) and the projects under each. The
-          generated profile id is `<space>-<project>`.
+          Atlassian organizations. Each org contains `sites`, and each site
+          contains `spaces`, mirroring Jira: `orgs.<org>.sites.<site>.spaces.<space>`.
+          Connection fields set on an org are inherited by its sites and
+          spaces; a deeper node overrides only what it sets. Profile ids are
+          `<org>-<site>-<space>`.
+        '';
+      };
+
+      spaces = mkOption {
+        type = types.attrsOf legacySpaceNode;
+        default = {};
+        description = ''
+          Legacy direct spaces for Server/Data Center and older jira-cli:
+          `spaces.<space>.projects.<project>`. New Cloud configs should use
+          `orgs` instead. Profile ids are `<space>-<project>`.
         '';
       };
     };

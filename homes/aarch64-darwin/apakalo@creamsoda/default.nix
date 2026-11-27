@@ -187,6 +187,9 @@ in {
 
       bookmarks = {
         enable = true;
+        # Host-local project configs (RFC adding-nix-generated-files-into-container):
+        # Darwin keeps the out-of-store link writer (`writeMode = "home.file"`).
+        projects = enabled;
       };
 
       services = {
@@ -205,9 +208,10 @@ in {
     enableAlias = true;
   };
 
-  # Jira CLI spaces -> projects. A "space" owns the server/login/token; a
-  # "project" owns the default project key and metadata. Profile ids are
-  # `<space>-<project>` and become `jira-<space>-<project>` shell functions.
+  # Legacy Jira CLI path for the work Server/Data Center instance (older
+  # jira-cli). `spaces.rutube.projects.AHUB` keeps the legacy
+  # `<space>-<project>` naming; the Cloud `orgs.<org>.sites.<site>.spaces`
+  # hierarchy is intentionally not used here.
   #
   # TODO(@creamsoda): rename `rutube`/`AHUB` if needed. The work Jira is a
   # Server/Data Center instance with an unscoped, URL-wide PAT, so one token

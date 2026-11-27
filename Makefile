@@ -153,7 +153,11 @@ encrypt-melis-stoke-xray-config:
 .PHONY: decrypt-build-time-secrets
 
 decrypt-build-time-secrets:
-	invoke --search-root=./tasks secrets.decrypt --node=$(NODE) || echo "Node doesn't has any build-time secrets to decrypt..."
+	@if [ -d ./secrets/buildTime-/$(NODE) ]; then \
+		invoke --search-root=./tasks secrets.decrypt --node=$(NODE); \
+	else \
+		echo "Node $(NODE) doesn't have any build-time secrets to decrypt..."; \
+	fi
 
 # Edit in vault, change some content, save -> mac is updated.
 # Use with care, only when you're sure you've just mistaken while
@@ -196,3 +200,21 @@ debug-virtual-microphone:
 	invoke --search-root=$(HOME)/.bookmarks/shared-scripts virtual-microphone.debug
 
 include Makefile.opencode-mcp
+
+# Host-local generated project configs (@salt). The payload is produced by the
+# `bookmarks.projects` module; these targets run the Phase 2/3 generator
+# manually. `project-configs-salt` writes the generation root + manifest;
+# pass PROJECT_CONFIGS_ARGS="--write-links --effective-ignore-file ..." only
+# after the Phase 3 ignore boundary is verified on the real host.
+# See docs/rfc/adding-nix-generated-files-into-container/plan.md.
+PROJECT_CONFIGS_HOME ?= ds13@salt
+PROJECT_CONFIGS_ARGS ?=
+
+project-configs-salt:
+	payload=$$(nix eval --impure --raw '.#homeConfigurations."$(PROJECT_CONFIGS_HOME)".config.ds-omega.bookmarks.projects.generatorPayloadPath') && \
+	python3 scripts/project-configs-salt.py --input "$$payload" $(PROJECT_CONFIGS_ARGS)
+
+project-configs-salt-check:
+	payload=$$(nix eval --impure --raw '.#homeConfigurations."$(PROJECT_CONFIGS_HOME)".config.ds-omega.bookmarks.projects.generatorPayloadPath') && \
+	python3 scripts/project-configs-salt.py --input "$$payload" --check
+

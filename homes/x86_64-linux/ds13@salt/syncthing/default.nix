@@ -104,7 +104,11 @@ in
             # is root-anchored.
             ".local-artifacts"
             "/.artifacts--processed"
-          ];
+          ]
+          # Tier 1 host-local generated project configs (RFC
+          # adding-nix-generated-files-into-container). Derived from the same
+          # model as the salt generator, so the boundary cannot drift.
+          ++ config.${namespace}.bookmarks.projects.ignorePatterns;
         };
         "rut-Projects_artifacts" = {
           path = "/zsalt/shared-/@creamsoda/Projects/.artifact";

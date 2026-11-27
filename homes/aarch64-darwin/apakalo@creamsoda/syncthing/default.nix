@@ -74,7 +74,13 @@ in
           ignorePatterns = [
             ".local-artifacts"
             "/.artifacts--processed"
-          ];
+          ]
+          # Tier 1 host-local generated project configs (RFC
+          # adding-nix-generated-files-into-container). Derived from the same
+          # model as the salt generator, so the boundary cannot drift. The
+          # namespace is spelled out to avoid the evaluation-host `namespace`
+          # argument here.
+          ++ config.ds-omega.bookmarks.projects.ignorePatterns;
         };
         "rut-Projects_artifacts" = {
           path = "${homeDirectory}/Projects/.artifact";

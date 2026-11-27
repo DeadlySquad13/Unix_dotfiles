@@ -114,6 +114,19 @@
       "--effective-ignore-cmd"
       cfg.ignoreBoundaryCommand
     ];
+
+  # Home Manager's Syncthing module forwards `settings.folders.<name>` to
+  # `/rest/config/folders`, which has no `ignorePatterns` field. Syncthing
+  # reads ignores from `<folder>/.stignore` instead (the NixOS module uses
+  # `/rest/db/ignores`; Home Manager has no equivalent). We therefore write the
+  # file ourselves, non-destructively, before the generator verifies it.
+  #
+  # Test the helper with `python3 scripts/test_stignore_merge.py`; the Nix
+  # check `checks/stignore-merge` runs the same suite in the sandbox.
+  stignoreArgs =
+    ["--file" (toString cfg.stignorePath)]
+    ++ lib.concatMap (pattern: ["--pattern" pattern])
+    (cfg.stignoreBasePatterns ++ cfg.ignorePatterns);
 in
   lib.${namespace}.mkIfEnabled
   {
@@ -162,9 +175,20 @@ in
           })
           structures));
 
+    # Runs in both write modes: Darwin (`home.file`) and @salt (`activation`)
+    # need the same `.stignore`, independent of which writer materialises the
+    # project tree. A missing parent directory is skipped by the helper.
+    home.activation.agentProjectConfigsStignore =
+      lib.mkIf cfg.writeStignore
+      (dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${../../../../scripts/stignore-merge.py} ${lib.escapeShellArgs stignoreArgs}
+      '');
+
+    # Ordered after the `.stignore` writer so the boundary file exists before
+    # the generator verifies it.
     home.activation.agentProjectConfigs =
       lib.mkIf (cfg.writeMode == "activation")
-      (dag.entryAfter ["writeBoundary"] ''
+      (dag.entryAfter ["writeBoundary" "agentProjectConfigsStignore"] ''
         $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${../../../../scripts/project-configs-salt.py} ${lib.escapeShellArgs generatorArgs}
       '');
   }
@@ -273,6 +297,41 @@ in
         description = "Manifest written atomically by the salt generator (schema 1).";
       };
 
+      writeStignore = mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Write the Syncthing ignore patterns to `stignorePath` on activation.
+          The Home Manager Syncthing module cannot push `ignorePatterns`
+          (unlike the NixOS module's `/rest/db/ignores` path), so this module
+          owns `<folder>/.stignore`. Runs in both `writeMode` values.
+        '';
+      };
+
+      stignorePath = mkOption {
+        type = types.str;
+        default = "${resolvedProjectsRoot}/.stignore";
+        description = ''
+          The `.stignore` file Syncthing reads for `syncthingFolderName`.
+          Defaults to the resolved projects root.
+        '';
+      };
+
+      stignoreBasePatterns = mkOption {
+        type = types.listOf types.str;
+        default = [
+          "node_modules"
+          "/.artifact"
+          ".local-artifacts"
+          ".artifacts--processed"
+        ];
+        description = ''
+          Non-generated ignore patterns that must always be present. Hosts may
+          override (for example @salt adds the host-local `/ai-` scratchpad).
+          The writer never removes host-local patterns already in the file.
+        '';
+      };
+
       writeMode = mkOption {
         type = types.enum ["home.file" "activation"];
         default = "home.file";
@@ -301,11 +360,16 @@ in
 
       ignoreBoundaryFile = mkOption {
         type = types.nullOr (types.either types.str types.path);
-        default = null;
+        default =
+          if cfg.writeStignore
+          then cfg.stignorePath
+          else null;
         description = ''
           File containing the effective Syncthing ignore patterns, one per line
           (for example the output of `syncthing cli config folders <id> ignores get`).
-          Required at runtime when `writeLinks = true` unless a command is set.
+          Defaults to `stignorePath` when the writer is enabled, so no explicit
+          path is needed on @salt. Required at runtime when `writeLinks = true`
+          unless a command is set.
         '';
       };
 
@@ -340,6 +404,31 @@ in
         readOnly = true;
         internal = true;
         description = "Store path of the generator JSON payload (for Make targets).";
+      };
+
+      stignoreArgs = mkOption {
+        type = types.listOf types.str;
+        default = stignoreArgs;
+        readOnly = true;
+        internal = true;
+        description = ''
+          Exact argv handed to `scripts/stignore-merge.py` by the
+          `agentProjectConfigsStignore` activation entry. Exposed read-only so
+          checks can compare the whole argument string instead of unsound
+          per-pattern substring assertions.
+        '';
+      };
+
+      generatorArgs = mkOption {
+        type = types.listOf types.str;
+        default = generatorArgs;
+        readOnly = true;
+        internal = true;
+        description = ''
+          Exact argv handed to `scripts/project-configs-salt.py` by the
+          `agentProjectConfigs` activation entry. Exposed read-only for exact
+          activation assertions.
+        '';
       };
     };
   }

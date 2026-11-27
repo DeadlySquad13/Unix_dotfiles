@@ -101,7 +101,9 @@
             };
           };
           config.lib.file.mkOutOfStoreSymlink = path: "out-of-store:${toString path}";
-          config.lib.dag.entryAfter = _names: text: text;
+          # Capture the dependency list so the check can assert ordering; the
+          # real Home Manager DAG stores the same `{ after; data; }` shape.
+          config.lib.dag.entryAfter = names: text: {after = names; data = text;};
           config.services.syncthing.settings.folders."rut-Projects".path = projectsRoot;
         }
         extra
@@ -119,12 +121,69 @@
       };
     };
   };
+  saltNoStignore = evalHome {
+    projectsRoot = saltRoot;
+    extra = {
+      config.${namespace}.bookmarks.projects = {
+        writeMode = "activation";
+        writeStignore = false;
+        generationRoot = "/home/ds13/.local/share/agent-project-configs";
+        manifestPath = "/home/ds13/.local/state/agent-project-configs/manifest.json";
+      };
+    };
+  };
 
   darwinFiles = darwin.config.home.file;
   saltActivation = salt.config.home.activation.agentProjectConfigs or null;
-  saltIgnore = salt.config.${namespace}.bookmarks.projects.ignorePatterns;
+  saltStignore = salt.config.home.activation.agentProjectConfigsStignore or null;
+  saltProjects = salt.config.${namespace}.bookmarks.projects;
+  saltIgnore = saltProjects.ignorePatterns;
+  saltStignorePatterns = saltProjects.stignoreBasePatterns ++ saltIgnore;
+
+  # Exact argv strings, not per-pattern substrings: `/x` is a prefix of `/x/y`,
+  # so `hasInfix pattern` would still pass if `/x`'s own argument were dropped
+  # while a longer sibling containing it remained.
+  # `generatorArgs` embeds the payload store path, so its escaped form carries
+  # string context; `hasInfix` operates on plain strings. The comparison is
+  # textual only, so dropping context is correct and safe.
+  stignoreArgString =
+    builtins.unsafeDiscardStringContext (lib.escapeShellArgs saltProjects.stignoreArgs);
+  generatorArgString =
+    builtins.unsafeDiscardStringContext (lib.escapeShellArgs saltProjects.generatorArgs);
+
+  expectedIgnorePatterns =
+    map (logical: "/" + logical) (builtins.attrNames saltStructures);
 
   libSource = builtins.readFile ../../lib/project-configs/default.nix;
+
+  # Regression guard: the Home Manager Syncthing module silently drops
+  # `settings.folders.<name>.ignorePatterns`, so this feature owns
+  # `<root>/.stignore` instead. Other folders (rut-Documents) legitimately
+  # declare their own `ignorePatterns` for the NixOS-style path, so the guard
+  # is scoped to the `rut-Projects` entry this module drives.
+  creamSyncthing = builtins.readFile "${../../homes/aarch64-darwin}/apakalo@creamsoda/syncthing/default.nix";
+  saltSyncthing = builtins.readFile "${../../homes/x86_64-linux}/ds13@salt/syncthing/default.nix";
+
+  syncthingFolderBlock = folder: text: let
+    parts = lib.splitString "\"${folder}\" = {" text;
+  in
+    if builtins.length parts < 2
+    then ""
+    else lib.head (lib.splitString "};" (builtins.elemAt parts 1));
+
+  # Drop everything after `#` so explanatory comments that mention the dropped
+  # attribute do not trip the guard. The files under test contain no `#` inside
+  # string literals.
+  stripComments = text:
+    lib.concatMapStrings
+    (line: lib.head (lib.splitString "#" line) + "\n")
+    (lib.splitString "\n" text);
+
+  rutProjectsBlock = folder: text:
+    stripComments (syncthingFolderBlock folder text);
+
+  creamRutProjects = rutProjectsBlock "rut-Projects" creamSyncthing;
+  saltRutProjects = rutProjectsBlock "rut-Projects" saltSyncthing;
 
   # --- assertions ---
 
@@ -147,12 +206,34 @@
     darwinFiles ? ${autoHubEnvrcKey}
     && lib.hasInfix "dotenv ./.env.dev" darwinFiles.${autoHubEnvrcKey}.text;
 
-  # 4. `activation` mode writes no `home.file` and installs the generator.
+  # 4. `activation` mode writes no `home.file` and installs the generator,
+  #    ordered after the `.stignore` writer.
   assertActivation =
     salt.config.home.file == {}
     && saltActivation != null
-    && lib.hasInfix "project-configs-salt.py" saltActivation
-    && lib.hasInfix "--input" saltActivation;
+    && saltActivation.after == ["writeBoundary" "agentProjectConfigsStignore"]
+    && lib.hasInfix "project-configs-salt.py" saltActivation.data
+    && lib.hasInfix generatorArgString (builtins.unsafeDiscardStringContext saltActivation.data);
+
+  # 4a. The stignore writer is installed with the script path and the *whole*
+  #     argument string (every base plus derived pattern, in order). Comparing
+  #     the escaped argv rules out the prefix-collision that per-pattern
+  #     `hasInfix` allowed.
+  assertStignoreActivation =
+    saltStignore != null
+    && lib.hasInfix "stignore-merge.py" saltStignore.data
+    && lib.hasInfix stignoreArgString (builtins.unsafeDiscardStringContext saltStignore.data);
+
+  # 4b. `ignoreBoundaryFile` defaults to `<projectsRoot>/.stignore`.
+  assertStignoreBoundaryDefault =
+    toString saltProjects.ignoreBoundaryFile == "${saltRoot}/.stignore";
+
+  # 4c. Disabling the writer removes the activation entry and the boundary
+  #     default.
+  assertStignoreDisabled =
+    !(saltNoStignore.config.home.activation ? agentProjectConfigsStignore)
+    && saltNoStignore.config.${namespace}.bookmarks.projects.ignoreBoundaryFile
+    == null;
 
   # 5. Tier 1 ignore patterns are derived from the exact same model, one per
   #    generated logical path, and never absolute paths.
@@ -161,6 +242,40 @@
     == lib.sort (a: b: a < b) (projectConfigs.ignorePatterns saltStructures)
     && builtins.length saltIgnore == builtins.length (builtins.attrNames saltStructures)
     && lib.all (pattern: lib.hasPrefix "/--professional/Rutube__/" pattern) saltIgnore;
+
+  # 5a. `ignorePatterns` is exactly one root-anchored pattern per logical path,
+  #     unique, and free of `//`.
+  assertIgnorePatternsExact =
+    saltIgnore == expectedIgnorePatterns
+    && lib.all (pattern: lib.hasPrefix "/" pattern) saltIgnore
+    && lib.all (pattern: !(lib.hasInfix "//" pattern)) saltIgnore
+    && lib.unique saltIgnore == saltIgnore;
+
+  # 5b. Explicit per-logical-path membership, not just whole-list equality.
+  assertIgnorePerPath =
+    lib.all
+    (logical: builtins.elem "/${logical}" saltIgnore)
+    (builtins.attrNames saltStructures);
+
+  # 5c. Base and derived patterns never collide.
+  assertNoDuplicateStignorePatterns =
+    builtins.length saltStignorePatterns
+    == builtins.length (lib.unique saltStignorePatterns);
+
+  # 4d. Activation ordering, the writer flag, and the owned path.
+  assertStignoreShape =
+    saltStignore != null
+    && saltStignore.after == ["writeBoundary"]
+    && saltProjects.writeStignore == true
+    && toString saltProjects.stignorePath == "${saltRoot}/.stignore";
+
+  # 4e. The Syncthing host files never re-declare `ignorePatterns` on the
+  #     `rut-Projects` folder (Home Manager would silently drop it).
+  assertNoSyncthingIgnorePatterns =
+    creamRutProjects != ""
+    && saltRutProjects != ""
+    && !(lib.hasInfix "ignorePatterns" creamRutProjects)
+    && !(lib.hasInfix "ignorePatterns" saltRutProjects);
 
   # 6. Logical paths are host-neutral (relative to projectsRoot): salt-like
   #    inputs do not leak the salt prefix into the model keys.
@@ -186,6 +301,14 @@ in
   assert assertDarwinFileShape;
   assert assertDarwinTextShape;
   assert assertActivation;
+  assert assertStignoreActivation;
+  assert assertStignoreBoundaryDefault;
+  assert assertStignoreDisabled;
+  assert assertIgnorePatternsExact;
+  assert assertIgnorePerPath;
+  assert assertNoDuplicateStignorePatterns;
+  assert assertStignoreShape;
+  assert assertNoSyncthingIgnorePatterns;
   assert assertIgnoreCoverage;
   assert assertLogicalPathsRelative;
   assert assertNoCurrentSystem;

@@ -233,6 +233,16 @@ in
     bookmarks.projects = {
       writeMode = "activation";
       writeLinks = false;
+      # Shared defaults plus the @salt-only `/ai-` scratchpad (previously
+      # pushed as a Syncthing `ignorePatterns` entry, which Home Manager drops).
+      # The module writes these to `rut-Projects/.stignore`.
+      stignoreBasePatterns = [
+        "node_modules"
+        "/.artifact"
+        ".local-artifacts"
+        ".artifacts--processed"
+        "/ai-"
+      ];
     };
 
     # Jira CLI orgs/sites/spaces, mirroring Jira. An org owns the shared

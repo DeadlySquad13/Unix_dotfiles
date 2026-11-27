@@ -94,21 +94,11 @@ in
           path = "/zsalt/shared-/@creamsoda/Projects";
           id = shared.folderIds.rut-Projects;
           devices = ["@creamsoda"];
-          ignorePatterns = [
-            # Scratchpad, relevant only on @salt for now so no need to sync.
-            "/ai-"
-            # Project-local raw artifacts (mirrored into the centralized
-            # `.artifact`). Must not be scanned by the bidirectional rut-Projects
-            # folder — carried only by the simplex pair. `.local-artifacts` is
-            # unanchored (project-anchored, any depth); `.artifacts--processed`
-            # is root-anchored.
-            ".local-artifacts"
-            "/.artifacts--processed"
-          ]
-          # Tier 1 host-local generated project configs (RFC
-          # adding-nix-generated-files-into-container). Derived from the same
-          # model as the salt generator, so the boundary cannot drift.
-          ++ config.${namespace}.bookmarks.projects.ignorePatterns;
+          # Ignores are written to `rut-Projects/.stignore` by
+          # `config.ds-omega.bookmarks.projects`. The Home Manager Syncthing
+          # module has no `ignorePatterns` support (unlike the NixOS module's
+          # `/rest/db/ignores` path), so an `ignorePatterns` attribute here
+          # would be silently dropped.
         };
         "rut-Projects_artifacts" = {
           path = "/zsalt/shared-/@creamsoda/Projects/.artifact";

@@ -28,6 +28,20 @@ Contract
   fresh host: print ``SKIP`` and exit ``0`` so a home-manager switch is not
   failed. This applies to ``--check`` too, which is diagnostic otherwise.
 
+Symlink semantics
+-----------------
+Syncthing syncs symlinks but never follows them: it indexes the *real* tree
+under the synced folder, not the alias path a symlink points to. The project
+taxonomy is a symlink graph (``Projects/auto-hub`` is real;
+``Projects/--professional/Rutube__/AutoHub -> ../../auto-hub`` is a link), so
+an ignore pattern anchored on the alias
+(``/--professional/.../AutoHub/_scripts``) matches nothing and the real
+``auto-hub/_scripts`` keeps syncing. With
+``--projects-root`` every root-anchored pattern is expanded to its real
+location as well (see :func:`expand_alias_patterns`). Only the parent of each
+entry is resolved, because the entry itself is usually a store symlink that
+must stay ignored, not dereferenced.
+
 Modes
 -----
 * default     create/merge the file
@@ -52,6 +66,54 @@ PROG = "stignore-merge"
 
 EXIT_OK = 0
 EXIT_MISSING = 1
+
+
+def expand_alias_patterns(
+    patterns: list[str], projects_root: str
+) -> list[str]:
+    """Return patterns plus real-location variants for symlinked dirs.
+
+    ``projects_root`` is the Syncthing folder root. For every pattern that
+    starts with ``/``, the parent of the referenced path is resolved with
+    ``realpath``; if that lands elsewhere inside the root, the real
+    root-anchored variant is appended right after the logical pattern. The
+    entry itself is never resolved (it is usually a store symlink that must
+    remain ignored as a link). Patterns whose real location escapes the root
+    are skipped. The result keeps first occurrence order and is idempotent.
+    """
+    # Keep in sync with the other copy in scripts/ (no runtime import: the
+    # activation writer is a standalone store file).
+    root = os.path.realpath(projects_root)
+    expanded: list[str] = []
+    seen: set[str] = set()
+
+    def add(pattern: str) -> None:
+        if pattern in seen:
+            return
+        seen.add(pattern)
+        expanded.append(pattern)
+
+    for pattern in patterns:
+        add(pattern)
+        if not pattern.startswith("/"):
+            continue
+        abs_path = os.path.normpath(
+            os.path.join(root, pattern.lstrip("/"))
+        )
+        parent_real = os.path.realpath(os.path.dirname(abs_path))
+        real_path = os.path.join(parent_real, os.path.basename(abs_path))
+        if real_path == abs_path:
+            continue
+        try:
+            inside = os.path.commonpath([root, real_path]) == root
+        except ValueError:
+            inside = False
+        if not inside:
+            continue
+        relative = os.path.relpath(real_path, root).replace(os.sep, "/")
+        add("/" + relative)
+
+    return expanded
 
 
 def _read_existing(path: Path) -> str:
@@ -159,7 +221,18 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         prog=PROG,
         description="Non-destructively merge patterns into a .stignore file.",
     )
-    parser.add_argument("--file", required=True, help="Path of the .stignore file.")
+    parser.add_argument(
+        "--file", required=True, help="Path of the .stignore file."
+    )
+    parser.add_argument(
+        "--projects-root",
+        default=None,
+        metavar="PATH",
+        help=(
+            "Synced projects root. When set, root-anchored --pattern values "
+            "also get a real-location variant for symlinked project dirs."
+        ),
+    )
     parser.add_argument(
         "--pattern",
         action="append",
@@ -183,9 +256,12 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    patterns = args.pattern
+    if args.projects_root is not None:
+        patterns = expand_alias_patterns(patterns, args.projects_root)
     return merge(
         Path(args.file),
-        args.pattern,
+        patterns,
         dry_run=args.dry_run,
         check=args.check,
     )

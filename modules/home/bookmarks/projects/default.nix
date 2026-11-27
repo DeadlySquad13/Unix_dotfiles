@@ -124,7 +124,15 @@
   # Test the helper with `python3 scripts/test_stignore_merge.py`; the Nix
   # check `checks/stignore-merge` runs the same suite in the sandbox.
   stignoreArgs =
-    ["--file" (toString cfg.stignorePath)]
+    [
+      "--file"
+      (toString cfg.stignorePath)
+      # The writer expands each root-anchored pattern to the real location of a
+      # symlinked project dir at runtime (Syncthing indexes the real tree, not
+      # the alias). The static pattern list stays logical.
+      "--projects-root"
+      (toString resolvedProjectsRoot)
+    ]
     ++ lib.concatMap (pattern: ["--pattern" pattern])
     (cfg.stignoreBasePatterns ++ cfg.ignorePatterns);
 in

@@ -224,6 +224,17 @@
     && lib.hasInfix "stignore-merge.py" saltStignore.data
     && lib.hasInfix stignoreArgString (builtins.unsafeDiscardStringContext saltStignore.data);
 
+  # 4a-bis. The writer receives an absolute projects root *before* the
+  #         patterns, so it can expand each logical pattern to the real
+  #         location of a symlinked project dir at runtime. The static list
+  #         still carries every logical pattern (expansion is not Nix-side).
+  assertStignoreProjectsRoot =
+    lib.lists.take 4 saltProjects.stignoreArgs
+    == ["--file" "${saltRoot}/.stignore" "--projects-root" saltRoot]
+    && lib.all
+    (logical: builtins.elem "/${logical}" saltProjects.stignoreArgs)
+    (builtins.attrNames saltStructures);
+
   # 4b. `ignoreBoundaryFile` defaults to `<projectsRoot>/.stignore`.
   assertStignoreBoundaryDefault =
     toString saltProjects.ignoreBoundaryFile == "${saltRoot}/.stignore";
@@ -302,6 +313,7 @@ in
   assert assertDarwinTextShape;
   assert assertActivation;
   assert assertStignoreActivation;
+  assert assertStignoreProjectsRoot;
   assert assertStignoreBoundaryDefault;
   assert assertStignoreDisabled;
   assert assertIgnorePatternsExact;
